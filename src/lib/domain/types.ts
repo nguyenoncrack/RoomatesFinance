@@ -78,11 +78,24 @@ export interface Settlement {
   completedAt: string | null;
 }
 
+/** Audit trail entry for changes that don't otherwise show up in the ledger (edits, deletes, joins). */
+export interface AuditEvent {
+  id: string;
+  actorId: string | null;
+  entityType: "expense" | "settlement" | "member" | "household";
+  entityId: string | null;
+  action: string;
+  title: string | null;
+  amountCents: Cents | null;
+  createdAt: string;
+}
+
 export interface HouseholdSnapshot {
   household: Household;
   members: Member[];
   expenses: Expense[];
   settlements: Settlement[];
+  audit: AuditEvent[];
 }
 
 export const CATEGORY_LABELS: Record<Category, string> = {
