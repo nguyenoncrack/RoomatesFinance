@@ -146,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur supports-backdrop-filter:bg-background/70">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 md:h-16 md:px-8">
-            <div className="md:hidden">{ready ? <HouseholdSwitcher className="max-w-[60vw] border-0 bg-transparent px-0 shadow-none hover:bg-transparent" /> : <Logo />}</div>
+            <div className="md:hidden">{ready ? <HouseholdSwitcher className="max-w-[46vw] border-0 bg-transparent px-0 shadow-none hover:bg-transparent" /> : <Logo />}</div>
             <h1 className="hidden text-lg font-semibold tracking-tight md:block">{current?.label ?? "Roommate AI"}</h1>
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? (
@@ -156,6 +156,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               ) : null}
               {ready ? (
                 <>
+                  <Button variant="outline" size="sm" onClick={() => openSettleUp()} className="sm:hidden">
+                    <HandCoins /> Settle
+                  </Button>
                   <Button variant="outline" onClick={() => openSettleUp()} className="hidden sm:inline-flex">
                     <HandCoins /> Settle up
                   </Button>
@@ -178,10 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {ready ? (
         <>
-          <div className="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 flex flex-col items-end gap-2 sm:hidden">
-            <Button variant="outline" size="lg" className="rounded-full bg-card shadow-md" onClick={() => openSettleUp()}>
-              <HandCoins /> Settle
-            </Button>
+          <div className="fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 sm:hidden">
             <Button size="lg" className="h-12 rounded-full px-5 text-base shadow-lg" onClick={() => openAddExpense()}>
               <Plus className="size-5" /> Add expense
             </Button>

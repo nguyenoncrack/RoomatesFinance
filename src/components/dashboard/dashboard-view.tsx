@@ -82,7 +82,7 @@ export function DashboardView() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm text-muted-foreground">{snapshot.household.name}</p>
+        <p className="hidden text-sm text-muted-foreground md:block">{snapshot.household.name}</p>
         <h2 className="text-2xl font-semibold tracking-tight">Hey {firstName(user.displayName)}</h2>
       </div>
 
