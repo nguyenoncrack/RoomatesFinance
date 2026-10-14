@@ -21,6 +21,7 @@ const buttonVariants = cva(
         link: "text-foreground underline decoration-foreground/30 underline-offset-4 hover:decoration-foreground",
         /** Cartoon sticker buttons: pencil outline, hard shadow that grows on hover and flattens on press. */
         pop: "bg-pop-yellow text-foreground sticker-sm transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 hover:shadow-[3px_4px_0_0_var(--foreground)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
+        lilac: "bg-lilac text-foreground sticker-sm transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 hover:bg-pop-purple hover:shadow-[3px_4px_0_0_var(--foreground)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
         mint: "bg-mint text-foreground sticker-sm transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 hover:bg-pop-green hover:shadow-[3px_4px_0_0_var(--foreground)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
       },
       size: {

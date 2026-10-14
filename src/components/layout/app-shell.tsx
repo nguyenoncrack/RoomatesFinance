@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ChevronsUpDown, LayoutDashboard, Link2, Plus, Receipt, Scale, Settings, type LucideIcon } from "lucide-react";
+import { Activity, ChevronsUpDown, LayoutDashboard, Link2, Plus, Receipt, Scale, Settings, UserPlus, type LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -42,7 +42,7 @@ const NAV: { href: string; label: string; icon: LucideIcon; doodle: DoodleName }
 
 function HouseholdSwitcher({ className }: { className?: string }) {
   const { households, activeHouseholdId, setActiveHousehold } = useAppData();
-  const { openHousehold } = useDialogs();
+  const { openHousehold, openInvite } = useDialogs();
   const active = households.find((h) => h.id === activeHouseholdId);
   return (
     <DropdownMenu>
@@ -77,6 +77,11 @@ function HouseholdSwitcher({ className }: { className?: string }) {
               ))}
               <DropdownMenuSeparator />
             </>
+          ) : null}
+          {active ? (
+            <DropdownMenuItem onSelect={openInvite}>
+              <UserPlus /> Invite roommates
+            </DropdownMenuItem>
           ) : null}
           <DropdownMenuItem onSelect={() => openHousehold("create")}>
             <Plus /> New household
@@ -115,6 +120,24 @@ function PageTitle({ label, doodle }: { label: string; doodle?: DoodleName }) {
 }
 
 /** Your name on a taped-on paper note, with a mini Penny peeking over it whose face follows your balance. */
+/** Always-visible sidebar shortcut to the invite dialog. */
+function InviteButton() {
+  const { openInvite } = useDialogs();
+  return (
+    <button
+      type="button"
+      onClick={openInvite}
+      className="group/invite -mt-2 flex w-full items-center gap-2.5 rounded-2xl px-3 py-1.5 text-left font-label text-[11px] text-muted-foreground transition-[color,translate] hover:translate-x-1 hover:text-foreground"
+    >
+      <span aria-hidden className="grid size-7 place-items-center transition-transform group-hover/invite:animate-wiggle group-hover/invite:[--wiggle-amount:12deg] group-hover/invite:[--wiggle-duration:0.6s]">
+        <PeopleDoodle className="size-7" />
+      </span>
+      Invite roommates
+      <Plus aria-hidden className="ml-auto size-3.5 opacity-60" strokeWidth={2} />
+    </button>
+  );
+}
+
 function MyBalancePill() {
   const { ledger, user } = useAppData();
   if (!ledger || !user) return null;
@@ -207,6 +230,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {repo.mode === "demo" ? <DemoBadge /> : null}
         </div>
         {inApp ? <HouseholdSwitcher /> : null}
+        {ready ? <InviteButton /> : null}
         <nav className="flex flex-col gap-0.5">
           {NAV.map(({ href, label, doodle }, i) => {
             const active = pathname.startsWith(href);

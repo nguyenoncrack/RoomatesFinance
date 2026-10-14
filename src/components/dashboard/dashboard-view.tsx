@@ -46,7 +46,7 @@ function CardLink({ href, children }: { href: string; children: string }) {
 
 export function DashboardView() {
   const { ledger, snapshot, user } = useAppData();
-  const { openAddExpense, openSettleUp } = useDialogs();
+  const { openAddExpense, openSettleUp, openInvite } = useDialogs();
   if (!ledger || !snapshot || !user) return null;
 
   const net = ledger.balances.get(user.id) ?? 0;
@@ -126,6 +126,9 @@ export function DashboardView() {
               </Button>
               <Button variant="mint" doodle="dollar" onClick={() => openSettleUp()}>
                 Settle up
+              </Button>
+              <Button variant="lilac" doodle="people" onClick={openInvite}>
+                Invite
               </Button>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { ExpenseFormDialog, type ExpenseTemplate } from "@/components/expenses/expense-form-dialog";
 import { HouseholdDialog, type HouseholdSetupTab } from "@/components/layout/household-setup";
+import { InviteDialog } from "@/components/layout/invite-dialog";
 import { SettleUpDialog, type SettleUpPrefill } from "@/components/settlements/settle-up-dialog";
 import type { Expense } from "@/lib/domain/types";
 
@@ -12,6 +13,8 @@ interface Dialogs {
   openRepeatExpense: (template: ExpenseTemplate) => void;
   openSettleUp: (prefill?: SettleUpPrefill) => void;
   openHousehold: (tab?: HouseholdSetupTab) => void;
+  /** One-tap invite: opens with a fresh link already made. */
+  openInvite: () => void;
 }
 
 const DialogsContext = createContext<Dialogs | null>(null);
@@ -23,6 +26,7 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
   const [settleOpen, setSettleOpen] = useState(false);
   const [prefill, setPrefill] = useState<SettleUpPrefill | null>(null);
   const [householdOpen, setHouseholdOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [householdTab, setHouseholdTab] = useState<HouseholdSetupTab>("create");
   // Bumped on every open so each form mounts with fresh state and a fresh idempotency key.
   const [formKey, setFormKey] = useState(0);
@@ -53,9 +57,14 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
     setHouseholdOpen(true);
   }, []);
 
+  const openInvite = useCallback(() => {
+    setFormKey((k) => k + 1);
+    setInviteOpen(true);
+  }, []);
+
   const value = useMemo(
-    () => ({ openAddExpense, openRepeatExpense, openSettleUp, openHousehold }),
-    [openAddExpense, openRepeatExpense, openSettleUp, openHousehold],
+    () => ({ openAddExpense, openRepeatExpense, openSettleUp, openHousehold, openInvite }),
+    [openAddExpense, openRepeatExpense, openSettleUp, openHousehold, openInvite],
   );
 
   return (
@@ -63,6 +72,7 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
       {children}
       <ExpenseFormDialog open={expenseOpen} onOpenChange={setExpenseOpen} expense={editing} template={template} formKey={formKey} />
       <SettleUpDialog open={settleOpen} onOpenChange={setSettleOpen} prefill={prefill} formKey={formKey} />
+      <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} formKey={formKey} />
       <HouseholdDialog open={householdOpen} onOpenChange={setHouseholdOpen} tab={householdTab} formKey={formKey} />
     </DialogsContext.Provider>
   );

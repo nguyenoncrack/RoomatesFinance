@@ -570,6 +570,12 @@
   }
 }
 
+/* Minimized chat assistant: hide the whole Elfsight UI but keep it mounted so a conversation survives. */
+.rf-chat-min #__EAAPS_PORTAL,
+.rf-chat-min [class*="es-portal-root"] {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker,
   .animate-blink,
