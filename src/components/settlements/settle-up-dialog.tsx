@@ -3,6 +3,7 @@
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { celebrate } from "@/components/shared/celebration";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -115,6 +116,7 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
             ? `You paid ${otherName} ${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]}`
             : `${otherName} paid you ${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]}`,
       });
+      if (completed) celebrate("Payment recorded", { subtitle: `${formatCents(amountCents)} ${direction === "pay" ? "to" : "from"} ${otherName}`, priority: 1 });
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't record this payment.");

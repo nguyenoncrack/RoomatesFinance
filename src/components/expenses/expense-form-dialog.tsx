@@ -6,7 +6,9 @@ import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { CATEGORY_META } from "@/components/shared/category";
+import { AnimatedMoney } from "@/components/shared/animated-money";
 import { MemberAvatar } from "@/components/shared/member-avatar";
+import { TabPill } from "@/components/shared/tab-pill";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -323,8 +325,9 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                 <ToggleGroupItem
                   key={m}
                   value={m}
-                  className="px-2.5 text-xs data-[state=on]:border-primary/40 data-[state=on]:bg-primary/15 data-[state=on]:text-accent-foreground"
+                  className="relative isolate px-2.5 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground"
                 >
+                  {m === method ? <TabPill group="split-method" /> : null}
                   {SPLIT_METHOD_LABELS[m]}
                 </ToggleGroupItem>
               ))}
@@ -366,7 +369,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                     </div>
                   ) : null}
                   <span className={cn("w-20 text-right font-mono text-sm font-semibold tabular-nums", on && share ? "text-foreground" : "text-muted-foreground")}>
-                    {on ? (share !== undefined ? formatCents(share) : "—") : ""}
+                    {on ? share !== undefined ? <AnimatedMoney cents={share} flash={false} /> : "—" : ""}
                   </span>
                 </div>
               );
@@ -375,15 +378,19 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
 
           {split.ok && amountCents ? (
             <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-              {split.splits.map((sp, i) => (
-                <motion.span
-                  key={sp.userId}
-                  layout
-                  className="h-full rounded-full"
-                  style={{ flexGrow: sp.shareCents, background: SHARE_COLORS[i % SHARE_COLORS.length] }}
-                  transition={{ type: "spring", stiffness: 400, damping: 40 }}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {split.splits.map((sp) => (
+                  <motion.span
+                    key={sp.userId}
+                    className="h-full min-w-0 basis-0 rounded-full"
+                    style={{ background: SHARE_COLORS[members.findIndex((m) => m.id === sp.userId) % SHARE_COLORS.length] }}
+                    initial={{ flexGrow: 0, opacity: 0 }}
+                    animate={{ flexGrow: sp.shareCents, opacity: 1 }}
+                    exit={{ flexGrow: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 30 }}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           ) : null}
 
