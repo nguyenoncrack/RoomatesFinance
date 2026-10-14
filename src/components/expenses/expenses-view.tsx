@@ -4,6 +4,8 @@ import { format, parseISO, startOfMonth, subDays } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Paperclip, Receipt, Search, SearchX, X } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
+import { RecurringCard } from "./recurring-list";
+import { RepeatChips } from "./repeat-chips";
 import { useMemo, useState } from "react";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
@@ -93,6 +95,9 @@ export function ExpensesView() {
           </p>
         </div>
       </div>
+
+      <RepeatChips />
+      <RecurringCard />
 
       <Card tone="sky" className="py-3">
         <CardContent className="space-y-3 px-3">

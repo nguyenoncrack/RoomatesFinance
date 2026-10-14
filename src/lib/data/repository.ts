@@ -1,3 +1,4 @@
+import type { Cadence, SettleSchedule } from "@/lib/domain/recurring";
 import type {
   Category,
   Cents,
@@ -29,6 +30,20 @@ export interface ExpenseInput {
   /** undefined = keep existing receipt, null = remove, File = replace. */
   receipt?: File | null;
   clientRequestId: string;
+}
+
+/** Starts a repeating series. The first expense is added separately; this schedules the next ones. */
+export interface RecurringInput {
+  title: string;
+  amountCents: Cents;
+  paidBy: string;
+  category: Category;
+  description: string | null;
+  splitMethod: SplitMethod;
+  splits: ExpenseSplit[];
+  cadence: Cadence;
+  /** Date of the expense that started the series (YYYY-MM-DD). */
+  startDate: string;
 }
 
 export interface SettlementInput {
@@ -74,6 +89,14 @@ export interface Repository {
   createExpense(householdId: string, input: ExpenseInput): Promise<string>;
   updateExpense(expenseId: string, input: ExpenseInput, expectedUpdatedAt: string): Promise<void>;
   deleteExpense(expenseId: string): Promise<void>;
+
+  createRecurring(householdId: string, input: RecurringInput): Promise<string>;
+  /** Creator, payer or owner only. Already-added expenses stay. */
+  stopRecurring(recurringId: string): Promise<void>;
+  /** Adds every occurrence due on or before `today` and advances each series. Safe to call repeatedly. */
+  runDueRecurring(householdId: string, today: string): Promise<number>;
+  /** Owner only. `null` turns the settle day off. */
+  setSettleSchedule(householdId: string, schedule: SettleSchedule | null): Promise<void>;
 
   recordSettlement(householdId: string, input: SettlementInput): Promise<string>;
   setSettlementStatus(settlementId: string, status: "completed" | "voided"): Promise<void>;

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Ban, CircleCheck, Clock, HandCoins, Pencil, Trash2, UserMinus, UserPlus, Type } from "lucide-react";
+import { Ban, CalendarClock, CircleCheck, Clock, HandCoins, Pencil, Repeat, Trash2, Type, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { celebrate } from "@/components/shared/celebration";
@@ -167,6 +167,9 @@ function AuditRow({ item, name }: { item: Extract<ActivityItem, { kind: "audit" 
     leave: { icon: UserMinus, text: "left the household" },
     kick: { icon: UserMinus, text: `removed ${e.title ?? "a roommate"}` },
     rename: { icon: Type, text: `renamed the household to ${e.title ?? ""}` },
+    repeat: { icon: Repeat, text: `set ${e.title ?? "an expense"} to repeat` },
+    stop_repeat: { icon: Repeat, text: `stopped repeating ${e.title ?? "an expense"}` },
+    settle_day: { icon: CalendarClock, text: "changed the settle day" },
   };
   const meta = map[e.action] ?? { icon: Pencil, text: e.action };
   const Icon = meta.icon;

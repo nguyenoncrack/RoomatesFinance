@@ -30,6 +30,7 @@ import {
   type Member,
   type SplitMethod,
 } from "@/lib/domain/types";
+import type { Cadence } from "@/lib/domain/recurring";
 import { firstName, todayDay } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -60,15 +61,22 @@ function parseValue(method: SplitMethod, raw: string | undefined): number {
   return v === null ? Number.NaN : v;
 }
 
+/** The parts of an expense that "add again" copies: what, how much, who paid and how it's split. */
+export type ExpenseTemplate = Pick<Expense, "title" | "amountCents" | "paidBy" | "category" | "description" | "splitMethod" | "splits">;
+
 export function ExpenseFormDialog({
   open,
   onOpenChange,
   expense,
+  template = null,
   formKey,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Editing an existing expense. */
   expense: Expense | null;
+  /** Adding a new expense prefilled from a previous one (ignored when editing). */
+  template?: ExpenseTemplate | null;
   formKey: number;
 }) {
   return (
@@ -80,41 +88,50 @@ export function ExpenseFormDialog({
           if (window.matchMedia("(max-width: 640px)").matches) e.preventDefault();
         }}
       >
-        {open ? <ExpenseForm key={formKey} expense={expense} onDone={() => onOpenChange(false)} /> : null}
+        {open ? <ExpenseForm key={formKey} expense={expense} template={expense ? null : template} onDone={() => onOpenChange(false)} /> : null}
       </DialogContent>
     </Dialog>
   );
 }
 
-function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () => void }) {
-  const { snapshot, ledger, user, createExpense, updateExpense } = useAppData();
+function ExpenseForm({ expense, template, onDone }: { expense: Expense | null; template: ExpenseTemplate | null; onDone: () => void }) {
+  const { snapshot, ledger, user, createExpense, updateExpense, createRecurring } = useAppData();
   const members: Member[] = useMemo(() => snapshot?.members.filter((m) => m.leftAt === null) ?? [], [snapshot]);
   const isEdit = expense !== null;
+  // Where the initial values come from: the expense being edited, or the one being added again.
+  // Roommates who have since left are dropped from a copied split.
+  const source: ExpenseTemplate | null = useMemo(() => {
+    const base = expense ?? template;
+    if (!base || expense) return base;
+    const active = new Set(members.map((m) => m.id));
+    return { ...base, splits: base.splits.filter((sp) => active.has(sp.userId)), paidBy: active.has(base.paidBy) ? base.paidBy : (user?.id ?? base.paidBy) };
+  }, [expense, template, members, user]);
 
   const [clientRequestId] = useState(() => crypto.randomUUID());
-  const [title, setTitle] = useState(expense?.title ?? "");
-  const [amountInput, setAmountInput] = useState(expense ? centsToInput(expense.amountCents) : "");
-  const [paidBy, setPaidBy] = useState(expense?.paidBy ?? user?.id ?? members[0]?.id ?? "");
+  const [title, setTitle] = useState(source?.title ?? "");
+  const [amountInput, setAmountInput] = useState(source ? centsToInput(source.amountCents) : "");
+  const [paidBy, setPaidBy] = useState(source?.paidBy ?? user?.id ?? members[0]?.id ?? "");
   const [date, setDate] = useState(expense?.expenseDate ?? todayDay());
-  const [category, setCategory] = useState<Category>(expense?.category ?? "groceries");
-  const [method, setMethod] = useState<SplitMethod>(expense?.splitMethod ?? "equal");
+  const [category, setCategory] = useState<Category>(source?.category ?? "groceries");
+  const [method, setMethod] = useState<SplitMethod>(source?.splitMethod ?? "equal");
+  const [repeat, setRepeat] = useState<"never" | Cadence>("never");
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(expense ? expense.splits.map((s) => s.userId) : members.map((m) => m.id)),
+    () => new Set(source ? source.splits.map((s) => s.userId) : members.map((m) => m.id)),
   );
   const [values, setValues] = useState<Record<string, string>>(() => {
-    if (!expense) return {};
+    if (!source) return {};
     return Object.fromEntries(
-      expense.splits.map((s) => [
+      source.splits.map((s) => [
         s.userId,
-        expense.splitMethod === "custom"
+        source.splitMethod === "custom"
           ? centsToInput(s.shareCents)
-          : expense.splitMethod === "percentage"
+          : source.splitMethod === "percentage"
             ? bpToInput(s.weight ?? 0)
             : String(s.weight ?? 1),
       ]),
     );
   });
-  const [description, setDescription] = useState(expense?.description ?? "");
+  const [description, setDescription] = useState(source?.description ?? "");
   const [receipt, setReceipt] = useState<File | null | undefined>(undefined);
   const [showMore, setShowMore] = useState(Boolean(expense?.description || expense?.receiptUrl));
   const [submitting, setSubmitting] = useState(false);
@@ -180,7 +197,13 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         toast.success("Expense updated", { description: "Balances were recalculated." });
       } else {
         await createExpense(input);
-        toast.success(`Added ${title.trim()}`, { description: `${formatCents(amountCents)} split ${participants.length} ways` });
+        if (repeat !== "never") {
+          const { receipt: _r, clientRequestId: _c, expenseDate: _d, ...rest } = input;
+          await createRecurring({ ...rest, cadence: repeat, startDate: date });
+        }
+        toast.success(`Added ${title.trim()}`, {
+          description: `${formatCents(amountCents)} split ${participants.length} ways${repeat === "never" ? "" : ` · repeats ${repeat}`}`,
+        });
       }
       onDone();
     } catch (err) {
@@ -279,9 +302,31 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="expense-date">Date</Label>
-            <Input id="expense-date" type="date" value={date} max="2100-12-31" onChange={(e) => setDate(e.target.value)} className="h-11 rounded-xl [color-scheme:dark]" />
+            <Input id="expense-date" type="date" value={date} max="2100-12-31" onChange={(e) => setDate(e.target.value)} className="h-11 rounded-xl" />
           </div>
         </div>
+
+        {isEdit ? null : (
+          <div className="space-y-1.5">
+            <Label>Repeat</Label>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={repeat}
+              onValueChange={(v) => v && setRepeat(v as "never" | Cadence)}
+              aria-label="Repeat"
+              className="w-full"
+            >
+              {(["never", "weekly", "monthly"] as const).map((r) => (
+                <ToggleGroupItem key={r} value={r} className="relative isolate flex-1 capitalize data-[state=on]:bg-transparent data-[state=on]:text-foreground">
+                  {repeat === r ? <TabPill group="expense-repeat" /> : null}
+                  {r === "never" ? "Just once" : r}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+        )}
 
         <div className="space-y-1.5">
           <Label>Category</Label>

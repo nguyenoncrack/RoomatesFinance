@@ -1,13 +1,15 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { ExpenseFormDialog } from "@/components/expenses/expense-form-dialog";
+import { ExpenseFormDialog, type ExpenseTemplate } from "@/components/expenses/expense-form-dialog";
 import { HouseholdDialog, type HouseholdSetupTab } from "@/components/layout/household-setup";
 import { SettleUpDialog, type SettleUpPrefill } from "@/components/settlements/settle-up-dialog";
 import type { Expense } from "@/lib/domain/types";
 
 interface Dialogs {
   openAddExpense: (expense?: Expense) => void;
+  /** New expense prefilled from a previous one: same title, amount, payer and split, dated today. */
+  openRepeatExpense: (template: ExpenseTemplate) => void;
   openSettleUp: (prefill?: SettleUpPrefill) => void;
   openHousehold: (tab?: HouseholdSetupTab) => void;
 }
@@ -17,6 +19,7 @@ const DialogsContext = createContext<Dialogs | null>(null);
 export function DialogsProvider({ children }: { children: ReactNode }) {
   const [expenseOpen, setExpenseOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
+  const [template, setTemplate] = useState<ExpenseTemplate | null>(null);
   const [settleOpen, setSettleOpen] = useState(false);
   const [prefill, setPrefill] = useState<SettleUpPrefill | null>(null);
   const [householdOpen, setHouseholdOpen] = useState(false);
@@ -26,6 +29,14 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
 
   const openAddExpense = useCallback((expense?: Expense) => {
     setEditing(expense ?? null);
+    setTemplate(null);
+    setFormKey((k) => k + 1);
+    setExpenseOpen(true);
+  }, []);
+
+  const openRepeatExpense = useCallback((t: ExpenseTemplate) => {
+    setEditing(null);
+    setTemplate(t);
     setFormKey((k) => k + 1);
     setExpenseOpen(true);
   }, []);
@@ -42,12 +53,15 @@ export function DialogsProvider({ children }: { children: ReactNode }) {
     setHouseholdOpen(true);
   }, []);
 
-  const value = useMemo(() => ({ openAddExpense, openSettleUp, openHousehold }), [openAddExpense, openSettleUp, openHousehold]);
+  const value = useMemo(
+    () => ({ openAddExpense, openRepeatExpense, openSettleUp, openHousehold }),
+    [openAddExpense, openRepeatExpense, openSettleUp, openHousehold],
+  );
 
   return (
     <DialogsContext.Provider value={value}>
       {children}
-      <ExpenseFormDialog open={expenseOpen} onOpenChange={setExpenseOpen} expense={editing} formKey={formKey} />
+      <ExpenseFormDialog open={expenseOpen} onOpenChange={setExpenseOpen} expense={editing} template={template} formKey={formKey} />
       <SettleUpDialog open={settleOpen} onOpenChange={setSettleOpen} prefill={prefill} formKey={formKey} />
       <HouseholdDialog open={householdOpen} onOpenChange={setHouseholdOpen} tab={householdTab} formKey={formKey} />
     </DialogsContext.Provider>

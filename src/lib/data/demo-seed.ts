@@ -1,6 +1,7 @@
 import { format, subDays, subMonths, startOfMonth, addDays } from "date-fns";
 import { computeSplit } from "@/lib/domain/splits";
-import type { Category, Expense, Household, Member, Settlement, SplitMethod } from "@/lib/domain/types";
+import { anchorDayOf, nextOccurrence } from "@/lib/domain/recurring";
+import type { Category, Expense, Household, Member, RecurringExpense, Settlement, SplitMethod } from "@/lib/domain/types";
 
 export interface DemoInvitation {
   id: string;
@@ -36,6 +37,8 @@ export interface DemoSettlement extends Settlement {
 
 export interface DemoState {
   version: 1;
+  /** Added after v1 shipped; older saved states are upgraded on read. */
+  recurring: RecurringExpense[];
   currentUserId: string;
   profiles: { id: string; displayName: string; avatarUrl: string | null }[];
   households: Household[];
@@ -184,13 +187,35 @@ export function createDemoState(now = new Date()): DemoState {
     { id: jordan, displayName: "Jordan Lee", avatarUrl: null },
   ];
 
+  // Rent and internet repeat monthly from their latest occurrence, so the next one is in the future.
+  const repeatFrom = (title: string): RecurringExpense => {
+    const last = expenses.filter((e) => e.householdId === H_APT && e.title === title).sort((a, b) => b.expenseDate.localeCompare(a.expenseDate))[0];
+    return {
+      id: `r-seed-${title.toLowerCase().replace(/\W+/g, "-")}`,
+      householdId: H_APT,
+      title: last.title,
+      amountCents: last.amountCents,
+      paidBy: last.paidBy,
+      category: last.category,
+      description: last.description,
+      splitMethod: last.splitMethod,
+      splits: last.splits,
+      cadence: "monthly",
+      anchorDay: anchorDayOf(last.expenseDate),
+      nextDate: nextOccurrence(last.expenseDate, "monthly"),
+      createdBy: last.paidBy,
+      createdAt: last.createdAt,
+    };
+  };
+
   return {
     version: 1,
+    recurring: [repeatFrom("Rent"), repeatFrom("Cox Internet")],
     currentUserId: alex,
     profiles,
     households: [
-      { id: H_APT, name: "UCSB Apartment", createdBy: maya, createdAt: created },
-      { id: H_TRIP, name: "Tahoe Ski Trip", createdBy: jordan, createdAt: iso(subDays(now, 25)) },
+      { id: H_APT, name: "UCSB Apartment", createdBy: maya, createdAt: created, settleCadence: "monthly", settleDay: 1 },
+      { id: H_TRIP, name: "Tahoe Ski Trip", createdBy: jordan, createdAt: iso(subDays(now, 25)), settleCadence: null, settleDay: null },
     ],
     members: [
       ...apt.map((userId) => ({

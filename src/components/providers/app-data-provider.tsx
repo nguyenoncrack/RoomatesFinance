@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { asDemo, getRepository, type ExpenseInput, type HouseholdSummary, type Repository, type SettlementInput } from "@/lib/data";
+import { asDemo, getRepository, type ExpenseInput, type HouseholdSummary, type RecurringInput, type Repository, type SettlementInput } from "@/lib/data";
+import type { SettleSchedule } from "@/lib/domain/recurring";
+import { todayDay } from "@/lib/format";
 import type { Expense, HouseholdSnapshot, Profile, Settlement } from "@/lib/domain/types";
 import { buildLedger, type Ledger } from "@/lib/ledger";
 
@@ -30,6 +32,9 @@ interface AppData {
   recordSettlement: (input: SettlementInput) => Promise<void>;
   setSettlementStatus: (id: string, status: "completed" | "voided") => Promise<void>;
   createHousehold: (name: string) => Promise<void>;
+  createRecurring: (input: RecurringInput) => Promise<void>;
+  stopRecurring: (id: string) => Promise<void>;
+  setSettleSchedule: (schedule: SettleSchedule | null) => Promise<void>;
 }
 
 const AppDataContext = createContext<AppData | null>(null);
@@ -51,7 +56,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const loadSnapshot = useCallback(
     async (householdId: string) => {
-      const snap = await repo.getSnapshot(householdId);
+      let snap = await repo.getSnapshot(householdId);
+      // Add any repeating expenses that came due since the last visit, then show the result.
+      const today = todayDay();
+      if (snap.recurring.some((r) => r.nextDate <= today)) {
+        try {
+          if ((await repo.runDueRecurring(householdId, today)) > 0) snap = await repo.getSnapshot(householdId);
+        } catch {
+          // A failed catch-up shouldn't block the dashboard; the next load retries.
+        }
+      }
       if (activeRef.current === householdId) setSnapshot(snap);
     },
     [repo],
@@ -228,6 +242,30 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [repo, reload],
   );
 
+  const createRecurring = useCallback(
+    async (input: RecurringInput) => {
+      if (!activeRef.current) throw new Error("No household selected.");
+      await repo.createRecurring(activeRef.current, input);
+      await reload();
+    },
+    [repo, reload],
+  );
+
+  const stopRecurring = useCallback(
+    (id: string) =>
+      optimistic((s) => ({ ...s, recurring: s.recurring.filter((r) => r.id !== id) }), () => repo.stopRecurring(id)),
+    [optimistic, repo],
+  );
+
+  const setSettleSchedule = useCallback(
+    (schedule: SettleSchedule | null) =>
+      optimistic(
+        (s) => ({ ...s, household: { ...s.household, settleCadence: schedule?.cadence ?? null, settleDay: schedule?.day ?? null } }),
+        () => repo.setSettleSchedule(activeRef.current!, schedule),
+      ),
+    [optimistic, repo],
+  );
+
   const skipSetup = useCallback(() => {
     if (user) window.localStorage.setItem(skipKey(user.id), "1");
     setSetupSkipped(true);
@@ -252,6 +290,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     recordSettlement,
     setSettlementStatus,
     createHousehold,
+    createRecurring,
+    stopRecurring,
+    setSettleSchedule,
   };
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

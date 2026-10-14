@@ -1,3 +1,5 @@
+import type { Cadence } from "./recurring";
+
 export type Cents = number;
 
 export const CATEGORIES = [
@@ -38,6 +40,10 @@ export interface Household {
   name: string;
   createdBy: string;
   createdAt: string;
+  /** Optional settle-up rhythm; null when the household hasn't set one. */
+  settleCadence: Cadence | null;
+  /** Weekday 0–6 for weekly, day of month 1–28 for monthly. */
+  settleDay: number | null;
 }
 
 export interface ExpenseSplit {
@@ -62,6 +68,26 @@ export interface Expense {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+}
+
+/** A template that adds the same expense every week or month. */
+export interface RecurringExpense {
+  id: string;
+  householdId: string;
+  title: string;
+  amountCents: Cents;
+  paidBy: string;
+  category: Category;
+  description: string | null;
+  splitMethod: SplitMethod;
+  splits: ExpenseSplit[];
+  cadence: Cadence;
+  /** Day of month the series started on; monthly repeats clamp to it in short months. */
+  anchorDay: number;
+  /** Next date (YYYY-MM-DD) an expense will be added. */
+  nextDate: string;
+  createdBy: string;
+  createdAt: string;
 }
 
 export interface Settlement {
@@ -95,6 +121,7 @@ export interface HouseholdSnapshot {
   members: Member[];
   expenses: Expense[];
   settlements: Settlement[];
+  recurring: RecurringExpense[];
   audit: AuditEvent[];
 }
 

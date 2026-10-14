@@ -7,17 +7,20 @@ import type {
   Member,
   PaymentMethod,
   Profile,
+  RecurringExpense,
   Settlement,
   SettlementStatus,
   SplitMethod,
 } from "@/lib/domain/types";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { Cadence, SettleSchedule } from "@/lib/domain/recurring";
 import {
   RepositoryError,
   type CreatedInvite,
   type ExpenseInput,
   type HouseholdSummary,
   type InvitePreview,
+  type RecurringInput,
   type Repository,
   type SettlementInput,
 } from "./repository";
@@ -57,6 +60,22 @@ interface SettlementRow {
   created_by: string;
   created_at: string;
   completed_at: string | null;
+}
+interface RecurringRow {
+  id: string;
+  household_id: string;
+  title: string;
+  amount_cents: number;
+  paid_by: string;
+  category: Category;
+  description: string | null;
+  split_method: SplitMethod;
+  splits: { user_id: string; share_cents: number; weight: number | null }[];
+  cadence: Cadence;
+  anchor_day: number;
+  next_date: string;
+  created_by: string;
+  created_at: string;
 }
 interface AuditRow {
   id: number;
@@ -145,8 +164,8 @@ export class SupabaseRepository implements Repository {
   }
 
   async getSnapshot(householdId: string): Promise<HouseholdSnapshot> {
-    const [household, members, expenses, settlements, audit] = await Promise.all([
-      this.db.from("households").select("id, name, created_by, created_at").eq("id", householdId).maybeSingle(),
+    const [household, members, expenses, settlements, recurring, audit] = await Promise.all([
+      this.db.from("households").select("id, name, created_by, created_at, settle_cadence, settle_day").eq("id", householdId).maybeSingle(),
       this.db
         .from("household_members")
         .select("role, joined_at, left_at, profile:profiles(id, display_name, avatar_url)")
@@ -162,21 +181,41 @@ export class SupabaseRepository implements Repository {
         .order("created_at", { ascending: false }),
       this.db.from("settlements").select("*").eq("household_id", householdId).order("created_at", { ascending: false }),
       this.db
+        .from("recurring_expenses")
+        .select("id, household_id, title, amount_cents, paid_by, category, description, split_method, splits, cadence, anchor_day, next_date, created_by, created_at")
+        .eq("household_id", householdId)
+        .is("stopped_at", null)
+        .order("next_date"),
+      this.db
         .from("audit_log")
         .select("id, actor_id, entity_type, entity_id, action, before, after, created_at")
         .eq("household_id", householdId)
-        .in("action", ["update", "delete", "voided", "join", "leave", "kick", "rename"])
+        .in("action", ["update", "delete", "voided", "join", "leave", "kick", "rename", "repeat", "stop_repeat", "settle_day"])
         .order("created_at", { ascending: false })
         .limit(100),
     ]);
 
-    const h = unwrap<{ id: string; name: string; created_by: string; created_at: string } | null>(household);
+    const h = unwrap<{
+      id: string;
+      name: string;
+      created_by: string;
+      created_at: string;
+      settle_cadence: Cadence | null;
+      settle_day: number | null;
+    } | null>(household);
     if (!h) throw new RepositoryError("Household not found.", "not_found");
 
     const memberRows = unwrap<{ role: Member["role"]; joined_at: string; left_at: string | null; profile: ProfileRow | null }[]>(members);
 
     return {
-      household: { id: h.id, name: h.name, createdBy: h.created_by, createdAt: h.created_at },
+      household: {
+        id: h.id,
+        name: h.name,
+        createdBy: h.created_by,
+        createdAt: h.created_at,
+        settleCadence: h.settle_cadence,
+        settleDay: h.settle_day,
+      },
       members: memberRows
         .filter((m) => m.profile)
         .map((m) => ({
@@ -222,6 +261,24 @@ export class SupabaseRepository implements Repository {
           createdBy: s.created_by,
           createdAt: s.created_at,
           completedAt: s.completed_at,
+        }),
+      ),
+      recurring: unwrap<RecurringRow[]>(recurring).map(
+        (r): RecurringExpense => ({
+          id: r.id,
+          householdId: r.household_id,
+          title: r.title,
+          amountCents: num(r.amount_cents),
+          paidBy: r.paid_by,
+          category: r.category,
+          description: r.description,
+          splitMethod: r.split_method,
+          splits: r.splits.map((s) => ({ userId: s.user_id, shareCents: num(s.share_cents), weight: s.weight === null ? null : num(s.weight) })),
+          cadence: r.cadence,
+          anchorDay: r.anchor_day,
+          nextDate: r.next_date,
+          createdBy: r.created_by,
+          createdAt: r.created_at,
         }),
       ),
       audit: unwrap<AuditRow[]>(audit).map((a) => {
@@ -324,6 +381,36 @@ export class SupabaseRepository implements Repository {
     unwrap(await this.db.rpc("delete_expense", { p_expense_id: expenseId }));
   }
 
+  async createRecurring(householdId: string, input: RecurringInput): Promise<string> {
+    const { p_expense_date: _unused, ...args } = this.expenseArgs({ ...input, expenseDate: input.startDate, clientRequestId: "" });
+    return unwrap<string>(
+      await this.db.rpc("create_recurring_expense", {
+        p_household_id: householdId,
+        ...args,
+        p_cadence: input.cadence,
+        p_start_date: input.startDate,
+      }),
+    );
+  }
+
+  async stopRecurring(recurringId: string): Promise<void> {
+    unwrap(await this.db.rpc("stop_recurring_expense", { p_recurring_id: recurringId }));
+  }
+
+  async runDueRecurring(householdId: string, today: string): Promise<number> {
+    return unwrap<number>(await this.db.rpc("run_due_recurring", { p_household_id: householdId, p_today: today }));
+  }
+
+  async setSettleSchedule(householdId: string, schedule: SettleSchedule | null): Promise<void> {
+    unwrap(
+      await this.db.rpc("set_settle_schedule", {
+        p_household_id: householdId,
+        p_cadence: schedule?.cadence ?? null,
+        p_day: schedule?.day ?? null,
+      }),
+    );
+  }
+
   async recordSettlement(householdId: string, input: SettlementInput): Promise<string> {
     return unwrap<string>(
       await this.db.rpc("record_settlement", {
@@ -382,6 +469,7 @@ export class SupabaseRepository implements Repository {
       .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter }, onChange)
       .on("postgres_changes", { event: "*", schema: "public", table: "settlements", filter }, onChange)
       .on("postgres_changes", { event: "*", schema: "public", table: "household_members", filter }, onChange)
+      .on("postgres_changes", { event: "*", schema: "public", table: "recurring_expenses", filter }, onChange)
       .subscribe();
     return () => {
       void this.db.removeChannel(channel);

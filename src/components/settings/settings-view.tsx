@@ -11,6 +11,7 @@ import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { SettleDayCard } from "./settle-day-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -317,6 +318,8 @@ function SettingsInner() {
           </form>
         </Card>
       </div>
+
+      <SettleDayCard />
 
       <DemoControls />
 

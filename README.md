@@ -5,6 +5,8 @@ Split shared expenses with your roommates, see who owes what, and settle up with
 - **Households**: create several, invite roommates with expiring links, switch between them.
 - **Expenses**: equal, custom-amount, percentage (must total 100%), or weighted-share splits, with a live per-person breakdown before you save. Optional notes and receipt uploads.
 - **Debt balancing**: each person's net balance is computed in integer cents, then a deterministic greedy pass matches debtors to creditors. You can switch between "Simplified" and "Original debts" (expense by expense).
+- **Repeats**: "Add again" chips reopen a recent expense with the same payer and split, dated today. Any new expense can repeat weekly or monthly; due repeats are added when someone opens the app (missed ones are caught up, at most 12 at a time).
+- **Settle day**: an optional weekly or monthly day set by the owner. On and after it, the dashboard reminds you to settle, but only while you owe or are owed money.
 - **Settle up**: record Venmo, Zelle, cash, or other payments made outside the app, including partial or pending ones. Completed payments update balances immediately.
 - **History**: search and filter by category, payer, roommate, and date. Expenses can be edited or deleted (soft delete with an audit trail).
 - **Dashboard**: summary cards, who-pays-whom, balances, recent activity, and charts for spending by category, by month, and by roommate.
@@ -33,7 +35,7 @@ With no environment variables set, the app runs in **demo mode**. It seeds a hou
 ## Connect Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Apply the schema. Either paste `supabase/migrations/20261013000000_init.sql` into the SQL editor and run it, or use the CLI:
+2. Apply the schema. Either paste each file in `supabase/migrations/` into the SQL editor in order and run it, or use the CLI:
    ```bash
    npx supabase link --project-ref <your-ref>
    npx supabase db push
@@ -61,8 +63,9 @@ Once both keys are set, signed-out visitors are redirected to `/login`. New user
 ```bash
 createdb roommate_test
 psql -d roommate_test -f supabase/tests/supabase-stubs.sql
-psql -d roommate_test -f supabase/migrations/20261013000000_init.sql
-psql -d roommate_test -f supabase/tests/rpc-smoke.sql   # expected rejections print as ERROR lines
+for f in supabase/migrations/*.sql; do psql -d roommate_test -f "$f"; done
+psql -d roommate_test -f supabase/tests/rpc-smoke.sql        # expected rejections print as ERROR lines
+psql -d roommate_test -f supabase/tests/recurring-smoke.sql  # repeats and settle day
 ```
 
 ## Project layout

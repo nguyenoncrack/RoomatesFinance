@@ -1,4 +1,5 @@
 import { computeNetBalances } from "@/lib/domain/balances";
+import { CADENCES, anchorDayOf, dueOccurrences, isValidSettleSchedule, nextOccurrence, type SettleSchedule } from "@/lib/domain/recurring";
 import { validateSplits } from "@/lib/domain/splits";
 import { CATEGORIES, PAYMENT_METHODS, SPLIT_METHODS, type HouseholdSnapshot, type Profile } from "@/lib/domain/types";
 import { createDemoState, type DemoAuditEvent, type DemoState } from "./demo-seed";
@@ -8,6 +9,7 @@ import {
   type ExpenseInput,
   type HouseholdSummary,
   type InvitePreview,
+  type RecurringInput,
   type Repository,
   type SettlementInput,
 } from "./repository";
@@ -79,7 +81,15 @@ export class DemoRepository implements Repository {
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as DemoState;
-        if (parsed.version === 1) return parsed;
+        if (parsed.version === 1) {
+          // Saved before repeats and settle days existed: fill in the new fields.
+          parsed.recurring ??= [];
+          for (const h of parsed.households) {
+            h.settleCadence ??= null;
+            h.settleDay ??= null;
+          }
+          return parsed;
+        }
       } catch {
         // fall through to reseed
       }
@@ -188,6 +198,7 @@ export class DemoRepository implements Repository {
       settlements: s.settlements
         .filter((x) => x.householdId === householdId)
         .map(({ clientRequestId: _c, ...x }) => x),
+      recurring: s.recurring.filter((r) => r.householdId === householdId).sort((a, b) => a.nextDate.localeCompare(b.nextDate)),
       audit: s.audit
         .filter((a) => a.householdId === householdId)
         .map((a) => ({
@@ -211,7 +222,7 @@ export class DemoRepository implements Repository {
       if (trimmed.length < 1 || trimmed.length > 80) throw new RepositoryError("Household names are 1–80 characters.", "invalid");
       const id = uid("h");
       const now = new Date().toISOString();
-      s.households.push({ id, name: trimmed, createdBy: this.me(s), createdAt: now });
+      s.households.push({ id, name: trimmed, createdBy: this.me(s), createdAt: now, settleCadence: null, settleDay: null });
       s.members.push({ householdId: id, id: this.me(s), role: "owner", joinedAt: now, leftAt: null });
       this.log(s, { householdId: id, entityType: "household", entityId: id, action: "create", summary: { title: trimmed } });
       return id;
@@ -350,6 +361,108 @@ export class DemoRepository implements Repository {
       e.deletedAt = new Date().toISOString();
       e.deletedBy = this.me(s);
       this.log(s, { householdId: e.householdId, entityType: "expense", entityId: e.id, action: "delete", summary: { title: e.title, amountCents: e.amountCents } });
+    });
+  }
+
+  // ---- repeating expenses & settle day ----------------------------------------------
+
+  createRecurring(householdId: string, input: RecurringInput): Promise<string> {
+    return this.mutate((s) => {
+      this.requireMember(s, householdId);
+      if (!CADENCES.includes(input.cadence)) throw new RepositoryError("Pick weekly or monthly.", "invalid");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(input.startDate)) throw new RepositoryError("Pick a valid date.", "invalid");
+      this.validateExpense(s, householdId, { ...input, expenseDate: input.startDate, clientRequestId: "" });
+      const id = uid("r");
+      s.recurring.push({
+        id,
+        householdId,
+        title: input.title.trim(),
+        amountCents: input.amountCents,
+        paidBy: input.paidBy,
+        category: input.category,
+        description: input.description?.trim() || null,
+        splitMethod: input.splitMethod,
+        splits: input.splits,
+        cadence: input.cadence,
+        anchorDay: anchorDayOf(input.startDate),
+        nextDate: nextOccurrence(input.startDate, input.cadence),
+        createdBy: this.me(s),
+        createdAt: new Date().toISOString(),
+      });
+      this.log(s, { householdId, entityType: "expense", entityId: id, action: "repeat", summary: { title: input.title.trim(), amountCents: input.amountCents } });
+      return id;
+    });
+  }
+
+  stopRecurring(recurringId: string): Promise<void> {
+    return this.mutate((s) => {
+      const r = s.recurring.find((x) => x.id === recurringId);
+      if (!r || !this.activeMember(s, r.householdId, this.me(s))) throw new RepositoryError("Repeating expense not found.", "not_found");
+      const me = this.me(s);
+      const role = this.activeMember(s, r.householdId, me)?.role;
+      if (r.createdBy !== me && r.paidBy !== me && role !== "owner") {
+        throw new RepositoryError("Only the person who set this up, the payer, or the owner can stop it.", "forbidden");
+      }
+      s.recurring = s.recurring.filter((x) => x.id !== recurringId);
+      this.log(s, { householdId: r.householdId, entityType: "expense", entityId: r.id, action: "stop_repeat", summary: { title: r.title } });
+    });
+  }
+
+  async runDueRecurring(householdId: string, today: string): Promise<number> {
+    const s = this.read();
+    this.requireMember(s, householdId);
+    if (!s.recurring.some((r) => r.householdId === householdId && r.nextDate <= today)) return 0;
+    return this.mutate((st) => {
+      let created = 0;
+      for (const r of st.recurring.filter((x) => x.householdId === householdId && x.nextDate <= today)) {
+        // A series whose payer or participants have left can't be added; leave it for someone to stop.
+        const stillValid =
+          this.activeMember(st, householdId, r.paidBy) && r.splits.every((sp) => this.activeMember(st, householdId, sp.userId));
+        if (!stillValid) continue;
+        const { dates, nextDate } = dueOccurrences(r.nextDate, today, r.cadence, r.anchorDay);
+        for (const date of dates) {
+          const requestId = `${r.id}:${date}`;
+          if (st.expenses.some((e) => e.clientRequestId === requestId)) continue;
+          const now = new Date().toISOString();
+          const id = uid("e");
+          st.expenses.push({
+            id,
+            householdId,
+            title: r.title,
+            amountCents: r.amountCents,
+            paidBy: r.paidBy,
+            category: r.category,
+            description: r.description,
+            expenseDate: date,
+            splitMethod: r.splitMethod,
+            splits: r.splits,
+            receiptUrl: null,
+            createdBy: r.createdBy,
+            createdAt: now,
+            updatedAt: now,
+            clientRequestId: requestId,
+            deletedAt: null,
+            deletedBy: null,
+          });
+          this.log(st, { householdId, entityType: "expense", entityId: id, action: "create", summary: { title: r.title, amountCents: r.amountCents } });
+          created++;
+        }
+        r.nextDate = nextDate;
+      }
+      return created;
+    });
+  }
+
+  setSettleSchedule(householdId: string, schedule: SettleSchedule | null): Promise<void> {
+    return this.mutate((s) => {
+      if (this.requireMember(s, householdId).role !== "owner") {
+        throw new RepositoryError("Only the household owner can set the settle day.", "forbidden");
+      }
+      if (schedule && !isValidSettleSchedule(schedule)) throw new RepositoryError("Pick a weekday, or a day from 1 to 28.", "invalid");
+      const h = s.households.find((x) => x.id === householdId)!;
+      h.settleCadence = schedule?.cadence ?? null;
+      h.settleDay = schedule?.day ?? null;
+      this.log(s, { householdId, entityType: "household", entityId: householdId, action: "settle_day", summary: {} });
     });
   }
 

@@ -20,7 +20,7 @@ export function canEditExpense(expense: Expense, userId: string | undefined, rol
 
 export function ExpenseDetailDialog({ expense, onOpenChange }: { expense: Expense | null; onOpenChange: (open: boolean) => void }) {
   const { ledger, user, repo, deleteExpense } = useAppData();
-  const { openAddExpense } = useDialogs();
+  const { openAddExpense, openRepeatExpense } = useDialogs();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [openingReceipt, setOpeningReceipt] = useState(false);
@@ -162,7 +162,17 @@ export function ExpenseDetailDialog({ expense, onOpenChange }: { expense: Expens
                       <Trash2 /> Delete
                     </Button>
                     <Button
+                      variant="pop"
+                      doodle="receipt"
                       className="ml-auto"
+                      onClick={() => {
+                        close(false);
+                        openRepeatExpense(expense);
+                      }}
+                    >
+                      Add again
+                    </Button>
+                    <Button
                       onClick={() => {
                         close(false);
                         openAddExpense(expense);
@@ -173,7 +183,19 @@ export function ExpenseDetailDialog({ expense, onOpenChange }: { expense: Expens
                   </>
                 )
               ) : (
-                <p className="text-xs text-muted-foreground">Only the person who added or paid for this can edit it.</p>
+                <>
+                  <p className="flex-1 text-xs text-muted-foreground">Only the person who added or paid for this can edit it.</p>
+                  <Button
+                    variant="pop"
+                    doodle="receipt"
+                    onClick={() => {
+                      close(false);
+                      openRepeatExpense(expense);
+                    }}
+                  >
+                    Add again
+                  </Button>
+                </>
               )}
             </div>
           </>

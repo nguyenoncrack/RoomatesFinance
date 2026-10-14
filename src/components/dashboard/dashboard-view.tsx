@@ -21,7 +21,9 @@ import { spendingThisMonth } from "@/lib/analytics";
 import { formatCents } from "@/lib/domain/money";
 import { firstName } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { RepeatChips } from "@/components/expenses/repeat-chips";
 import { Analytics } from "./analytics";
+import { SettleReminder } from "./settle-reminder";
 
 // Soft focus pull, like the section changes on an editorial landing page.
 const fadeUp = (delay = 0) => ({
@@ -63,6 +65,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6 md:space-y-8">
+      <SettleReminder />
       <section className="grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)] lg:gap-7">
         <motion.div
           {...fadeUp()}
@@ -151,6 +154,10 @@ export function DashboardView() {
           </NightPanel>
         </motion.div>
       </section>
+
+      <motion.div {...fadeUp(0.1)}>
+        <RepeatChips />
+      </motion.div>
 
       <div className="grid grid-cols-[minmax(0,1fr)] items-stretch gap-5 lg:grid-cols-2">
         <motion.div {...fadeUp(0.12)} className="flex">

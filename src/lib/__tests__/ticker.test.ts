@@ -26,7 +26,7 @@ function settlement(id: string, paidBy: string, paidTo: string, amountCents: num
 }
 
 const snapshot = (expenses: Expense[], settlements: Settlement[] = []) =>
-  ({ household: {} as HouseholdSnapshot["household"], members: [], expenses, settlements, audit: [] }) satisfies HouseholdSnapshot;
+  ({ household: {} as HouseholdSnapshot["household"], members: [], expenses, settlements, recurring: [], audit: [] }) satisfies HouseholdSnapshot;
 
 describe("buildTicker", () => {
   const groceries = expense("groceries", "alex", 12000, { alex: 4000, ben: 4000, chris: 4000 }, "2026-10-01T10:00:00Z");
