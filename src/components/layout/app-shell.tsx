@@ -4,10 +4,11 @@ import { Activity, ChevronsUpDown, HandCoins, LayoutDashboard, Plus, Receipt, Sc
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityTicker } from "@/components/activity/activity-ticker";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
+import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { BalanceAmount } from "@/components/shared/money";
@@ -87,7 +88,7 @@ function MyBalancePill() {
           <p className="truncate text-sm font-medium">{user.displayName}</p>
           <p className="text-xs text-muted-foreground">
             {net > 0 ? "You're owed" : net < 0 ? "You owe" : "All settled"}{" "}
-            {net !== 0 ? <BalanceAmount cents={net} absolute className="text-xs" /> : null}
+            {net !== 0 ? <BalanceAmount cents={net} absolute animated className="text-xs" /> : null}
           </p>
         </div>
       </div>
@@ -139,10 +140,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                  active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  "isolate",
+                  active ? "text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
                 )}
               >
-                {active ? <span className="absolute top-2 bottom-2 -left-4 w-0.5 rounded-full bg-primary shadow-[0_0_12px_2px] shadow-primary/60" /> : null}
+                {active ? (
+                  <motion.span layoutId="sidebar-active" className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent" transition={{ type: "spring", stiffness: 500, damping: 40 }}>
+                    <span className="absolute top-2 bottom-2 -left-4 w-0.5 rounded-full bg-primary shadow-[0_0_12px_2px] shadow-primary/60" />
+                  </motion.span>
+                ) : null}
                 <Icon className="size-4" />
                 {label}
               </Link>
@@ -169,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Button variant="outline" onClick={() => openSettleUp()} className="hidden h-9 rounded-full px-4 sm:inline-flex">
                     <HandCoins /> Settle up
                   </Button>
-                  <Button onClick={() => openAddExpense()} className="hidden h-9 rounded-full px-4 font-semibold glow-primary sm:inline-flex">
+                  <Button onClick={() => openAddExpense()} className="hidden h-9 rounded-full px-4 font-semibold glow-primary glow-pulse sm:inline-flex">
                     <Plus strokeWidth={2.5} /> Add Expense
                   </Button>
                   <Button variant="ghost" size="icon" asChild className="rounded-full md:hidden">
@@ -188,10 +194,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           {status === "loading" ? <ShellLoading /> : null}
           {status === "error" ? <ShellError message={error} onRetry={reload} /> : null}
           {status === "no-households" ? <NoHouseholds /> : null}
-          {ready ? children : null}
+          {ready ? (
+            <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+              {children}
+            </motion.div>
+          ) : null}
         </main>
       </div>
 
+      <CelebrationLayer />
+      {ready ? <SettledWatcher /> : null}
       {ready ? (
         <nav
           aria-label="Primary"
@@ -207,7 +219,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 whileTap={{ scale: 0.92 }}
                 onClick={() => openAddExpense()}
                 aria-label="Add Expense"
-                className="-mt-7 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-300 to-emerald-500 text-primary-foreground ring-4 ring-background glow-primary"
+                className="-mt-7 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-300 to-emerald-500 text-primary-foreground ring-4 ring-background glow-primary glow-pulse"
               >
                 <Plus className="size-6" strokeWidth={2.75} />
               </motion.button>
@@ -220,6 +232,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
     </div>
   );
+}
+
+/** Celebrates the moment the signed-in roommate's balance in the current household reaches exactly $0. */
+function SettledWatcher() {
+  const { ledger, user, activeHouseholdId } = useAppData();
+  const net = ledger && user ? (ledger.balances.get(user.id) ?? 0) : null;
+  const previous = useRef<{ householdId: string | null; net: number } | null>(null);
+
+  useEffect(() => {
+    if (net === null) return;
+    const prev = previous.current;
+    previous.current = { householdId: activeHouseholdId, net };
+    if (prev && prev.householdId === activeHouseholdId && prev.net !== 0 && net === 0) {
+      celebrate("All settled!", { subtitle: "You're square with everyone.", priority: 2 });
+    }
+  }, [net, activeHouseholdId]);
+
+  return null;
 }
 
 function DemoBadge({ className }: { className?: string }) {

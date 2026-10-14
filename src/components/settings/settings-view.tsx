@@ -94,7 +94,7 @@ function SettingsInner() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="stagger-children mx-auto max-w-3xl space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Settings</h2>
 
       <Card>
