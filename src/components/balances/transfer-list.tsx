@@ -4,6 +4,7 @@ import { ArrowRight, CircleCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
+import { EmptyState } from "@/components/shared/empty-state";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { Button } from "@/components/ui/button";
 import type { Transfer } from "@/lib/domain/balances";
@@ -18,13 +19,9 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
 
   if (transfers.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 py-8 text-center">
-        <span className="flex size-10 items-center justify-center rounded-full bg-positive-soft text-positive">
-          <CircleCheck className="size-5" />
-        </span>
-        <p className="text-sm font-medium">Everyone&apos;s square</p>
-        <p className="text-xs text-muted-foreground">{emptyText ?? "No payments needed right now."}</p>
-      </div>
+      <EmptyState icon={CircleCheck} tone="positive" title="Everyone's square">
+        {emptyText ?? "No payments needed right now."}
+      </EmptyState>
     );
   }
 
@@ -42,16 +39,16 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
             key={`${t.from}-${t.to}`}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.03 }}
+            transition={{ delay: i * 0.04, duration: 0.25 }}
             className={cn(
-              "flex items-center gap-3 rounded-xl border px-3 py-2.5",
-              fromMe && "border-negative/20 bg-negative-soft/50",
-              toMe && "border-positive/20 bg-positive-soft/50",
+              "flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3 transition-colors hover:border-white/[0.12] hover:bg-white/[0.04]",
+              fromMe && "border-negative/25 bg-negative-soft hover:border-negative/40 hover:bg-negative-soft",
+              toMe && "border-positive/25 bg-positive-soft hover:border-positive/40 hover:bg-positive-soft",
             )}
           >
             <div className="flex items-center -space-x-1.5">
-              <MemberAvatar id={t.from} name={from?.displayName ?? "?"} src={from?.avatarUrl} className="ring-2 ring-card" />
-              <MemberAvatar id={t.to} name={to?.displayName ?? "?"} src={to?.avatarUrl} className="ring-2 ring-card" />
+              <MemberAvatar id={t.from} name={from?.displayName ?? "?"} src={from?.avatarUrl} className="ring-2 ring-background" />
+              <MemberAvatar id={t.to} name={to?.displayName ?? "?"} src={to?.avatarUrl} className="ring-2 ring-background" />
             </div>
             <p className="min-w-0 flex-1 text-sm">
               <span className="font-semibold">{name(t.from)}</span>
@@ -59,13 +56,14 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
               <span className="font-semibold">{name(t.to)}</span>
               {compact ? null : <span className="block text-xs text-muted-foreground">{fromMe ? "You pay" : toMe ? "Pays you" : "Pays"}</span>}
             </p>
-            <span className={cn("text-sm font-semibold tabular-nums", fromMe ? "text-negative" : toMe ? "text-positive" : "")}>
+            <span className={cn("font-mono text-sm font-semibold tabular-nums", fromMe ? "text-negative" : toMe ? "text-positive" : "text-foreground/90")}>
               {formatCents(t.amountCents)}
             </span>
             {fromMe || toMe ? (
               <Button
                 size="sm"
                 variant={fromMe ? "default" : "outline"}
+                className={cn("rounded-full px-3", fromMe && "glow-primary")}
                 onClick={() =>
                   openSettleUp({ direction: fromMe ? "pay" : "receive", counterpartyId: fromMe ? t.to : t.from, amountCents: t.amountCents })
                 }

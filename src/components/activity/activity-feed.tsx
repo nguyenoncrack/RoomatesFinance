@@ -70,7 +70,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                 <button
                   onClick={() => setViewing(item.expense)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-muted/70",
+                    "flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none",
                     item.expense.id.startsWith("optimistic-") && "opacity-60",
                   )}
                 >
@@ -83,14 +83,14 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                       {formatDay(item.expense.expenseDate)} · split {item.expense.splits.length} way{item.expense.splits.length === 1 ? "" : "s"}
                     </span>
                   </span>
-                  <span className="text-sm font-semibold tabular-nums">{formatCents(item.expense.amountCents)}</span>
+                  <span className="font-mono text-sm font-semibold tabular-nums">{formatCents(item.expense.amountCents)}</span>
                 </button>
               ) : item.kind === "settlement" ? (
                 <div className={cn("flex items-start gap-3 rounded-xl px-2 py-2.5", item.settlement.status === "voided" && "opacity-55")}>
                   <span
                     className={cn(
                       "inline-flex size-9 shrink-0 items-center justify-center rounded-xl ring-1",
-                      item.settlement.status === "pending" ? "bg-amber-50 text-amber-700 ring-amber-100" : "bg-positive-soft text-positive ring-positive/15",
+                      item.settlement.status === "pending" ? "bg-amber-400/10 text-amber-300 ring-amber-400/20" : "bg-positive-soft text-positive ring-positive/15",
                     )}
                   >
                     {item.settlement.status === "pending" ? <Clock className="size-4" /> : <HandCoins className="size-4" />}
@@ -103,7 +103,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                     <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       {PAYMENT_METHOD_LABELS[item.settlement.paymentMethod]} · {relativeTime(item.settlement.createdAt)}
                       {item.settlement.status !== "completed" ? (
-                        <Badge variant="outline" className={cn("h-4 px-1.5 text-[10px]", item.settlement.status === "pending" && "border-amber-300 text-amber-700")}>
+                        <Badge variant="outline" className={cn("h-4 px-1.5 text-[10px]", item.settlement.status === "pending" && "border-amber-400/40 text-amber-300")}>
                           {item.settlement.status}
                         </Badge>
                       ) : null}
@@ -111,7 +111,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                     </p>
                     {showActions ? <SettlementActions s={item.settlement} /> : null}
                   </div>
-                  <span className="text-sm font-semibold text-positive tabular-nums">{formatCents(item.settlement.amountCents)}</span>
+                  <span className="font-mono text-sm font-semibold text-positive tabular-nums">{formatCents(item.settlement.amountCents)}</span>
                 </div>
               ) : (
                 <AuditRow item={item} name={name} />
@@ -139,7 +139,7 @@ function AuditRow({ item, name }: { item: Extract<ActivityItem, { kind: "audit" 
   const Icon = meta.icon;
   return (
     <div className="flex items-center gap-3 rounded-xl px-2 py-2 text-muted-foreground">
-      <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted">
+      <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10">
         <Icon className="size-4" />
       </span>
       <p className="min-w-0 flex-1 truncate text-sm">
