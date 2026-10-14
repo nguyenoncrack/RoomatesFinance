@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fredoka, Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
@@ -7,6 +7,12 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
+});
+
+const fredoka = Fredoka({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -20,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f8f9fb",
+  themeColor: "#0b0f0d",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -28,10 +34,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable} ${fredoka.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <TooltipProvider>{children}</TooltipProvider>
-        <Toaster theme="light" position="top-center" richColors={false} />
+        <Toaster theme="dark" position="top-center" richColors={false} />
       </body>
     </html>
   );
