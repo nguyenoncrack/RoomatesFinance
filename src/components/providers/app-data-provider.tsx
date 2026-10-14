@@ -6,6 +6,7 @@ import type { Expense, HouseholdSnapshot, Profile, Settlement } from "@/lib/doma
 import { buildLedger, type Ledger } from "@/lib/ledger";
 
 const ACTIVE_KEY = "roommate-ai:active-household";
+const skipKey = (userId: string) => `roommate-ai:setup-skipped:${userId}`;
 
 type Status = "loading" | "ready" | "no-households" | "error";
 
@@ -18,6 +19,9 @@ interface AppData {
   ledger: Ledger | null;
   status: Status;
   error: string | null;
+  /** The user chose "Skip for now" and is browsing the app without a household. */
+  setupSkipped: boolean;
+  skipSetup: () => void;
   setActiveHousehold: (id: string) => void;
   reload: () => Promise<void>;
   createExpense: (input: ExpenseInput) => Promise<void>;
@@ -38,6 +42,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<HouseholdSnapshot | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
+  const [setupSkipped, setSetupSkipped] = useState(false);
   const activeRef = useRef<string | null>(null);
   const snapshotRef = useRef<HouseholdSnapshot | null>(null);
   useEffect(() => {
@@ -58,6 +63,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       const [me, list] = await Promise.all([repo.getCurrentUser(), repo.listHouseholds()]);
       setUser(me);
       setHouseholds(list);
+      setSetupSkipped(me ? window.localStorage.getItem(skipKey(me.id)) === "1" : false);
       if (list.length === 0) {
         activeRef.current = null;
         setActiveId(null);
@@ -222,6 +228,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [repo, reload],
   );
 
+  const skipSetup = useCallback(() => {
+    if (user) window.localStorage.setItem(skipKey(user.id), "1");
+    setSetupSkipped(true);
+  }, [user]);
+
   const value: AppData = {
     repo,
     user,
@@ -231,6 +242,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     ledger: ledgerResult.ledger,
     status: ledgerResult.error ? "error" : status,
     error: ledgerResult.error ?? error,
+    setupSkipped,
+    skipSetup,
     setActiveHousehold,
     reload,
     createExpense,

@@ -13,13 +13,28 @@ import { Button } from "@/components/ui/button";
 import type { ActivityItem } from "@/lib/activity";
 import { formatCents } from "@/lib/domain/money";
 import { PAYMENT_METHOD_LABELS, type Expense, type Settlement } from "@/lib/domain/types";
-import { firstName, formatDay, relativeTime } from "@/lib/format";
+import { formatDay, relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 function SettlementActions({ s }: { s: Settlement }) {
   const { user, setSettlementStatus } = useAppData();
   const [busy, setBusy] = useState<"completed" | "voided" | null>(null);
+  const [confirmingVoid, setConfirmingVoid] = useState(false);
   if (!user || (s.paidBy !== user.id && s.paidTo !== user.id) || s.status === "voided" || s.id.startsWith("optimistic-")) return null;
+
+  if (confirmingVoid) {
+    return (
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Void this {formatCents(s.amountCents)} payment? Balances go back to before it.</span>
+        <Button size="xs" variant="ghost" onClick={() => setConfirmingVoid(false)} disabled={busy !== null}>
+          Keep
+        </Button>
+        <Button size="xs" variant="destructive" onClick={() => run("voided")} disabled={busy !== null}>
+          <Ban /> Void payment
+        </Button>
+      </div>
+    );
+  }
 
   async function run(next: "completed" | "voided") {
     setBusy(next);
@@ -41,7 +56,13 @@ function SettlementActions({ s }: { s: Settlement }) {
           <CircleCheck /> Mark completed
         </Button>
       ) : null}
-      <Button size="xs" variant="ghost" className="text-muted-foreground" onClick={() => run("voided")} disabled={busy !== null}>
+      <Button
+        size="xs"
+        variant="ghost"
+        className="text-muted-foreground"
+        onClick={() => (s.status === "completed" ? setConfirmingVoid(true) : run("voided"))}
+        disabled={busy !== null}
+      >
         <Ban /> {s.status === "pending" ? "Cancel" : "Void"}
       </Button>
     </div>
@@ -53,7 +74,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
   const [viewing, setViewing] = useState<Expense | null>(null);
   if (!ledger) return null;
   const name = (id: string | null) =>
-    id === user?.id ? "You" : id ? firstName(ledger.memberById.get(id)?.displayName ?? "A former roommate") : "Someone";
+    id === user?.id ? "You" : id ? (ledger.shortName.get(id) ?? "A former roommate") : "Someone";
 
   return (
     <>
