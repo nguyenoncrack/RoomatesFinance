@@ -19,7 +19,7 @@ export function ActivityTicker({ className }: { className?: string }) {
           trend: e.trend,
           label: (
             <>
-              <b className="font-semibold">{name(e.fromId)}</b> paid <b className="font-semibold">{name(e.toId) === "You" ? "you" : name(e.toId)}</b>
+              <b className="font-normal text-foreground">{name(e.fromId)}</b> paid <b className="font-normal text-foreground">{name(e.toId) === "You" ? "you" : name(e.toId)}</b>
               {e.pending ? <span className="text-muted-foreground"> · pending</span> : null}
             </>
           ),
@@ -30,10 +30,10 @@ export function ActivityTicker({ className }: { className?: string }) {
       return {
         id: e.id,
         trend: e.trend,
-        icon: <Icon className="size-3.5 text-muted-foreground" />,
+        icon: <Icon className="size-3.5 text-muted-foreground" strokeWidth={2} />,
         label: (
           <>
-            <b className="font-semibold">{name(e.payerId)}</b> · {e.title}
+            <b className="font-normal text-foreground">{name(e.payerId)}</b> · {e.title}
           </>
         ),
         value: e.deltaCents ? formatCents(e.deltaCents, { signed: true }) : formatCents(e.amountCents),

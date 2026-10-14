@@ -86,6 +86,31 @@ function HouseholdSwitcher({ className }: { className?: string }) {
   );
 }
 
+/** Page title: its nav doodle, the scrambled-in serif label, and a pencil underline that draws itself in. */
+function PageTitle({ label, doodle }: { label: string; doodle?: DoodleName }) {
+  const Doodle = doodle ? DOODLES[doodle] : null;
+  return (
+    <h1 className="hidden items-center gap-2.5 md:flex">
+      {Doodle ? (
+        <span aria-hidden className="animate-wiggle [--wiggle-amount:-8deg] [--wiggle-duration:3.2s]">
+          <Doodle className="size-9" />
+        </span>
+      ) : null}
+      <span className="relative font-display text-3xl leading-none">
+        <ScrambleText text={label} duration={550} />
+        <svg aria-hidden viewBox="0 0 120 10" preserveAspectRatio="none" className="absolute -bottom-2.5 left-0 h-2.5 w-full overflow-visible text-pop-pink">
+          <path
+            d="M2 6c14-4 26-4 40-1s30 3 44 0 22-3 32-1"
+            pathLength={1}
+            className="pencil-stroke animate-pencil [--pencil-delay:0.35s] [--pencil-duration:0.9s]"
+            strokeWidth={3}
+          />
+        </svg>
+      </span>
+    </h1>
+  );
+}
+
 /** Your name on a taped-on paper note, with a mini Penny peeking over it whose face follows your balance. */
 function MyBalancePill() {
   const { ledger, user } = useAppData();
@@ -222,25 +247,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-foreground/[0.06] bg-background/75 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 bg-background/80 bg-[image:var(--pencil-divider)] bg-[length:60px_6px] bg-bottom bg-repeat-x backdrop-blur-xl">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-4 md:h-16 md:px-8">
             <div className="min-w-0 md:hidden">
               {inApp ? <HouseholdSwitcher className="max-w-[48vw] bg-transparent px-0 after:hidden hover:bg-transparent" /> : <Logo />}
             </div>
-            <h1 className="hidden font-display text-3xl leading-none md:block">
-              <ScrambleText key={current?.label} text={current?.label ?? "Roommate Finance"} duration={550} />
-            </h1>
+            <PageTitle key={current?.href} label={current?.label ?? "Roommate Finance"} doodle={current?.doodle} />
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}
               {ready ? (
                 <>
-                  <Button variant="outline" size="sm" mark="cross" onClick={() => openSettleUp()} className="sm:hidden">
+                  <Button variant="mint" size="sm" doodle="dollar" onClick={() => openSettleUp()} className="sm:hidden">
                     Settle
                   </Button>
-                  <Button variant="outline" mark="cross" onClick={() => openSettleUp()} className="hidden sm:inline-flex">
+                  <Button variant="mint" doodle="dollar" onClick={() => openSettleUp()} className="hidden sm:inline-flex">
                     Settle up
                   </Button>
-                  <Button mark="star" onClick={() => openAddExpense()} className="hidden sm:inline-flex">
+                  <Button variant="pop" doodle="receipt" onClick={() => openAddExpense()} className="hidden sm:inline-flex">
                     Add expense
                   </Button>
                 </>

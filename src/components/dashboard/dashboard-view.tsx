@@ -116,10 +116,10 @@ export function DashboardView() {
               </span>
             </h2>
             <div className="flex flex-wrap gap-3">
-              <Button size="lg" mark="star" onClick={() => openAddExpense()}>
+              <Button variant="pop" doodle="receipt" onClick={() => openAddExpense()}>
                 Add expense
               </Button>
-              <Button size="lg" variant="outline" mark="cross" onClick={() => openSettleUp()} className="bg-card">
+              <Button variant="mint" doodle="dollar" onClick={() => openSettleUp()}>
                 Settle up
               </Button>
             </div>

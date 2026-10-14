@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 import { Slot } from "radix-ui"
+import { DOODLES, type DoodleName } from "@/components/shared/doodles"
 
 const buttonVariants = cva(
   "group/button relative inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding font-mono text-[11px] font-medium tracking-[0.08em] whitespace-nowrap uppercase transition-[color,background-color,border-color,box-shadow] duration-200 outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px motion-reduce:active:translate-y-0 disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-']):not([data-pencil])]:size-3.5 [&_svg:not([data-pencil])]:stroke-[1.75]",
@@ -18,6 +19,9 @@ const buttonVariants = cva(
         destructive:
           "border-destructive/35 bg-destructive/[0.06] text-destructive hover:border-destructive/60 hover:bg-destructive/10 focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
         link: "text-foreground underline decoration-foreground/30 underline-offset-4 hover:decoration-foreground",
+        /** Cartoon sticker buttons: pencil outline, hard shadow that grows on hover and flattens on press. */
+        pop: "bg-pop-yellow text-foreground sticker-sm transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 hover:shadow-[3px_4px_0_0_var(--foreground)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
+        mint: "bg-mint text-foreground sticker-sm transition-[translate,box-shadow,background-color] hover:-translate-y-0.5 hover:bg-pop-green hover:shadow-[3px_4px_0_0_var(--foreground)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
       },
       size: {
         default:
@@ -79,6 +83,7 @@ function Button({
   size = "default",
   asChild = false,
   mark,
+  doodle,
   children,
   ...props
 }: React.ComponentProps<"button"> &
@@ -86,7 +91,10 @@ function Button({
     asChild?: boolean
     /** Optional typographic mark shown before the label. */
     mark?: keyof typeof MARKS
+    /** Optional mini doodle before the label; it wiggles on hover. */
+    doodle?: DoodleName
   }) {
+  const Doodle = doodle ? DOODLES[doodle] : null
   const Comp = asChild ? Slot.Root : "button"
   const sketched = SKETCHED.has(variant ?? "default") && !String(size).startsWith("icon")
 
@@ -98,6 +106,15 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
+      {Doodle ? (
+        <span
+          aria-hidden
+          data-pencil
+          className="-my-1 -ml-1 grid size-6 shrink-0 place-items-center transition-transform group-hover/button:animate-wiggle group-hover/button:[--wiggle-amount:14deg] group-hover/button:[--wiggle-duration:0.5s]"
+        >
+          <Doodle className="size-6" />
+        </span>
+      ) : null}
       {mark ? (
         <span aria-hidden className="text-[0.95em] leading-none opacity-70">
           {MARKS[mark]}
