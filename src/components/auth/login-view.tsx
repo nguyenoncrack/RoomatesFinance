@@ -225,11 +225,11 @@ function Shell({ children }: { children: React.ReactNode }) {
             </span>
           </h1>
           <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Track groceries, bills and rent with your roommates. Roommate AI nets everything out and tells each of you exactly who
+            Track groceries, bills and rent with your roommates. Roommate Finance nets everything out and tells each of you exactly who
             to pay — and how much.
           </p>
           <div className="w-full max-w-md">{children}</div>
-          <p className="text-[11px] text-muted-foreground/80">We only keep score. No real money ever moves through Roommate AI.</p>
+          <p className="text-[11px] text-muted-foreground/80">We only keep score. No real money ever moves through Roommate Finance.</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.1 }}>

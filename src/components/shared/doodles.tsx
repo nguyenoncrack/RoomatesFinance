@@ -218,11 +218,15 @@ export function DollarCoinDoodle({ className }: { className?: string }) {
   );
 }
 
-export function PiggyDoodle({ className }: { className?: string }) {
+export function PiggyDoodle({ className, coin = true }: { className?: string; coin?: boolean }) {
   return (
     <Frame className={className} viewBox="0 0 72 64">
-      <circle {...INK} cx="42" cy="9" r="7" fill="var(--pop-yellow)" strokeWidth={2} />
-      <path d="M42 5.5v7" {...INK} strokeWidth={1.8} />
+      {coin ? (
+        <>
+          <circle {...INK} cx="42" cy="9" r="7" fill="var(--pop-yellow)" strokeWidth={2} />
+          <path d="M42 5.5v7" {...INK} strokeWidth={1.8} />
+        </>
+      ) : null}
       <path {...INK} d="M30 24l-2-9 9 6" fill="var(--pop-pink)" />
       <path {...INK} d="M9 40c-5 0-6-6-2-7" strokeWidth={2} />
       <ellipse {...INK} cx="34" cy="38" rx="24" ry="17" fill="var(--pop-pink)" />
@@ -276,6 +280,19 @@ export function MoneyBagDoodle({ className }: { className?: string }) {
   );
 }
 
+export function GearDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={className}>
+      <path
+        {...INK}
+        d="M28 6h8l1.5 6.5 5 2.2 5.8-3.6 5.6 5.6-3.6 5.8 2.2 5 6.5 1.5v8l-6.5 1.5-2.2 5 3.6 5.8-5.6 5.6-5.8-3.6-5 2.2L36 58h-8l-1.5-6.5-5-2.2-5.8 3.6-5.6-5.6 3.6-5.8-2.2-5L6 36v-8l6.5-1.5 2.2-5-3.6-5.8 5.6-5.6 5.8 3.6 5-2.2z"
+        fill="var(--pop-purple)"
+      />
+      <circle {...INK} cx="32" cy="32" r="9" fill="var(--butter)" />
+    </Frame>
+  );
+}
+
 export const DOODLES = {
   coins: CoinsDoodle,
   house: HouseDoodle,
@@ -294,6 +311,7 @@ export const DOODLES = {
   wallet: WalletDoodle,
   card: CardDoodle,
   moneybag: MoneyBagDoodle,
+  gear: GearDoodle,
 } as const;
 
 export type DoodleName = keyof typeof DOODLES;

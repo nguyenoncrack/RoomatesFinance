@@ -168,6 +168,20 @@
   background-size: 60px 6px;
 }
 
+/* Light paper scope inside dark areas (the sidebar name card). */
+.theme-paper {
+  --background: oklch(0.972 0.006 95);
+  --foreground: oklch(0.235 0.008 85);
+  --card: oklch(0.982 0.005 95);
+  --card-foreground: oklch(0.235 0.008 85);
+  --muted-foreground: oklch(0.45 0.01 85);
+  --primary: oklch(0.255 0.009 85);
+  --primary-foreground: oklch(0.968 0.006 95);
+  --border: oklch(0.235 0.008 85 / 12%);
+  color: var(--foreground);
+  color-scheme: light;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -347,6 +361,71 @@
   animation: wiggle var(--wiggle-duration, 2.6s) ease-in-out infinite;
 }
 
+/* A coin falls into the piggy bank's slot; the piggy jiggles as it lands. Same period, so they stay in sync. */
+@keyframes coin-drop {
+  0%,
+  12% {
+    transform: translate3d(0, -26px, 0) rotate(-20deg);
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(0, 4px, 0) rotate(10deg);
+    opacity: 1;
+  }
+  60%,
+  100% {
+    transform: translate3d(0, 12px, 0) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+@utility animate-coin-drop {
+  animation: coin-drop 3s cubic-bezier(0.5, 0, 0.75, 0) infinite;
+}
+
+@keyframes piggy-jiggle {
+  0%,
+  50%,
+  100% {
+    transform: none;
+  }
+  56% {
+    transform: translateY(2px) scale(1.04, 0.95);
+  }
+  64% {
+    transform: translateY(-3px) rotate(-4deg);
+  }
+  72% {
+    transform: rotate(3deg);
+  }
+  80% {
+    transform: none;
+  }
+}
+
+@utility animate-piggy-jiggle {
+  animation: piggy-jiggle 3s ease-out infinite;
+  transform-origin: 50% 90%;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(-1deg) translateY(-1px);
+  }
+}
+
+@utility animate-sway {
+  animation: sway 5s ease-in-out infinite;
+  transform-origin: 50% 0%;
+}
+
 @keyframes bob {
   0%,
   100% {
@@ -468,7 +547,10 @@
     animation: none;
   }
   .animate-wiggle,
-  .animate-bob {
+  .animate-bob,
+  .animate-coin-drop,
+  .animate-piggy-jiggle,
+  .animate-sway {
     animation: none;
   }
   .animate-pencil {

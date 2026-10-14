@@ -12,7 +12,7 @@ import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { MoneyScatter } from "@/components/shared/money-scatter";
-import { PiggyDoodle, BillDoodle } from "@/components/shared/doodles";
+import { BillDoodle, DOODLES, DollarCoinDoodle, Mascot, PiggyDoodle, SparkleDoodle, type DoodleName, PeopleDoodle, SquiggleDoodle } from "@/components/shared/doodles";
 import { ScrambleText } from "@/components/shared/scramble-text";
 import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
@@ -29,12 +29,12 @@ import { cn } from "@/lib/utils";
 import { HouseholdSetupCard, NoHouseholdState } from "./household-setup";
 import { ShellError, ShellLoading } from "./shell-states";
 
-const NAV: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/expenses", label: "Expenses", icon: Receipt },
-  { href: "/balances", label: "Balances", icon: Scale },
-  { href: "/activity", label: "Activity", icon: Activity },
-  { href: "/settings", label: "Settings", icon: Settings },
+const NAV: { href: string; label: string; icon: LucideIcon; doodle: DoodleName }[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, doodle: "house" },
+  { href: "/expenses", label: "Expenses", icon: Receipt, doodle: "receipt" },
+  { href: "/balances", label: "Balances", icon: Scale, doodle: "scale" },
+  { href: "/activity", label: "Activity", icon: Activity, doodle: "clock" },
+  { href: "/settings", label: "Settings", icon: Settings, doodle: "gear" },
 ];
 
 function HouseholdSwitcher({ className }: { className?: string }) {
@@ -46,12 +46,15 @@ function HouseholdSwitcher({ className }: { className?: string }) {
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "flex w-full items-center gap-2 rounded-xl border border-foreground/15 px-3 py-2 text-left transition-colors hover:border-foreground/35",
+              "group/hh flex w-full items-center gap-2.5 rounded-2xl bg-foreground/[0.04] px-3 py-2.5 text-left transition-colors sketch-line hover:bg-foreground/[0.08]",
               className,
             )}
           >
+            <span aria-hidden className="shrink-0 transition-transform duration-300 group-hover/hh:-rotate-6">
+              <PeopleDoodle className="size-8" />
+            </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate font-display text-lg leading-tight">{active?.name ?? (households.length ? "Choose household" : "No household")}</span>
+              <span className="block truncate font-hand text-xl leading-tight">{active?.name ?? (households.length ? "Choose household" : "No household")}</span>
               <span className="block font-label text-[9.5px] text-muted-foreground">
                 {active ? `${active.memberCount} roommate${active.memberCount === 1 ? "" : "s"}` : households.length ? "" : "Create or join one"}
               </span>
@@ -83,22 +86,53 @@ function HouseholdSwitcher({ className }: { className?: string }) {
   );
 }
 
+/** Your name on a taped-on paper note, with a mini Penny peeking over it whose face follows your balance. */
 function MyBalancePill() {
   const { ledger, user } = useAppData();
   if (!ledger || !user) return null;
   const net = ledger.balances.get(user.id) ?? 0;
   return (
-    <div className="rounded-2xl border-[1.5px] border-foreground/20 bg-foreground/[0.04] p-3">
-      <div className="flex items-center gap-2">
-        <MemberAvatar id={user.id} name={user.displayName} src={user.avatarUrl} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-hand text-lg leading-tight">{user.displayName}</p>
-          <p className="text-xs text-muted-foreground">
-            {net > 0 ? "You're owed" : net < 0 ? "You owe" : "All settled"}{" "}
-            {net !== 0 ? <BalanceAmount cents={net} absolute animated className="text-xs" /> : null}
-          </p>
+    <div className="theme-paper relative mx-1 animate-sway hover:[animation-play-state:paused]">
+      <span aria-hidden className="absolute -top-14 right-1 z-10 animate-bob">
+        <Mascot mood={net < 0 ? "worried" : net > 0 ? "proud" : "happy"} className="h-[4.25rem]" />
+      </span>
+      <div className="relative rounded-2xl bg-card px-3 pt-4 pb-3 sticker-sm">
+        <span
+          aria-hidden
+          className="absolute -top-2.5 left-5 z-[3] h-5 w-14 -rotate-6 bg-butter/85 [clip-path:polygon(4%_0,96%_6%,100%_100%,0_94%)]"
+        />
+        <div className="flex items-center gap-3">
+          <MemberAvatar id={user.id} name={user.displayName} src={user.avatarUrl} size="lg" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-hand text-xl leading-tight">{user.displayName}</p>
+            <p className="font-hand text-base leading-tight text-muted-foreground">
+              {net > 0 ? "you're owed" : net < 0 ? "you owe" : "all settled ✓"}{" "}
+              {net !== 0 ? <BalanceAmount cents={net} absolute animated className="font-hand text-lg font-normal" /> : null}
+            </p>
+          </div>
         </div>
+        <SquiggleDoodle className="mt-2 h-2 w-full opacity-25" />
       </div>
+    </div>
+  );
+}
+
+/** A bill drifting past while a coin drops into the piggy bank on a loop. */
+function PiggyScene() {
+  return (
+    <div aria-hidden className="relative h-24 w-44">
+      <span className="absolute top-0 right-2 block h-10 w-16 animate-bob [animation-delay:0.6s]">
+        <BillDoodle className="size-full rotate-12 drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
+      </span>
+      <span className="absolute top-[34px] left-[40px] block size-5 animate-coin-drop">
+        <DollarCoinDoodle className="size-full" />
+      </span>
+      <span className="absolute bottom-0 left-3 block h-16 w-20 animate-piggy-jiggle">
+        <PiggyDoodle coin={false} className="size-full drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
+      </span>
+      <span className="absolute bottom-12 left-0 size-3 animate-wiggle [--wiggle-amount:-30deg] [--wiggle-duration:1.4s]">
+        <SparkleDoodle className="size-full" color="var(--pop-pink)" />
+      </span>
     </div>
   );
 }
@@ -134,51 +168,55 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh w-full">
       <aside className="theme-night sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r-[1.5px] border-[var(--night)] bg-night bg-[radial-gradient(30rem_20rem_at_0%_0%,oklch(1_0_0/5%),transparent_60%)] px-4 py-5 md:flex">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[image:var(--texture-plaster)] bg-[length:260px_260px] opacity-[0.16] mix-blend-soft-light" />
+        <span aria-hidden className="pointer-events-none absolute top-24 right-4 size-3 animate-wiggle [--wiggle-amount:25deg]">
+          <SparkleDoodle className="size-full" color="var(--pop-yellow)" />
+        </span>
         <div className="flex items-center justify-between">
           <Logo />
           {repo.mode === "demo" ? <DemoBadge /> : null}
         </div>
         {inApp ? <HouseholdSwitcher /> : null}
         <nav className="flex flex-col gap-0.5">
-          {NAV.map(({ href, label }, i) => {
+          {NAV.map(({ href, label, doodle }, i) => {
             const active = pathname.startsWith(href);
+            const Doodle = DOODLES[doodle];
             return (
               <Link
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group/nav relative isolate flex items-center gap-2.5 rounded-full px-3.5 py-2 font-label text-[11px] transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "group/nav relative isolate flex items-center gap-3 rounded-2xl px-3 py-2 font-label text-[11px] transition-[color,translate] duration-200",
+                  active ? "text-foreground" : "text-muted-foreground hover:translate-x-1 hover:text-foreground",
                 )}
               >
                 {active ? (
                   <motion.span
                     layoutId="sidebar-active"
-                    className="absolute inset-0 -z-10 rounded-full border border-foreground/25"
+                    className="absolute inset-0 -z-10 rounded-2xl bg-foreground/[0.07] sketch-line"
                     transition={{ type: "spring", stiffness: 420, damping: 38 }}
                   />
                 ) : null}
-                <span aria-hidden className={cn("transition-opacity", active ? "opacity-100" : "opacity-40 group-hover/nav:opacity-100")}>
-                  •
+                <span
+                  aria-hidden
+                  className={cn(
+                    "grid size-7 place-items-center transition-[opacity,filter] duration-200",
+                    active ? "animate-wiggle [--wiggle-amount:-8deg] [--wiggle-duration:3s]" : "opacity-75 grayscale-[0.35] group-hover/nav:animate-wiggle group-hover/nav:opacity-100 group-hover/nav:grayscale-0 group-hover/nav:[--wiggle-amount:12deg] group-hover/nav:[--wiggle-duration:0.6s]",
+                  )}
+                >
+                  <Doodle className="size-7" />
                 </span>
                 {label}
-                <span aria-hidden className="ml-auto text-[9.5px] tabular-nums opacity-40">
+                <span aria-hidden className="ml-auto font-hand text-[15px] normal-case tracking-normal tabular-nums opacity-40">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto space-y-3">
-          <div aria-hidden className="relative mx-auto h-24 w-40">
-            <span className="absolute top-0 left-2 block h-10 w-16 animate-bob [animation-delay:0.6s]">
-              <BillDoodle className="size-full -rotate-12 drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
-            </span>
-            <span className="absolute right-3 bottom-0 block h-16 w-20 animate-bob">
-              <PiggyDoodle className="size-full drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
-            </span>
-          </div>
+        <div className="mt-auto space-y-2">
+          <PiggyScene />
           {ready ? <MyBalancePill /> : null}
         </div>
       </aside>
@@ -187,10 +225,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 border-b border-foreground/[0.06] bg-background/75 backdrop-blur-xl">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-4 md:h-16 md:px-8">
             <div className="min-w-0 md:hidden">
-              {inApp ? <HouseholdSwitcher className="max-w-[48vw] border-0 bg-transparent px-0 hover:bg-transparent" /> : <Logo />}
+              {inApp ? <HouseholdSwitcher className="max-w-[48vw] bg-transparent px-0 after:hidden hover:bg-transparent" /> : <Logo />}
             </div>
             <h1 className="hidden font-display text-3xl leading-none md:block">
-              <ScrambleText key={current?.label} text={current?.label ?? "Roommate AI"} duration={550} />
+              <ScrambleText key={current?.label} text={current?.label ?? "Roommate Finance"} duration={550} />
             </h1>
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}

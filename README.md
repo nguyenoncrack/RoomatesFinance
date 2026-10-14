@@ -1,4 +1,4 @@
-# Roommate AI
+# Roommate Finance
 
 Split shared expenses with your roommates, see who owes what, and settle up with as few payments as possible.
 
