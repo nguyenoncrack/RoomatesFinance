@@ -1,10 +1,10 @@
 "use client";
 
-import { Activity, ChevronsUpDown, HandCoins, LayoutDashboard, Plus, Receipt, Scale, Settings, type LucideIcon } from "lucide-react";
+import { Activity, ChevronsUpDown, HandCoins, LayoutDashboard, Link2, Plus, Receipt, Scale, Settings, type LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { ActivityTicker } from "@/components/activity/activity-ticker";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
@@ -23,8 +23,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { CreateHouseholdDialog } from "./create-household-dialog";
-import { ShellError, ShellLoading, NoHouseholds } from "./shell-states";
+import { HouseholdSetupCard, NoHouseholdState } from "./household-setup";
+import { ShellError, ShellLoading } from "./shell-states";
 
 const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -36,11 +36,10 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
 
 function HouseholdSwitcher({ className }: { className?: string }) {
   const { households, activeHouseholdId, setActiveHousehold } = useAppData();
-  const [createOpen, setCreateOpen] = useState(false);
+  const { openHousehold } = useDialogs();
   const active = households.find((h) => h.id === activeHouseholdId);
   return (
-    <>
-      <DropdownMenu>
+    <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
@@ -49,30 +48,35 @@ function HouseholdSwitcher({ className }: { className?: string }) {
             )}
           >
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold">{active?.name ?? "Choose household"}</span>
+              <span className="block truncate text-sm font-semibold">{active?.name ?? (households.length ? "Choose household" : "No household")}</span>
               <span className="block text-xs text-muted-foreground">
-                {active ? `${active.memberCount} roommate${active.memberCount === 1 ? "" : "s"}` : ""}
+                {active ? `${active.memberCount} roommate${active.memberCount === 1 ? "" : "s"}` : households.length ? "" : "Create or join one"}
               </span>
             </span>
             <ChevronsUpDown className="size-4 text-muted-foreground" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel>Your households</DropdownMenuLabel>
-          {households.map((h) => (
-            <DropdownMenuItem key={h.id} onSelect={() => setActiveHousehold(h.id)} className="justify-between">
-              <span className="truncate">{h.name}</span>
-              {h.id === activeHouseholdId ? <Badge variant="secondary">Current</Badge> : null}
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
+          {households.length ? (
+            <>
+              <DropdownMenuLabel>Your households</DropdownMenuLabel>
+              {households.map((h) => (
+                <DropdownMenuItem key={h.id} onSelect={() => setActiveHousehold(h.id)} className="justify-between">
+                  <span className="truncate">{h.name}</span>
+                  {h.id === activeHouseholdId ? <Badge variant="secondary">Current</Badge> : null}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+          <DropdownMenuItem onSelect={() => openHousehold("create")}>
             <Plus /> New household
           </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => openHousehold("join")}>
+            <Link2 /> Join with invite link
+          </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
-      <CreateHouseholdDialog open={createOpen} onOpenChange={setCreateOpen} />
-    </>
+    </DropdownMenu>
   );
 }
 
@@ -117,9 +121,11 @@ function MobileTab({ href, label, icon: Icon, active }: { href: string; label: s
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { status, error, reload, repo } = useAppData();
-  const { openAddExpense, openSettleUp } = useDialogs();
+  const { status, error, reload, repo, setupSkipped } = useAppData();
+  const { openAddExpense, openSettleUp, openHousehold } = useDialogs();
   const ready = status === "ready";
+  const browsing = status === "no-households" && setupSkipped;
+  const inApp = ready || browsing;
   const current = NAV.find((n) => pathname.startsWith(n.href));
 
   return (
@@ -129,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Logo />
           {repo.mode === "demo" ? <DemoBadge /> : null}
         </div>
-        {ready ? <HouseholdSwitcher /> : null}
+        {inApp ? <HouseholdSwitcher /> : null}
         <nav className="flex flex-col gap-1">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname.startsWith(href);
@@ -162,7 +168,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-background/75 backdrop-blur-xl">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-4 md:h-16 md:px-8">
             <div className="min-w-0 md:hidden">
-              {ready ? <HouseholdSwitcher className="max-w-[48vw] border-0 bg-transparent px-0 hover:bg-transparent" /> : <Logo />}
+              {inApp ? <HouseholdSwitcher className="max-w-[48vw] border-0 bg-transparent px-0 hover:bg-transparent" /> : <Logo />}
             </div>
             <h1 className="hidden font-display text-xl font-semibold tracking-tight md:block">{current?.label ?? "Roommate AI"}</h1>
             <div className="ml-auto flex items-center gap-2">
@@ -178,12 +184,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Button onClick={() => openAddExpense()} className="hidden h-9 rounded-full px-4 font-semibold glow-primary glow-pulse sm:inline-flex">
                     <Plus strokeWidth={2.5} /> Add Expense
                   </Button>
-                  <Button variant="ghost" size="icon" asChild className="rounded-full md:hidden">
-                    <Link href="/settings" aria-label="Settings">
-                      <Settings />
-                    </Link>
-                  </Button>
                 </>
+              ) : null}
+              {inApp ? (
+                <Button variant="ghost" size="icon" asChild className="rounded-full md:hidden">
+                  <Link href="/settings" aria-label="Settings">
+                    <Settings />
+                  </Link>
+                </Button>
               ) : null}
             </div>
           </div>
@@ -193,7 +201,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-32 md:px-8 md:pt-8 md:pb-12">
           {status === "loading" ? <ShellLoading /> : null}
           {status === "error" ? <ShellError message={error} onRetry={reload} /> : null}
-          {status === "no-households" ? <NoHouseholds /> : null}
+          {status === "no-households" && !setupSkipped ? <HouseholdSetupCard /> : null}
+          {browsing ? pathname.startsWith("/settings") ? children : <NoHouseholdState pathname={pathname} /> : null}
           {ready ? (
             <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
               {children}
@@ -204,7 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <CelebrationLayer />
       {ready ? <SettledWatcher /> : null}
-      {ready ? (
+      {inApp ? (
         <nav
           aria-label="Primary"
           className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 rounded-2xl border border-white/10 bg-popover/85 shadow-2xl shadow-black/60 backdrop-blur-xl md:hidden"
@@ -217,8 +226,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.92 }}
-                onClick={() => openAddExpense()}
-                aria-label="Add Expense"
+                onClick={() => (ready ? openAddExpense() : openHousehold("create"))}
+                aria-label={ready ? "Add Expense" : "Set up a household"}
                 className="-mt-7 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-300 to-emerald-500 text-primary-foreground ring-4 ring-background glow-primary glow-pulse"
               >
                 <Plus className="size-6" strokeWidth={2.75} />
