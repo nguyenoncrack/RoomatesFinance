@@ -210,7 +210,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <span className="hidden text-xs text-muted-foreground sm:inline">Splitwise math, banking-app calm.</span>
       </header>
 
-      <main className="relative mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-5 pt-4 pb-12 md:px-8 lg:grid-cols-[1fr_1.05fr] lg:gap-14 lg:py-12">
+      <main className="relative mx-auto grid grid-cols-1 w-full max-w-6xl flex-1 items-center gap-10 px-5 pt-4 pb-12 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-6">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
             <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />

@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCents } from "@/lib/domain/money";
 import { CATEGORIES, CATEGORY_LABELS, type Expense } from "@/lib/domain/types";
-import { firstName, formatDay, todayDay } from "@/lib/format";
+import { formatDay, todayDay } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ExpenseDetailDialog } from "./expense-detail-dialog";
 
@@ -70,7 +70,7 @@ export function ExpensesView() {
   if (!snapshot || !ledger || !user) return null;
   const viewing = snapshot.expenses.find((e) => e.id === viewingId) ?? null;
   const members = snapshot.members;
-  const name = (id: string) => (id === user.id ? "You" : firstName(ledger.memberById.get(id)?.displayName ?? "Former"));
+  const name = (id: string) => (id === user.id ? "You" : (ledger.shortName.get(id) ?? "Former"));
 
   function clear() {
     setQuery("");
@@ -127,7 +127,7 @@ export function ExpensesView() {
                 <SelectItem value="all">Paid by anyone</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
-                    Paid by {m.id === user.id ? "you" : firstName(m.displayName)}
+                    Paid by {m.id === user.id ? "you" : ledger.shortName.get(m.id)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -140,7 +140,7 @@ export function ExpensesView() {
                 <SelectItem value="all">Any roommate</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
-                    Involving {m.id === user.id ? "you" : firstName(m.displayName)}
+                    Involving {m.id === user.id ? "you" : ledger.shortName.get(m.id)}
                   </SelectItem>
                 ))}
               </SelectContent>
