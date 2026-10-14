@@ -12,6 +12,7 @@ import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { MoneyScatter } from "@/components/shared/money-scatter";
+import { RoamingBuddy } from "@/components/shared/roaming-buddy";
 import { MusicToggle } from "@/components/shared/music-toggle";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { BillDoodle, DOODLES, DollarCoinDoodle, Mascot, PiggyDoodle, SparkleDoodle, type DoodleName, PeopleDoodle, SquiggleDoodle } from "@/components/shared/doodles";
@@ -314,6 +315,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         {inApp ? <MoneyScatter /> : null}
+        {ready ? <RoamingBuddy /> : null}
         <main className="relative z-[1] mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-32 md:px-8 md:pt-8 md:pb-12">
           {status === "loading" ? <ShellLoading /> : null}
           {status === "error" ? <ShellError message={error} onRetry={reload} /> : null}

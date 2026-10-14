@@ -11,6 +11,7 @@ import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { BuddyCard } from "./buddy-card";
 import { DeleteAccountCard } from "./delete-account-card";
 import { SettleDayCard } from "./settle-day-card";
 import { Input } from "@/components/ui/input";
@@ -151,6 +152,7 @@ function NoHouseholdSettings() {
       </Card>
       <ProfileCard />
       <DemoControls />
+      <BuddyCard />
       <DeleteAccountCard />
       <div className="flex justify-end">
         <SignOutButton />
@@ -341,6 +343,8 @@ function SettingsInner() {
           <SignOutButton />
         </CardFooter>
       </Card>
+
+      <BuddyCard />
 
       <DeleteAccountCard />
     </div>
