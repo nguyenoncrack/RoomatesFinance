@@ -50,7 +50,7 @@ export function DashboardView() {
   const monthTotal = spendingThisMonth(snapshot.expenses);
   const monthCount = snapshot.expenses.filter((e) => e.expenseDate.slice(0, 7) === new Date().toISOString().slice(0, 7)).length;
   const activity = buildActivity(snapshot).slice(0, 6);
-  const nameOf = (id: string) => firstName(ledger.memberById.get(id)?.displayName ?? "Former roommate");
+  const nameOf = (id: string) => (ledger.shortName.get(id) ?? "Former roommate");
   const creditors = myDebts.map((t) => nameOf(t.to));
   const debtors = myCredits.map((t) => nameOf(t.from));
   const tone = net > 0 ? "positive" : net < 0 ? "negative" : "neutral";
@@ -123,7 +123,7 @@ export function DashboardView() {
               <span className="text-emerald-300">ledger.net</span>(<span className="text-amber-200">&quot;{me}&quot;</span>);
             </div>
             <div className="truncate">
-              you.balance{"  "}={" "}
+              you.balance{"  "}={ " "}
               <span className={cn(tone === "positive" && "text-positive", tone === "negative" && "text-negative")}>
                 {formatCents(net, { signed: true })} {net > 0 ? "▲" : net < 0 ? "▼" : ""}
               </span>

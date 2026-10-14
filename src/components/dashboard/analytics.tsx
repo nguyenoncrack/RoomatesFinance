@@ -13,7 +13,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { byCategory, contributions, monthlyTrend } from "@/lib/analytics";
 import { formatCents } from "@/lib/domain/money";
 import { CATEGORY_LABELS } from "@/lib/domain/types";
-import { firstName } from "@/lib/format";
 
 const compactUsd = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(cents / 100);
@@ -34,7 +33,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 export function Analytics() {
-  const { snapshot, user } = useAppData();
+  const { snapshot, ledger, user } = useAppData();
   const [range, setRange] = useState<"month" | "6m">("6m");
   const expenses = useMemo(() => snapshot?.expenses ?? [], [snapshot]);
   const since = format(range === "month" ? startOfMonth(new Date()) : startOfMonth(subMonths(new Date(), 5)), "yyyy-MM-dd");
@@ -43,11 +42,10 @@ export function Analytics() {
   const categories = useMemo(() => byCategory(expenses, since), [expenses, since]);
   const total = categories.reduce((a, c) => a + c.cents, 0);
   const people = useMemo(() => {
-    const byId = new Map(snapshot?.members.map((m) => [m.id, m]));
     return contributions(expenses, since)
-      .map((c) => ({ ...c, name: c.userId === user?.id ? "You" : firstName(byId.get(c.userId)?.displayName ?? "Former") }))
+      .map((c) => ({ ...c, name: c.userId === user?.id ? "You" : (ledger?.shortName.get(c.userId) ?? "Former") }))
       .sort((a, b) => b.paidCents - a.paidCents);
-  }, [expenses, since, snapshot, user]);
+  }, [expenses, since, ledger, user]);
 
   return (
     <section className="space-y-4">

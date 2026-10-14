@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, Copy, Link2, Loader2, LogOut, RotateCcw, UserRoundCog } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Check, Copy, Home, Link2, Loader2, Plus, RotateCcw, UserRoundCog } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { SignOutButton } from "@/components/layout/household-setup";
 import { useAppData, useDemoRepository } from "@/components/providers/app-data-provider";
+import { useDialogs } from "@/components/providers/dialogs-provider";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
@@ -33,16 +34,132 @@ function useAsync() {
 }
 
 export function SettingsView() {
-  const { snapshot, user } = useAppData();
+  const { snapshot, user, status } = useAppData();
+  if (status === "no-households") return <NoHouseholdSettings key={user?.id} />;
   return <SettingsInner key={`${snapshot?.household.id}:${user?.id}`} />;
+}
+
+function ProfileCard() {
+  const { user, repo, reload } = useAppData();
+  const { busy, run } = useAsync();
+  const [displayName, setDisplayName] = useState(user?.displayName ?? "");
+  if (!user) return null;
+
+  async function saveProfile(e: FormEvent) {
+    e.preventDefault();
+    await run("profile", async () => {
+      await repo.updateProfile(displayName);
+      await reload();
+    }, "Name updated");
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your profile</CardTitle>
+      </CardHeader>
+      <form onSubmit={saveProfile}>
+        <CardContent className="space-y-1.5">
+          <Label htmlFor="display-name">Display name</Label>
+          <Input id="display-name" value={displayName} maxLength={60} onChange={(e) => setDisplayName(e.target.value)} />
+        </CardContent>
+        <CardFooter className="mt-4">
+          <Button type="submit" size="sm" disabled={busy === "profile" || !displayName.trim() || displayName.trim() === user.displayName}>
+            {busy === "profile" ? <Loader2 className="animate-spin" /> : null} Save
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}
+
+function DemoControls() {
+  const { user, reload } = useAppData();
+  const demo = useDemoRepository();
+  if (!demo || !user) return null;
+  return (
+    <Card className="border-dashed">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <UserRoundCog className="size-4" /> Demo controls
+        </CardTitle>
+        <CardDescription>
+          Data lives in this browser&apos;s localStorage. Connect Supabase (see README) for real accounts and sync.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1 space-y-1.5">
+          <Label>View the app as</Label>
+          <Select
+            value={user.id}
+            onValueChange={async (id) => {
+              demo.switchUser(id);
+              await reload();
+              toast.success("Switched roommate");
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {demo.listProfiles().map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            demo.resetDemo();
+            window.localStorage.removeItem("roommate-ai:active-household");
+            await reload();
+            toast.success("Demo data reset");
+          }}
+        >
+          <RotateCcw /> Reset demo data
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function NoHouseholdSettings() {
+  const { openHousehold } = useDialogs();
+  return (
+    <div className="mx-auto max-w-3xl space-y-5">
+      <h2 className="text-2xl font-semibold tracking-tight md:hidden">Settings</h2>
+      <Card className="glow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Home className="size-4" /> Household
+          </CardTitle>
+          <CardDescription>You&apos;re not in a household yet. Start one for your place, or join your roommates with their invite link.</CardDescription>
+        </CardHeader>
+        <CardFooter className="flex flex-wrap gap-2">
+          <Button onClick={() => openHousehold("create")} className="font-semibold glow-primary">
+            <Plus strokeWidth={2.5} /> Create household
+          </Button>
+          <Button variant="outline" onClick={() => openHousehold("join")}>
+            <Link2 /> Join household
+          </Button>
+        </CardFooter>
+      </Card>
+      <ProfileCard />
+      <DemoControls />
+      <div className="flex justify-end">
+        <SignOutButton />
+      </div>
+    </div>
+  );
 }
 
 function SettingsInner() {
   const { snapshot, ledger, user, repo, reload } = useAppData();
-  const demo = useDemoRepository();
-  const router = useRouter();
+  const { openHousehold } = useDialogs();
   const { busy, run } = useAsync();
-  const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [householdName, setHouseholdName] = useState(snapshot?.household.name ?? "");
   const [invite, setInvite] = useState<{ url: string; expiresAt: string } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -53,14 +170,6 @@ function SettingsInner() {
   const myBalance = ledger.balances.get(user.id) ?? 0;
   const activeMembers = snapshot.members.filter((m) => m.leftAt === null);
   const formerMembers = snapshot.members.filter((m) => m.leftAt !== null);
-
-  async function saveProfile(e: FormEvent) {
-    e.preventDefault();
-    await run("profile", async () => {
-      await repo.updateProfile(displayName);
-      await reload();
-    }, "Name updated");
-  }
 
   async function saveHousehold(e: FormEvent) {
     e.preventDefault();
@@ -150,22 +259,7 @@ function SettingsInner() {
       </Card>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your profile</CardTitle>
-          </CardHeader>
-          <form onSubmit={saveProfile}>
-            <CardContent className="space-y-1.5">
-              <Label htmlFor="display-name">Display name</Label>
-              <Input id="display-name" value={displayName} maxLength={60} onChange={(e) => setDisplayName(e.target.value)} />
-            </CardContent>
-            <CardFooter className="mt-4">
-              <Button type="submit" size="sm" disabled={busy === "profile" || displayName.trim() === user.displayName}>
-                {busy === "profile" ? <Loader2 className="animate-spin" /> : null} Save
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+        <ProfileCard />
 
         <Card>
           <CardHeader>
@@ -181,58 +275,15 @@ function SettingsInner() {
               <Button type="submit" size="sm" disabled={!isOwner || busy === "household" || householdName.trim() === snapshot.household.name}>
                 {busy === "household" ? <Loader2 className="animate-spin" /> : null} Rename
               </Button>
+              <Button type="button" variant="ghost" size="sm" className="ml-auto text-muted-foreground" onClick={() => openHousehold("join")}>
+                <Link2 /> Join another
+              </Button>
             </CardFooter>
           </form>
         </Card>
       </div>
 
-      {demo ? (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserRoundCog className="size-4" /> Demo controls
-            </CardTitle>
-            <CardDescription>
-              Data lives in this browser&apos;s localStorage. Connect Supabase (see README) for real accounts and sync.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1 space-y-1.5">
-              <Label>View the app as</Label>
-              <Select
-                value={user.id}
-                onValueChange={async (id) => {
-                  demo.switchUser(id);
-                  await reload();
-                  toast.success("Switched roommate");
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {demo.listProfiles().map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              variant="outline"
-              onClick={async () => {
-                demo.resetDemo();
-                window.localStorage.removeItem("roommate-ai:active-household");
-                await reload();
-                toast.success("Demo data reset");
-              }}
-            >
-              <RotateCcw /> Reset demo data
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
+      <DemoControls />
 
       <Card className="border-negative/20">
         <CardHeader>
@@ -247,18 +298,7 @@ function SettingsInner() {
           <Button variant="destructive" disabled={myBalance !== 0 || busy === "leave"} onClick={leave}>
             {busy === "leave" ? <Loader2 className="animate-spin" /> : null} Leave {snapshot.household.name}
           </Button>
-          {repo.mode === "supabase" ? (
-            <Button
-              variant="ghost"
-              onClick={async () => {
-                await repo.signOut();
-                router.replace("/login");
-                router.refresh();
-              }}
-            >
-              <LogOut /> Sign out
-            </Button>
-          ) : null}
+          <SignOutButton />
         </CardFooter>
       </Card>
     </div>
