@@ -9,7 +9,6 @@ import { AnimatedMoney } from "@/components/shared/animated-money";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { Button } from "@/components/ui/button";
 import type { Transfer } from "@/lib/domain/balances";
-import { firstName } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export function TransferList({ transfers, emptyText, compact }: { transfers: Transfer[]; emptyText?: string; compact?: boolean }) {
@@ -25,7 +24,7 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
     );
   }
 
-  const name = (id: string) => (id === user?.id ? "You" : firstName(ledger.memberById.get(id)?.displayName ?? "Former roommate"));
+  const name = (id: string) => (id === user?.id ? "You" : (ledger.shortName.get(id) ?? "Former roommate"));
 
   return (
     <ul className="space-y-2">

@@ -1,9 +1,10 @@
 "use client";
 
-import { Home, Loader2, Sparkles } from "lucide-react";
+import { Home, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Logo } from "@/components/shared/logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +17,11 @@ import type { Profile } from "@/lib/domain/types";
 export function JoinView({ token }: { token: string }) {
   const repo = useMemo(() => getRepository(), []);
   const router = useRouter();
-  const [state, setState] = useState<{ loading: boolean; preview: InvitePreview | null; user: Profile | null }>({
+  const [state, setState] = useState<{ loading: boolean; preview: InvitePreview | null; user: Profile | null; isMember: boolean }>({
     loading: true,
     preview: null,
     user: null,
+    isMember: false,
   });
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -27,13 +29,18 @@ export function JoinView({ token }: { token: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([repo.previewInvite(token), repo.mode === "supabase" ? repo.getCurrentUser() : Promise.resolve(null)])
-      .then(([preview, user]) => !cancelled && setState({ loading: false, preview, user }))
-      .catch((e) => {
-        if (cancelled) return;
-        setError(e instanceof Error ? e.message : "Couldn't check this invite.");
-        setState({ loading: false, preview: null, user: null });
-      });
+    (async () => {
+      const [preview, user] = await Promise.all([
+        repo.previewInvite(token),
+        repo.mode === "supabase" ? repo.getCurrentUser() : Promise.resolve(null),
+      ]);
+      const isMember = Boolean(preview && user && (await repo.listHouseholds()).some((h) => h.id === preview.householdId));
+      if (!cancelled) setState({ loading: false, preview, user, isMember });
+    })().catch((e) => {
+      if (cancelled) return;
+      setError(e instanceof Error ? e.message : "Couldn't check this invite.");
+      setState({ loading: false, preview: null, user: null, isMember: false });
+    });
     return () => {
       cancelled = true;
     };
@@ -54,24 +61,41 @@ export function JoinView({ token }: { token: string }) {
     }
   }
 
-  const { loading, preview, user } = state;
+  const { loading, preview, user, isMember } = state;
+  const openHousehold = () => {
+    if (preview) window.localStorage.setItem("roommate-ai:active-household", preview.householdId);
+    router.replace("/dashboard");
+  };
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-b from-accent/60 to-background px-4 py-10">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="flex items-center justify-center gap-2 text-lg font-semibold">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="size-4" />
-          </span>
-          Roommate AI
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-terminal px-4 py-10">
+      <div className="pointer-events-none absolute inset-0 bg-grid" aria-hidden />
+      <div className="relative w-full max-w-sm space-y-6">
+        <div className="flex justify-center">
+          <Logo />
         </div>
-        <Card>
+        <Card className="glow-soft">
           {loading ? (
             <CardContent className="space-y-3 py-6">
               <Skeleton className="h-6 w-2/3" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-10 w-full" />
             </CardContent>
+          ) : preview && isMember ? (
+            <>
+              <CardHeader>
+                <span className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25">
+                  <Home className="size-5" />
+                </span>
+                <CardTitle>You&apos;re already in {preview.householdName}</CardTitle>
+                <CardDescription>This invite is for a household you belong to, so there&apos;s nothing to join.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full glow-primary" size="lg" onClick={openHousehold}>
+                  Open {preview.householdName}
+                </Button>
+              </CardContent>
+            </>
           ) : !preview || !preview.isValid ? (
             <>
               <CardHeader>
@@ -90,12 +114,14 @@ export function JoinView({ token }: { token: string }) {
           ) : (
             <>
               <CardHeader>
-                <span className="mb-2 flex size-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <span className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25">
                   <Home className="size-5" />
                 </span>
                 <CardTitle>Join {preview.householdName}</CardTitle>
                 <CardDescription>
-                  {preview.memberCount} roommate{preview.memberCount === 1 ? "" : "s"} already track shared expenses here.
+                  {preview.memberCount === 1
+                    ? "1 roommate already tracks shared expenses here."
+                    : `${preview.memberCount} roommates already track shared expenses here.`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -110,7 +136,7 @@ export function JoinView({ token }: { token: string }) {
                     </Button>
                   </form>
                 ) : user ? (
-                  <Button className="w-full" size="lg" onClick={() => accept()} disabled={busy}>
+                  <Button className="w-full glow-primary" size="lg" onClick={() => accept()} disabled={busy}>
                     {busy ? <Loader2 className="animate-spin" /> : null} Join as {user.displayName}
                   </Button>
                 ) : (

@@ -10,7 +10,7 @@ import { TabPill } from "@/components/shared/tab-pill";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { expenseDebts } from "@/lib/domain/balances";
 import { formatCents } from "@/lib/domain/money";
-import { firstName, formatDay } from "@/lib/format";
+import { formatDay } from "@/lib/format";
 import { MemberBalanceList } from "./member-balance-list";
 import { TransferList } from "./transfer-list";
 
@@ -20,7 +20,7 @@ export function BalancesView() {
   const perExpense = useMemo(() => (snapshot ? expenseDebts(snapshot.expenses) : []), [snapshot]);
 
   if (!snapshot || !ledger || !user) return null;
-  const name = (id: string) => (id === user.id ? "You" : firstName(ledger.memberById.get(id)?.displayName ?? "Former roommate"));
+  const name = (id: string) => (id === user.id ? "You" : (ledger.shortName.get(id) ?? "Former roommate"));
   const expenseById = new Map(snapshot.expenses.map((e) => [e.id, e]));
   const saved = ledger.original.length - ledger.simplified.length;
   const completedPayments = snapshot.settlements.filter((s) => s.status === "completed");
@@ -28,7 +28,7 @@ export function BalancesView() {
   return (
     <div className="stagger-children space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Balances</h2>
-      <div className="grid items-start gap-4 lg:grid-cols-[1fr_1.2fr]">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Net balances</CardTitle>
