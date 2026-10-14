@@ -5,14 +5,13 @@ import { useAppData } from "@/components/providers/app-data-provider";
 import { CATEGORY_META } from "@/components/shared/category";
 import { Ticker, type TickerItem } from "@/components/shared/ticker";
 import { formatCents } from "@/lib/domain/money";
-import { firstName } from "@/lib/format";
 import { buildTicker } from "@/lib/ticker";
 
 export function ActivityTicker({ className }: { className?: string }) {
   const { snapshot, ledger, user } = useAppData();
   const items = useMemo<TickerItem[]>(() => {
     if (!snapshot || !ledger) return [];
-    const name = (id: string) => (id === user?.id ? "You" : firstName(ledger.memberById.get(id)?.displayName ?? "Former roommate"));
+    const name = (id: string) => (id === user?.id ? "You" : (ledger.shortName.get(id) ?? "Former roommate"));
     return buildTicker(snapshot, user?.id ?? null).map((e) => {
       if (e.kind === "settlement") {
         return {

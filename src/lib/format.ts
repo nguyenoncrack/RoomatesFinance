@@ -29,3 +29,15 @@ export function todayDay(): string {
 export function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] ?? name;
 }
+
+/** First names, except roommates who share a first name get their full name so "Alex → Alex" never happens. */
+export function shortNames(members: { id: string; displayName: string }[]): Map<string, string> {
+  const counts = new Map<string, number>();
+  for (const m of members) {
+    const key = firstName(m.displayName).toLowerCase();
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return new Map(
+    members.map((m) => [m.id, (counts.get(firstName(m.displayName).toLowerCase()) ?? 0) > 1 ? m.displayName.trim() : firstName(m.displayName)]),
+  );
+}

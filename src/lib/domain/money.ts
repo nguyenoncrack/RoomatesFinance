@@ -18,6 +18,17 @@ export function parseCents(input: string): Cents | null {
   return cents;
 }
 
+/** User-facing reason an amount field can't be saved, or null when it's a positive amount. */
+export function amountInputError(input: string): string | null {
+  const trimmed = input.trim();
+  if (trimmed === "") return "Enter an amount greater than $0.";
+  if (/^-/.test(trimmed.replace(/^\$/, ""))) return "Amounts can't be negative.";
+  const cents = parseCents(trimmed);
+  if (cents === null) return "Use a dollar amount like 12.50, with at most 2 decimals.";
+  if (cents === 0) return "Enter an amount greater than $0.";
+  return null;
+}
+
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",

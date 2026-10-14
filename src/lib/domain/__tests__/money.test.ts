@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { centsToInput, formatCents, parseCents } from "../money";
+import { amountInputError, centsToInput, formatCents, parseCents } from "../money";
 
 describe("parseCents", () => {
   it.each([
@@ -34,5 +34,23 @@ describe("formatCents", () => {
   it("round-trips through input format", () => {
     expect(centsToInput(1205)).toBe("12.05");
     expect(parseCents(centsToInput(98765))).toBe(98765);
+  });
+});
+
+describe("amountInputError", () => {
+  it("accepts positive amounts", () => {
+    expect(amountInputError("12.50")).toBeNull();
+    expect(amountInputError("$1,200")).toBeNull();
+    expect(amountInputError("0.01")).toBeNull();
+  });
+
+  it("explains empty, zero, negative and malformed input", () => {
+    expect(amountInputError("")).toBe("Enter an amount greater than $0.");
+    expect(amountInputError("0")).toBe("Enter an amount greater than $0.");
+    expect(amountInputError("0.00")).toBe("Enter an amount greater than $0.");
+    expect(amountInputError("-5")).toBe("Amounts can't be negative.");
+    expect(amountInputError("$-5")).toBe("Amounts can't be negative.");
+    expect(amountInputError("12.345")).toMatch(/at most 2 decimals/);
+    expect(amountInputError("abc")).toMatch(/dollar amount/);
   });
 });
