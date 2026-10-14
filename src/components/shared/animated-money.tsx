@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
 import { formatCents } from "@/lib/domain/money";
 import { cn } from "@/lib/utils";
 
-const FLASH_UP = "rgba(52, 211, 153, 0.28)";
-const FLASH_DOWN = "rgba(248, 113, 113, 0.28)";
+const FLASH_UP = "rgba(96, 128, 76, 0.18)";
+const FLASH_DOWN = "rgba(184, 98, 66, 0.18)";
 const CLEAR = "rgba(0, 0, 0, 0)";
 
 /**

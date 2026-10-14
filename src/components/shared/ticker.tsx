@@ -43,7 +43,7 @@ export function Ticker({ items, label, className }: { items: TickerItem[]; label
       role="region"
       aria-label={label}
       className={cn(
-        "group relative overflow-hidden border-y border-white/[0.06] bg-white/[0.015] py-2.5 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]",
+        "group relative overflow-hidden border-y border-foreground/[0.06] bg-foreground/[0.015] py-2.5 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]",
         className,
       )}
     >

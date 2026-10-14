@@ -12,8 +12,8 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-2xl bg-linear-to-b from-card to-card/70 py-(--card-spacing) text-sm text-card-foreground shadow-[inset_0_1px_0_0_oklch(1_0_0/5%)] ring-1 ring-white/[0.07] [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
-        lift && "transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:ring-primary/20 motion-reduce:hover:translate-y-0",
+        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground shadow-[inset_0_1px_0_0_oklch(1_0_0/60%)] ring-1 ring-foreground/[0.09] [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
+        lift && "transition-[box-shadow] duration-300 ease-out hover:ring-foreground/20",
         className
       )}
       {...props}
@@ -39,7 +39,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-heading text-base leading-snug font-medium tracking-tight group-data-[size=sm]/card:text-sm",
+        "font-heading text-[1.6rem] leading-none tracking-[-0.01em] group-data-[size=sm]/card:text-xl",
         className
       )}
       {...props}

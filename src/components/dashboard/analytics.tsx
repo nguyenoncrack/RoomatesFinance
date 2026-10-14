@@ -20,7 +20,7 @@ const compactUsd = (cents: number) =>
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number; name?: string }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-popover/95 px-2.5 py-1.5 text-xs shadow-xl shadow-black/50 backdrop-blur">
+    <div className="rounded-lg border border-foreground/10 bg-popover/95 px-2.5 py-1.5 text-xs shadow-xl shadow-foreground/15 backdrop-blur">
       {label ? <p className="font-medium">{label}</p> : null}
       {payload.map((p, i) => (
         <p key={i} className="font-mono tabular-nums text-muted-foreground">

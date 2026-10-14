@@ -62,7 +62,7 @@ function SetupTabs({ initial, onCreated, autoFocus }: { initial: HouseholdSetupT
   const [tab, setTab] = useState<HouseholdSetupTab>(initial);
   return (
     <Tabs value={tab} onValueChange={(v) => setTab(v as HouseholdSetupTab)} className="gap-4">
-      <TabsList className="w-full rounded-xl bg-black/30">
+      <TabsList className="w-full rounded-xl bg-foreground/[0.035]">
         <TabsTrigger value="create">
           <Plus /> Create one
         </TabsTrigger>
@@ -133,7 +133,7 @@ export function HouseholdSetupCard() {
     <Card className="mx-auto max-w-md glow-soft">
       <CardContent className="space-y-5 py-8">
         <div className="flex flex-col items-center gap-2 text-center">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25 shadow-[0_0_24px_-6px] shadow-primary/60">
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25">
             <Home className="size-5" />
           </span>
           <h2 className="font-display text-2xl font-medium tracking-tight">Set up your household</h2>
@@ -142,7 +142,7 @@ export function HouseholdSetupCard() {
           </p>
         </div>
         <SetupTabs initial="create" autoFocus />
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-foreground/[0.06] pt-4">
           <Button variant="ghost" size="sm" onClick={skipSetup} className="text-muted-foreground">
             Skip for now
           </Button>
@@ -172,7 +172,7 @@ export function NoHouseholdState({ pathname }: { pathname: string }) {
   return (
     <Card className="mx-auto max-w-lg glow-soft">
       <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-        <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25 shadow-[0_0_24px_-6px] shadow-primary/60">
+        <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25">
           <Home className="size-5" />
         </span>
         <div className="space-y-1.5">

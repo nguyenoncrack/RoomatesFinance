@@ -30,7 +30,7 @@ export function MemberBalanceList({ detailed }: { detailed?: boolean }) {
                 {m?.leftAt ? <Badge variant="outline">Left</Badge> : null}
               </div>
               <div className="mt-1.5 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.06]">
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: pct / 100 }}

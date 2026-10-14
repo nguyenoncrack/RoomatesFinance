@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter, Inter_Tight } from "next/font/google";
+import { Geist_Mono, Inter, Instrument_Serif } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,10 +10,12 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-// Tight neo-grotesk for headings and big numbers: light weights, negative tracking.
-const interTight = Inter_Tight({
+// Condensed editorial serif for headings and big numbers.
+const instrumentSerif = Instrument_Serif({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 const geistMono = Geist_Mono({
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f0d",
+  themeColor: "#f0eee7",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -35,12 +37,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${geistMono.variable} ${interTight.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <MotionProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </MotionProvider>
-        <Toaster theme="dark" position="top-center" richColors={false} />
+        <Toaster theme="light" position="top-center" richColors={false} />
       </body>
     </html>
   );

@@ -2,13 +2,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const PALETTE = [
-  "bg-emerald-400/15 text-emerald-200",
-  "bg-teal-400/15 text-teal-200",
-  "bg-amber-400/15 text-amber-200",
-  "bg-rose-400/15 text-rose-200",
-  "bg-sky-400/15 text-sky-200",
-  "bg-lime-400/15 text-lime-200",
-  "bg-cyan-400/15 text-cyan-200",
+  "bg-emerald-400/15 text-emerald-800",
+  "bg-teal-400/15 text-teal-800",
+  "bg-amber-400/15 text-amber-800",
+  "bg-rose-400/15 text-rose-800",
+  "bg-sky-400/15 text-sky-800",
+  "bg-lime-400/15 text-lime-800",
+  "bg-cyan-400/15 text-cyan-800",
 ];
 
 function hash(id: string) {

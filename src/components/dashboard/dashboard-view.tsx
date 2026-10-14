@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, HandCoins, Plus, Receipt } from "lucide-react";
+import { ArrowRight, Receipt } from "lucide-react";
 import Link from "next/link";
 import { MemberBalanceList } from "@/components/balances/member-balance-list";
 import { TransferList } from "@/components/balances/transfer-list";
@@ -10,20 +10,22 @@ import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
 import { AnimatedMoney } from "@/components/shared/animated-money";
 import { EmptyState } from "@/components/shared/empty-state";
-import { CodeComment, Cursor, StatTile, TerminalPanel } from "@/components/shared/terminal-panel";
+import { PencilRing } from "@/components/shared/pencil-ring";
+import { ScrambleText } from "@/components/shared/scramble-text";
+import { NightPanel, StatRow, StatTile } from "@/components/shared/terminal-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildActivity } from "@/lib/activity";
 import { spendingThisMonth } from "@/lib/analytics";
 import { formatCents } from "@/lib/domain/money";
 import { firstName } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import { Analytics } from "./analytics";
 
+// Soft focus pull, like the section changes on an editorial landing page.
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+  initial: { opacity: 0, y: 10, filter: "blur(6px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  transition: { delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
 });
 
 function CardLink({ href, children }: { href: string; children: string }) {
@@ -56,35 +58,41 @@ export function DashboardView() {
   const tone = net > 0 ? "positive" : net < 0 ? "negative" : "neutral";
   const me = firstName(user.displayName);
   const activeMembers = snapshot.members.filter((m) => m.leftAt === null).length;
+  // Paid toward your own share: expenses you fronted plus completed paybacks, capped at 100%.
+  const mySummary = ledger.summaries.find((s) => s.userId === user.id);
+  const coverage = mySummary && mySummary.shareCents > 0 ? Math.min(1, Math.max(0, 1 + net / mySummary.shareCents)) : 1;
 
   return (
     <div className="space-y-6 md:space-y-8">
       <section className="grid grid-cols-[minmax(0,1fr)] items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
         <motion.div {...fadeUp()} className="space-y-5">
-          <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground md:inline-flex">
-            <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
-            {snapshot.household.name} · {activeMembers} roommate{activeMembers === 1 ? "" : "s"}
+          <span className="hidden items-center gap-2 rounded-full border border-foreground/15 px-3 py-1 font-label text-muted-foreground md:inline-flex">
+            {snapshot.household.name}
+            <span aria-hidden className="text-[8px] text-foreground/60">■</span>
+            {String(activeMembers).padStart(2, "0")}
           </span>
-          <h2 className="font-display text-[2.1rem] leading-[1.08] font-normal tracking-[-0.035em] sm:text-5xl">
-            Hey {me},
+          <h2 className="font-display text-[2.9rem] leading-[0.95] tracking-[-0.015em] sm:text-7xl">
+            <ScrambleText text={`Hey ${me},`} />
             <br />
-            {net < 0 ? (
-              <>
-                you owe <span className="text-negative text-glow">
-                  <AnimatedMoney cents={-net} />
-                </span>.
-              </>
-            ) : net > 0 ? (
-              <>
-                you&apos;re up <span className="text-gradient">
-                  <AnimatedMoney cents={net} flash={false} />
-                </span>.
-              </>
-            ) : (
-              <>
-                you&apos;re <span className="text-gradient">all square</span>.
-              </>
-            )}
+            <span className="text-gradient">
+              {net < 0 ? (
+                <>
+                  you owe <span className="text-negative">
+                    <AnimatedMoney cents={-net} />
+                  </span>
+                </>
+              ) : net > 0 ? (
+                <>
+                  you&apos;re up <span className="text-positive">
+                    <AnimatedMoney cents={net} flash={false} />
+                  </span>
+                </>
+              ) : (
+                <>
+                  you&apos;re <em>all square</em>
+                </>
+              )}
+            </span>
           </h2>
           <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
             {net < 0
@@ -94,57 +102,37 @@ export function DashboardView() {
                 : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => openAddExpense()} className="h-11 px-5">
-              <Plus strokeWidth={2.5} /> Add Expense
+            <Button size="lg" mark="star" onClick={() => openAddExpense()}>
+              Add expense
             </Button>
-            <Button size="lg" variant="outline" onClick={() => openSettleUp()} className="h-11 px-5">
-              <HandCoins /> Settle up
+            <Button size="lg" variant="outline" mark="cross" onClick={() => openSettleUp()}>
+              Settle up
             </Button>
           </div>
         </motion.div>
 
         <motion.div {...fadeUp(0.08)}>
-          <TerminalPanel
-            command="ledger.simplify()"
-            status="Live balance"
-            className={cn(tone === "negative" && "border-negative/20 glow-negative")}
+          <NightPanel
+            eyebrow="Your share, covered"
+            index={`${String(new Date().getMonth() + 1).padStart(2, "0")} / 12`}
             footer={
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <StatTile label="Your balance" value={<AnimatedMoney cents={net} signed />} tone={tone} />
+              <StatRow>
+                <StatTile label="Balance" value={<AnimatedMoney cents={net} signed />} tone={tone} />
                 <StatTile label="You owe" value={<AnimatedMoney cents={iOwe} />} tone={iOwe ? "negative" : "neutral"} />
                 <StatTile label="Owed to you" value={<AnimatedMoney cents={owedToMe} />} tone={owedToMe ? "positive" : "neutral"} />
                 <StatTile label="This month" value={<AnimatedMoney cents={monthTotal} />} hint={`${monthCount} expense${monthCount === 1 ? "" : "s"}`} />
-              </div>
+              </StatRow>
             }
           >
-            <CodeComment>pulling {snapshot.household.name} ledger…</CodeComment>
-            <div className="truncate">
-              <span className="text-teal-300">const</span> you = <span className="text-teal-300">await</span>{" "}
-              <span className="text-emerald-300">ledger.net</span>(<span className="text-amber-200">&quot;{me}&quot;</span>);
-            </div>
-            <div className="truncate">
-              you.balance{"  "}={" "}
-              <span className={cn(tone === "positive" && "text-positive", tone === "negative" && "text-negative")}>
-                {formatCents(net, { signed: true })} {net > 0 ? "▲" : net < 0 ? "▼" : ""}
-              </span>
-            </div>
-            {myDebts.slice(0, 2).map((t) => (
-              <div key={t.to} className="truncate">
-                you.<span className="text-emerald-300">pay</span>({nameOf(t.to).toLowerCase()},{" "}
-                <span className="text-negative">{formatCents(t.amountCents)}</span>);
-              </div>
-            ))}
-            {myCredits.slice(0, 2).map((t) => (
-              <div key={t.from} className="truncate">
-                {nameOf(t.from).toLowerCase()}.<span className="text-emerald-300">pay</span>(you,{" "}
-                <span className="text-positive">{formatCents(t.amountCents)}</span>);
-              </div>
-            ))}
-            <div className="truncate">
-              <span className="text-teal-300">return</span> <span className="text-emerald-300">settle</span>(you, roommates);
-              <Cursor />
-            </div>
-          </TerminalPanel>
+            <PencilRing progress={coverage}>
+              <p className="font-display text-[2.6rem] leading-none tabular-nums">{Math.round(coverage * 100)}%</p>
+              <p className="mt-2 font-display text-lg leading-tight text-night-foreground/70 italic">of your share paid</p>
+              <p className="mt-3 max-w-[11rem] font-label text-[9.5px] leading-relaxed text-night-foreground/45">
+                Paid <span className="text-night-foreground/80">{formatCents(mySummary?.paidCents ?? 0)}</span> of{" "}
+                <span className="text-night-foreground/80">{formatCents(mySummary?.shareCents ?? 0)}</span> so far
+              </p>
+            </PencilRing>
+          </NightPanel>
         </motion.div>
       </section>
 
@@ -190,8 +178,8 @@ export function DashboardView() {
                   icon={Receipt}
                   title="No expenses yet"
                   action={
-                    <Button onClick={() => openAddExpense()} className="px-4">
-                      <Plus /> Add Expense
+                    <Button mark="star" onClick={() => openAddExpense()}>
+                      Add expense
                     </Button>
                   }
                 >

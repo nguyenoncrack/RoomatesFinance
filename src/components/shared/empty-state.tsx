@@ -29,7 +29,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/[0.015] px-4 py-8 text-center",
+        "flex flex-col items-center gap-2 rounded-xl border border-dashed border-foreground/10 bg-foreground/[0.015] px-4 py-8 text-center",
         className,
       )}
     >
@@ -37,7 +37,7 @@ export function EmptyState({
         {SPARKLES.map((sp, i) => (
           <motion.span
             key={i}
-            className={cn("absolute size-1 rounded-full", tone === "neutral" ? "bg-white/40" : "bg-primary")}
+            className={cn("absolute size-1 rounded-full", tone === "neutral" ? "bg-foreground/40" : "bg-primary")}
             style={{ left: sp.left, top: sp.top }}
             animate={{ opacity: [0, 1, 0], scale: [0.4, 1.2, 0.4] }}
             transition={{ duration: 2.4, repeat: Infinity, delay: sp.delay, ease: "easeInOut" }}
@@ -49,14 +49,14 @@ export function EmptyState({
           className={cn(
             "relative flex size-12 items-center justify-center rounded-2xl ring-1",
             tone === "positive" && "bg-positive-soft text-positive ring-positive/25 shadow-[0_0_24px_-6px] shadow-positive/50",
-            tone === "primary" && "bg-primary/10 text-accent-foreground ring-primary/25 shadow-[0_0_24px_-6px] shadow-primary/50",
-            tone === "neutral" && "bg-white/5 text-muted-foreground ring-white/10",
+            tone === "primary" && "bg-primary/10 text-accent-foreground ring-primary/25",
+            tone === "neutral" && "bg-foreground/5 text-muted-foreground ring-foreground/10",
           )}
         >
           <Icon className="size-5" />
         </motion.span>
         <motion.span
-          className="absolute bottom-0 h-1.5 w-10 rounded-full bg-black/50 blur-[2px]"
+          className="absolute bottom-0 h-1.5 w-10 rounded-full bg-foreground/10 blur-[2px]"
           animate={{ scaleX: [1, 0.75, 1], opacity: [0.7, 0.4, 0.7] }}
           transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
         />

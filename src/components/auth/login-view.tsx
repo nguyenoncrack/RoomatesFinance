@@ -6,7 +6,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Logo } from "@/components/shared/logo";
-import { CodeComment, Cursor, StatTile, TerminalPanel } from "@/components/shared/terminal-panel";
+import { PencilRing } from "@/components/shared/pencil-ring";
+import { ScrambleText } from "@/components/shared/scramble-text";
+import { NightPanel, StatTile } from "@/components/shared/terminal-panel";
 import { TabPill } from "@/components/shared/tab-pill";
 import { Ticker, type TickerItem } from "@/components/shared/ticker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -41,7 +43,7 @@ export function LoginView() {
         <Card className="glow-soft">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-primary shadow-[0_0_10px] shadow-primary" />
+              <span className="size-2 rounded-full bg-primary" />
               You&apos;re in demo mode
             </CardTitle>
             <CardDescription>
@@ -119,7 +121,7 @@ export function LoginView() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
-            <TabsList className="w-full rounded-xl bg-black/30">
+            <TabsList className="w-full rounded-xl bg-foreground/[0.035]">
               <TabsTrigger value="signin" className="relative isolate data-active:bg-transparent dark:data-active:border-transparent dark:data-active:bg-transparent">
                 {mode === "signin" ? <TabPill group="auth-mode" /> : null}
                 Sign in
@@ -212,14 +214,15 @@ function Shell({ children }: { children: React.ReactNode }) {
 
       <main className="relative mx-auto grid grid-cols-1 w-full max-w-6xl flex-1 items-center gap-10 px-5 pt-4 pb-12 md:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14 lg:py-12">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-6">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
-            Shared expenses × debt simplification × zero spreadsheets
+          <span className="inline-flex items-center gap-2 rounded-full border border-foreground/15 px-3 py-1 font-label text-muted-foreground">
+            Shared expenses <span aria-hidden className="text-[8px] text-foreground/60">■</span> fewer transfers
           </span>
-          <h1 className="font-display text-[2.6rem] leading-[1.02] font-normal tracking-[-0.035em] sm:text-6xl">
-            Split rent,
+          <h1 className="font-display text-[3.2rem] leading-[0.95] tracking-[-0.015em] sm:text-7xl">
+            <ScrambleText text="Split the rent," />
             <br />
-            not <span className="text-gradient">friendships</span>.
+            <span className="text-gradient">
+              not the <em>friendship</em>.
+            </span>
           </h1>
           <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
             Track groceries, bills and rent with your roommates. Roommate AI nets everything out and tells each of you exactly who
@@ -230,51 +233,45 @@ function Shell({ children }: { children: React.ReactNode }) {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.1 }}>
-          <TerminalPanel
-            status="Live sync"
-            command="household.balance()"
+          <NightPanel
+            eyebrow="From receipts to settled"
+            index="01 / 03"
             footer={
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 divide-x divide-night-foreground/10">
                 <StatTile label="Transfers" value="2" hint="instead of 4" />
                 <StatTile label="Alex" value="+$50" tone="positive" />
                 <StatTile label="Chris" value="-$70" tone="negative" />
               </div>
             }
           >
-            <CodeComment>balancing UCSB Apartment…</CodeComment>
-            <div>
-              alex.<span className="text-emerald-300">paid</span>({"  "}<span className="text-amber-200">&quot;Groceries&quot;</span>, $120.00);
-            </div>
-            <div>
-              ben.<span className="text-emerald-300">paid</span>({"   "}<span className="text-amber-200">&quot;Electric&quot;</span>,{"  "}$90.00);
-            </div>
-            <div>
-              <span className="text-teal-300">const</span> net = <span className="text-emerald-300">ledger.net</span>();{" "}
-              <span className="hidden text-muted-foreground/80 sm:inline">{"// sums to $0.00"}</span>
-            </div>
-            <div>
-              chris.<span className="text-emerald-300">pay</span>(alex, <span className="text-positive">$50.00</span>); <span className="text-positive">▲</span>
-            </div>
-            <div>
-              chris.<span className="text-emerald-300">pay</span>(ben,{"  "}<span className="text-positive">$20.00</span>); <span className="text-positive">▲</span>
-              <Cursor />
-            </div>
-          </TerminalPanel>
+            <PencilRing progress={0.72}>
+              <p className="font-display text-[2.4rem] leading-[0.95]">
+                Fewer
+                <br />
+                <span className="text-night-foreground/60">Transfers</span>
+              </p>
+              <p className="mt-3 max-w-[12rem] font-label text-[9.5px] leading-relaxed text-night-foreground/45">
+                Everyone&apos;s net balance, matched <span className="text-night-foreground/80">so the house settles fast.</span>
+              </p>
+            </PencilRing>
+          </NightPanel>
         </motion.div>
       </main>
 
       <Ticker items={SAMPLE_TICKER} label="Example household activity" className="relative" />
 
       <section className="relative mx-auto grid w-full max-w-6xl gap-3 px-5 py-10 sm:grid-cols-3 md:px-8">
-        {FEATURES.map(({ icon: Icon, title, body }) => (
+        {FEATURES.map(({ icon: Icon, title, body }, i) => (
           <div
             key={title}
-            className="group rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5 transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/[0.03]"
+            className="group border-t border-foreground/15 pt-4"
           >
-            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/20 transition-shadow group-hover:shadow-[0_0_20px_-4px] group-hover:shadow-primary/60">
-              <Icon className="size-4" />
+            <span className="flex items-center gap-2 font-label text-muted-foreground">
+              {String(i + 1).padStart(2, "0")}
+              <span aria-hidden className="text-[8px] text-foreground/60">■</span>
+              <Icon className="size-3.5" strokeWidth={1.5} />
             </span>
-            <p className="mt-4 font-display text-base font-medium">{title}</p>
+            <p className="mt-3 font-display text-2xl leading-tight">{title}</p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
           </div>
         ))}

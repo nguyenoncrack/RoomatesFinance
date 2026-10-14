@@ -20,7 +20,7 @@ export function ShellLoading() {
             <Skeleton className="h-11 w-32 rounded-xl" />
           </div>
         </div>
-        <div className="space-y-3 rounded-2xl border border-white/[0.07] p-4">
+        <div className="space-y-3 rounded-2xl border border-foreground/[0.07] p-4">
           <Skeleton className="h-36 rounded-xl" />
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (

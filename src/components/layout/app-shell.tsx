@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, ChevronsUpDown, HandCoins, LayoutDashboard, Link2, Plus, Receipt, Scale, Settings, type LucideIcon } from "lucide-react";
+import { Activity, ChevronsUpDown, LayoutDashboard, Link2, Plus, Receipt, Scale, Settings, type LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,6 +11,7 @@ import { useDialogs } from "@/components/providers/dialogs-provider";
 import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
+import { ScrambleText } from "@/components/shared/scramble-text";
 import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,13 +44,13 @@ function HouseholdSwitcher({ className }: { className?: string }) {
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "flex w-full items-center gap-2 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-left transition-colors hover:border-primary/25 hover:bg-white/[0.05]",
+              "flex w-full items-center gap-2 rounded-xl border border-foreground/15 px-3 py-2 text-left transition-colors hover:border-foreground/35",
               className,
             )}
           >
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold">{active?.name ?? (households.length ? "Choose household" : "No household")}</span>
-              <span className="block text-xs text-muted-foreground">
+              <span className="block truncate font-display text-lg leading-tight">{active?.name ?? (households.length ? "Choose household" : "No household")}</span>
+              <span className="block font-label text-[9.5px] text-muted-foreground">
                 {active ? `${active.memberCount} roommate${active.memberCount === 1 ? "" : "s"}` : households.length ? "" : "Create or join one"}
               </span>
             </span>
@@ -85,7 +86,7 @@ function MyBalancePill() {
   if (!ledger || !user) return null;
   const net = ledger.balances.get(user.id) ?? 0;
   return (
-    <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
+    <div className="rounded-xl border border-foreground/[0.07] bg-foreground/[0.03] p-3">
       <div className="flex items-center gap-2">
         <MemberAvatar id={user.id} name={user.displayName} src={user.avatarUrl} />
         <div className="min-w-0 flex-1">
@@ -129,15 +130,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const current = NAV.find((n) => pathname.startsWith(n.href));
 
   return (
-    <div className="flex min-h-dvh w-full bg-terminal">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r border-sidebar-border bg-sidebar/80 px-4 py-5 backdrop-blur md:flex">
+    <div className="flex min-h-dvh w-full">
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r border-sidebar-border bg-sidebar px-4 py-5 md:flex">
         <div className="flex items-center justify-between">
           <Logo />
           {repo.mode === "demo" ? <DemoBadge /> : null}
         </div>
         {inApp ? <HouseholdSwitcher /> : null}
-        <nav className="flex flex-col gap-1">
-          {NAV.map(({ href, label, icon: Icon }) => {
+        <nav className="flex flex-col gap-0.5">
+          {NAV.map(({ href, label }, i) => {
             const active = pathname.startsWith(href);
             return (
               <Link
@@ -145,18 +146,24 @@ export function AppShell({ children }: { children: ReactNode }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                  "isolate",
-                  active ? "text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground",
+                  "group/nav relative isolate flex items-center gap-2.5 rounded-full px-3.5 py-2 font-label text-[11px] transition-colors",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {active ? (
-                  <motion.span layoutId="sidebar-active" className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent" transition={{ type: "spring", stiffness: 500, damping: 40 }}>
-                    <span className="absolute top-2 bottom-2 -left-4 w-0.5 rounded-full bg-primary shadow-[0_0_12px_2px] shadow-primary/60" />
-                  </motion.span>
+                  <motion.span
+                    layoutId="sidebar-active"
+                    className="absolute inset-0 -z-10 rounded-full border border-foreground/25"
+                    transition={{ type: "spring", stiffness: 420, damping: 38 }}
+                  />
                 ) : null}
-                <Icon className="size-4" />
+                <span aria-hidden className={cn("transition-opacity", active ? "opacity-100" : "opacity-40 group-hover/nav:opacity-100")}>
+                  •
+                </span>
                 {label}
+                <span aria-hidden className="ml-auto text-[9.5px] tabular-nums opacity-40">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
               </Link>
             );
           })}
@@ -165,24 +172,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-background/75 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-foreground/[0.06] bg-background/75 backdrop-blur-xl">
           <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-2 px-4 md:h-16 md:px-8">
             <div className="min-w-0 md:hidden">
               {inApp ? <HouseholdSwitcher className="max-w-[48vw] border-0 bg-transparent px-0 hover:bg-transparent" /> : <Logo />}
             </div>
-            <h1 className="hidden font-display text-xl font-medium tracking-tight md:block">{current?.label ?? "Roommate AI"}</h1>
+            <h1 className="hidden font-display text-3xl leading-none md:block">
+              <ScrambleText key={current?.label} text={current?.label ?? "Roommate AI"} duration={550} />
+            </h1>
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}
               {ready ? (
                 <>
-                  <Button variant="outline" size="sm" onClick={() => openSettleUp()} className="h-8 px-3 sm:hidden">
-                    <HandCoins /> Settle
+                  <Button variant="outline" size="sm" mark="cross" onClick={() => openSettleUp()} className="sm:hidden">
+                    Settle
                   </Button>
-                  <Button variant="outline" onClick={() => openSettleUp()} className="hidden h-9 px-4 sm:inline-flex">
-                    <HandCoins /> Settle up
+                  <Button variant="outline" mark="cross" onClick={() => openSettleUp()} className="hidden sm:inline-flex">
+                    Settle up
                   </Button>
-                  <Button onClick={() => openAddExpense()} className="hidden h-9 px-4 sm:inline-flex">
-                    <Plus strokeWidth={2.5} /> Add Expense
+                  <Button mark="star" onClick={() => openAddExpense()} className="hidden sm:inline-flex">
+                    Add expense
                   </Button>
                 </>
               ) : null}
@@ -204,7 +213,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           {status === "no-households" && !setupSkipped ? <HouseholdSetupCard /> : null}
           {browsing ? pathname.startsWith("/settings") ? children : <NoHouseholdState pathname={pathname} /> : null}
           {ready ? (
-            <motion.div key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 8, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
               {children}
             </motion.div>
           ) : null}
@@ -216,7 +230,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {inApp ? (
         <nav
           aria-label="Primary"
-          className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 rounded-2xl border border-white/10 bg-popover/85 shadow-2xl shadow-black/60 backdrop-blur-xl md:hidden"
+          className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 rounded-2xl border border-foreground/10 bg-popover/85 shadow-2xl shadow-foreground/15 backdrop-blur-xl md:hidden"
         >
           <div className="grid grid-cols-5 items-center px-1.5 py-1">
             {MOBILE_NAV.slice(0, 2).map((n) => (
@@ -228,9 +242,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 whileTap={{ scale: 0.92 }}
                 onClick={() => (ready ? openAddExpense() : openHousehold("create"))}
                 aria-label={ready ? "Add Expense" : "Set up a household"}
-                className="-mt-7 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-300 to-emerald-500 text-primary-foreground ring-4 ring-background glow-primary glow-pulse"
+                className="-mt-7 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-background"
               >
-                <Plus className="size-6" strokeWidth={2.75} />
+                <Plus className="size-6" strokeWidth={1.5} />
               </motion.button>
             </div>
             {MOBILE_NAV.slice(2).map((n) => (

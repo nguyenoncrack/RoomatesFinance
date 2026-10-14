@@ -4,6 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -26,6 +27,8 @@
   --color-chart-1: var(--chart-1);
   --color-chart-6: var(--chart-6);
   --color-chart-7: var(--chart-7);
+  --color-night: var(--night);
+  --color-night-foreground: var(--night-foreground);
   --color-positive: var(--positive);
   --color-positive-soft: var(--positive-soft);
   --color-negative: var(--negative);
@@ -55,49 +58,51 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Single dark "market terminal" theme: near-black canvas, emerald accent, green = receive, red = owe. */
-:root,
-.dark {
-  color-scheme: dark;
-  --background: oklch(0.135 0.006 170);
-  --foreground: oklch(0.965 0.006 165);
-  --card: oklch(0.172 0.008 170);
-  --card-foreground: oklch(0.965 0.006 165);
-  --popover: oklch(0.182 0.009 170);
-  --popover-foreground: oklch(0.965 0.006 165);
-  --primary: oklch(0.79 0.17 157);
-  --primary-foreground: oklch(0.17 0.035 165);
-  --secondary: oklch(0.22 0.01 170);
-  --secondary-foreground: oklch(0.93 0.008 165);
-  --muted: oklch(0.215 0.009 170);
-  --muted-foreground: oklch(0.69 0.014 170);
-  --accent: oklch(0.79 0.17 157 / 12%);
-  --accent-foreground: oklch(0.86 0.14 157);
-  --destructive: oklch(0.69 0.19 22);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.74 0.16 157);
-  --positive: oklch(0.79 0.17 155);
-  --positive-soft: oklch(0.79 0.17 155 / 12%);
-  --negative: oklch(0.7 0.19 22);
-  --negative-soft: oklch(0.7 0.19 22 / 12%);
-  --glow: oklch(0.79 0.17 157);
-  --chart-1: oklch(0.77 0.16 157);
-  --chart-2: oklch(0.74 0.12 190);
-  --chart-3: oklch(0.82 0.14 85);
-  --chart-4: oklch(0.71 0.17 20);
-  --chart-5: oklch(0.72 0.13 240);
-  --chart-6: oklch(0.87 0.17 125);
-  --chart-7: oklch(0.52 0.012 170);
-  --radius: 0.875rem;
-  --sidebar: oklch(0.148 0.007 170);
-  --sidebar-foreground: oklch(0.965 0.006 165);
-  --sidebar-primary: oklch(0.79 0.17 157);
-  --sidebar-primary-foreground: oklch(0.17 0.035 165);
-  --sidebar-accent: oklch(0.79 0.17 157 / 10%);
-  --sidebar-accent-foreground: oklch(0.88 0.13 157);
-  --sidebar-border: oklch(1 0 0 / 7%);
-  --sidebar-ring: oklch(0.74 0.16 157);
+/* Single warm editorial theme: paper canvas, charcoal ink, moss = receive, terracotta = owe. */
+:root {
+  color-scheme: light;
+  --background: oklch(0.952 0.008 95);
+  --foreground: oklch(0.235 0.008 85);
+  --card: oklch(0.972 0.006 95);
+  --card-foreground: oklch(0.235 0.008 85);
+  --popover: oklch(0.982 0.005 95);
+  --popover-foreground: oklch(0.235 0.008 85);
+  --primary: oklch(0.255 0.009 85);
+  --primary-foreground: oklch(0.968 0.006 95);
+  --secondary: oklch(0.918 0.01 95);
+  --secondary-foreground: oklch(0.27 0.008 85);
+  --muted: oklch(0.925 0.009 95);
+  --muted-foreground: oklch(0.52 0.01 85);
+  --accent: oklch(0.47 0.07 135 / 10%);
+  --accent-foreground: oklch(0.4 0.07 135);
+  --destructive: oklch(0.55 0.14 38);
+  --border: oklch(0.235 0.008 85 / 12%);
+  --input: oklch(0.235 0.008 85 / 18%);
+  --ring: oklch(0.47 0.07 135);
+  --positive: oklch(0.5 0.095 140);
+  --positive-soft: oklch(0.5 0.095 140 / 11%);
+  --negative: oklch(0.55 0.14 38);
+  --negative-soft: oklch(0.55 0.14 38 / 10%);
+  --glow: oklch(0.47 0.07 135);
+  /* Charcoal "night" panels, like the dark sections of an editorial page. */
+  --night: oklch(0.205 0.006 85);
+  --night-foreground: oklch(0.93 0.008 95);
+  --chart-1: oklch(0.5 0.09 140);
+  --chart-2: oklch(0.64 0.07 120);
+  --chart-3: oklch(0.7 0.1 80);
+  --chart-4: oklch(0.58 0.12 40);
+  --chart-5: oklch(0.55 0.06 230);
+  --chart-6: oklch(0.42 0.05 160);
+  --chart-7: oklch(0.62 0.01 85);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.938 0.009 95);
+  --sidebar-foreground: oklch(0.235 0.008 85);
+  --sidebar-primary: oklch(0.255 0.009 85);
+  --sidebar-primary-foreground: oklch(0.968 0.006 95);
+  --sidebar-accent: oklch(0.235 0.008 85 / 6%);
+  --sidebar-accent-foreground: oklch(0.235 0.008 85);
+  --sidebar-border: oklch(0.235 0.008 85 / 10%);
+  --sidebar-ring: oklch(0.47 0.07 135);
 }
 
 @layer base {
@@ -117,58 +122,73 @@
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    background: oklch(0.79 0.17 157 / 30%);
+    background: oklch(0.47 0.07 135 / 22%);
   }
 }
 
 @utility font-display {
-  font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 400;
+  font-synthesis-weight: none;
+  letter-spacing: -0.01em;
 }
 
-/* Emerald-to-lime headline accent. */
+/* Tiny uppercase mono labels: "• HOME", "01 ■ ELENA". */
+@utility font-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 450;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Second line of a two-tone headline. */
 @utility text-gradient {
-  background-image: linear-gradient(100deg, oklch(0.86 0.16 160), oklch(0.8 0.17 150) 45%, oklch(0.9 0.17 125));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  color: color-mix(in oklch, var(--foreground) 55%, var(--background));
 }
 
+/* The neon glows are retired; keep the names as quiet hairline shadows so call sites still read well. */
 @utility glow-primary {
-  box-shadow:
-    0 0 0 1px oklch(0.79 0.17 157 / 45%),
-    0 6px 28px -6px oklch(0.79 0.17 157 / 55%);
+  box-shadow: 0 1px 0 0 oklch(0.235 0.008 85 / 8%);
 }
 
 @utility glow-soft {
   box-shadow:
-    0 0 0 1px oklch(0.79 0.17 157 / 18%),
-    0 20px 60px -24px oklch(0.79 0.17 157 / 35%);
+    0 0 0 1px oklch(0.235 0.008 85 / 7%),
+    0 18px 40px -30px oklch(0.235 0.008 85 / 30%);
 }
 
 @utility glow-negative {
   box-shadow:
-    0 0 0 1px oklch(0.7 0.19 22 / 25%),
-    0 20px 60px -28px oklch(0.7 0.19 22 / 40%);
+    0 0 0 1px oklch(0.55 0.14 38 / 18%),
+    0 18px 40px -30px oklch(0.55 0.14 38 / 30%);
 }
 
 @utility text-glow {
-  text-shadow: 0 0 22px color-mix(in oklch, currentColor 35%, transparent);
+  text-shadow: none;
 }
 
-/* Faint grid + top glow used behind hero areas. */
+/* Soft paper light behind hero areas. */
 @utility bg-terminal {
   background-image:
-    radial-gradient(60rem 28rem at 15% -10%, oklch(0.79 0.17 157 / 10%), transparent 60%),
-    radial-gradient(40rem 22rem at 100% 0%, oklch(0.74 0.12 190 / 7%), transparent 60%);
+    radial-gradient(60rem 28rem at 15% -10%, oklch(1 0 0 / 55%), transparent 60%),
+    radial-gradient(40rem 22rem at 100% 0%, oklch(0.47 0.07 135 / 5%), transparent 60%);
 }
 
+/* Ruled pencil lines, fading out from the top. */
 @utility bg-grid {
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 3.5%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 3.5%) 1px, transparent 1px);
-  background-size: 44px 44px;
+  background-image: linear-gradient(to bottom, oklch(0.235 0.008 85 / 6%) 1px, transparent 1px);
+  background-size: 100% 44px;
   mask-image: radial-gradient(ellipse at 50% 0%, black 20%, transparent 75%);
+}
+
+/* Hand-drawn strokes (see PencilLoop / PencilRing): drawn in via stroke-dashoffset. */
+@utility pencil-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 @keyframes ticker {
@@ -201,43 +221,40 @@
 }
 
 @utility skeleton-shine {
-  background-image: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 5%) 50%, transparent 100%);
+  background-image: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 55%) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: skeleton-shine 1.6s linear infinite;
 }
 
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 0.15;
+/* Retired halo; kept as a no-op so old call sites don't break. */
+@utility glow-pulse {
+  position: relative;
+}
+
+@keyframes pencil-draw {
+  from {
+    stroke-dashoffset: 1;
   }
-  50% {
-    opacity: 0.85;
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
-/* Breathing halo on the primary CTA. Animates opacity of a pseudo-element only, so it stays on the compositor. */
-@utility glow-pulse {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    box-shadow: 0 0 26px 3px oklch(0.79 0.17 157 / 55%);
-    opacity: 0.15;
-    pointer-events: none;
-    animation: glow-pulse 2.8s ease-in-out infinite;
-  }
+@utility animate-pencil {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pencil-draw var(--pencil-duration, 1.4s) cubic-bezier(0.65, 0, 0.35, 1) var(--pencil-delay, 0s) forwards;
 }
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 10px, 0);
+    filter: blur(6px);
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
+    filter: none;
     transform: none;
   }
 }
@@ -245,7 +262,7 @@
 /* Staggered entrance for a page's top-level blocks. */
 @utility stagger-children {
   & > * {
-    animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   & > :nth-child(2) {
     animation-delay: 50ms;
@@ -268,8 +285,11 @@
   .animate-ticker,
   .animate-blink,
   .skeleton-shine,
-  .glow-pulse::after,
   .stagger-children > * {
     animation: none;
+  }
+  .animate-pencil {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }

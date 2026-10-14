@@ -74,7 +74,7 @@ export function ExpenseFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden border-t border-primary/25 p-0 shadow-[0_-20px_80px_-40px] shadow-primary/40 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none sm:max-w-xl"
+        className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden border-t border-primary/25 p-0 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none sm:max-w-xl"
         onOpenAutoFocus={(e) => {
           // Don't pop the keyboard over the form on phones.
           if (window.matchMedia("(max-width: 640px)").matches) e.preventDefault();
@@ -213,10 +213,10 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
 
   return (
     <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col" noValidate>
-      <DialogHeader className="relative border-b border-white/[0.06] px-5 pt-5 pb-4">
-        <span className="absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-white/15 sm:hidden" aria-hidden />
+      <DialogHeader className="relative border-b border-foreground/[0.06] px-5 pt-5 pb-4">
+        <span className="absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-foreground/15 sm:hidden" aria-hidden />
         <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25 shadow-[0_0_20px_-6px] shadow-primary/60">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25">
             <ReceiptText className="size-5" />
           </span>
           <div className="min-w-0 space-y-1 text-left">
@@ -254,7 +254,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                 value={amountInput}
                 onChange={(e) => setAmountInput(e.target.value)}
                 aria-invalid={Boolean(amountError)}
-                className="h-11 rounded-xl border-primary/30 bg-primary/[0.06] pl-8 font-display text-xl font-medium tabular-nums shadow-[0_0_24px_-10px] shadow-primary/70 focus-visible:border-primary/60 md:text-xl"
+                className="h-11 rounded-xl border-primary/30 bg-primary/[0.06] pl-8 font-display text-xl font-medium tabular-nums focus-visible:border-primary/60 md:text-xl"
               />
             </div>
             {amountError ? <p className="text-xs text-destructive">{amountError}</p> : null}
@@ -299,8 +299,8 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                   className={cn(
                     "flex flex-col items-center gap-1 rounded-xl border px-1 py-2.5 text-[11px] leading-tight font-medium transition-all active:scale-95",
                     active
-                      ? "border-primary/60 bg-primary/10 text-accent-foreground shadow-[0_0_18px_-6px] shadow-primary/70"
-                      : "border-white/[0.07] bg-white/[0.02] text-muted-foreground hover:border-white/15 hover:text-foreground",
+                      ? "border-primary/60 bg-primary/10 text-accent-foreground"
+                      : "border-foreground/[0.07] bg-foreground/[0.02] text-muted-foreground hover:border-foreground/15 hover:text-foreground",
                   )}
                 >
                   <Icon className="size-4" />
@@ -335,7 +335,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
             </ToggleGroup>
           </div>
 
-          <div className="divide-y divide-white/[0.06] overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.015]">
+          <div className="divide-y divide-foreground/[0.06] overflow-hidden rounded-xl border border-foreground/[0.07] bg-foreground/[0.015]">
             {members.map((m) => {
               const on = selected.has(m.id);
               const share = shareById.get(m.id);
@@ -396,7 +396,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
           ) : null}
 
           <div className="flex items-center justify-between text-xs">
-            <span className={cn("font-medium", statusOk ? "text-muted-foreground" : "text-amber-300")}>
+            <span className={cn("font-medium", statusOk ? "text-muted-foreground" : "text-amber-700")}>
               {participants.length === 0 ? "Pick at least one roommate" : statusLine}
             </span>
             {method !== "equal" && participants.length > 0 ? (
@@ -464,7 +464,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         ) : null}
       </div>
 
-      <div className="flex items-center gap-3 border-t border-white/[0.06] bg-black/20 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="flex items-center gap-3 border-t border-foreground/[0.06] bg-foreground/[0.035] px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="min-w-0 flex-1 text-xs text-muted-foreground">
           {amountCents ? (
             <>

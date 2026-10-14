@@ -93,12 +93,12 @@ export function CelebrationLayer() {
                 transition={{ duration: 1.25, delay: p.delay, ease: [0.16, 1, 0.3, 1], times: [0, 0.55, 1] }}
               />
             ))}
-            <span className="relative flex size-16 items-center justify-center rounded-full bg-linear-to-br from-emerald-300 to-emerald-500 text-primary-foreground glow-primary">
+            <span className="relative flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground glow-primary">
               <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.4, delay: 0.12, ease: "easeOut" }} />
               </svg>
             </span>
-            <div className="mt-3 rounded-2xl border border-primary/25 bg-popover/90 px-4 py-2 text-center shadow-2xl shadow-black/50 backdrop-blur">
+            <div className="mt-3 rounded-2xl border border-primary/25 bg-popover/90 px-4 py-2 text-center shadow-2xl shadow-foreground/15 backdrop-blur">
               <p className="font-display text-lg font-medium">{current.title}</p>
               {current.subtitle ? <p className="text-xs text-muted-foreground">{current.subtitle}</p> : null}
             </div>

@@ -4,33 +4,31 @@ import { cn } from "cn"
 import { Slot } from "radix-ui"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-[6px] border border-transparent bg-clip-padding text-[13px] font-medium tracking-[-0.005em] whitespace-nowrap transition-[color,background-color,border-color,box-shadow] outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px motion-reduce:active:translate-y-0 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button relative inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding font-mono text-[11px] font-medium tracking-[0.08em] whitespace-nowrap uppercase transition-[color,background-color,border-color,box-shadow] duration-200 outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px motion-reduce:active:translate-y-0 disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-']):not([data-pencil])]:size-3.5 [&_svg:not([data-pencil])]:stroke-[1.75]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-[color-mix(in_oklch,var(--primary),white_14%)]",
+        default: "bg-primary text-primary-foreground hover:bg-[color-mix(in_oklch,var(--primary),white_12%)]",
         outline:
-          "border-foreground/25 bg-transparent text-foreground hover:border-foreground/45 hover:bg-foreground/[0.04] aria-expanded:border-foreground/45 aria-expanded:bg-foreground/[0.04]",
+          "border-foreground/30 bg-transparent text-foreground hover:border-foreground/60 hover:bg-foreground/[0.03] aria-expanded:border-foreground/60 aria-expanded:bg-foreground/[0.03]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground aria-expanded:bg-foreground/[0.05] aria-expanded:text-foreground",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-destructive/35 bg-destructive/[0.06] text-destructive hover:border-destructive/60 hover:bg-destructive/10 focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
+        link: "text-foreground underline decoration-foreground/30 underline-offset-4 hover:decoration-foreground",
       },
       size: {
         default:
-          "h-8 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5",
-        xs: "h-6 gap-1 rounded-[5px] px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[5px] px-2.5 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-4 text-sm has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3",
-        icon: "size-8",
-        "icon-xs":
-          "size-6 rounded-[5px] [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-7 rounded-[5px]",
-        "icon-lg": "size-9",
+          "h-9 gap-2 px-4 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5",
+        xs: "h-7 gap-1.5 px-2.5 text-[10px] has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-']):not([data-pencil])]:size-3",
+        sm: "h-8 gap-1.5 px-3 text-[10.5px] has-data-[icon=inline-end]:pr-2.5 has-data-[icon=inline-start]:pl-2.5 [&_svg:not([class*='size-']):not([data-pencil])]:size-3",
+        lg: "h-10 gap-2 px-5 has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4",
+        icon: "size-9",
+        "icon-xs": "size-7 [&_svg:not([class*='size-']):not([data-pencil])]:size-3",
+        "icon-sm": "size-8",
+        "icon-lg": "size-10",
       },
     },
     defaultVariants: {
@@ -40,17 +38,57 @@ const buttonVariants = cva(
   }
 )
 
+/** Typographic marks borrowed from editorial nav labels ("• HOME", "✳ STAY UPDATED", "✕ LET'S TALK"). */
+const MARKS = { dot: "•", star: "✳", cross: "✕", square: "■" } as const
+
+const SKETCHED = new Set(["default", "outline", "secondary", "destructive"])
+
+/**
+ * A loose hand-drawn loop around the button. It overshoots its own start like a quick pencil
+ * circle, and draws itself in on hover. Outline buttons also keep a faint retrace at rest.
+ */
+function PencilLoop({ resting }: { resting: boolean }) {
+  return (
+    <svg
+      data-pencil
+      aria-hidden
+      viewBox="0 0 200 60"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute -inset-x-[7px] -inset-y-[5px] h-[calc(100%+10px)] w-[calc(100%+14px)] overflow-visible text-foreground"
+    >
+      {resting ? (
+        <path
+          className="pencil-stroke opacity-25 transition-opacity duration-300 group-hover/button:opacity-0"
+          strokeWidth={0.75}
+          d="M 30 6 C 90 2, 170 3, 193 22 C 200 40, 160 57, 100 56 C 40 56, 4 50, 6 30 C 8 14, 22 8, 44 6"
+        />
+      ) : null}
+      <path
+        pathLength={1}
+        className="pencil-stroke opacity-0 [stroke-dasharray:1_2] [stroke-dashoffset:1] transition-[stroke-dashoffset,opacity] duration-500 group-hover/button:opacity-100 group-focus-visible/button:opacity-100 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/button:[stroke-dashoffset:0] group-focus-visible/button:[stroke-dashoffset:0] motion-reduce:transition-none"
+        strokeWidth={1}
+        d="M 20 36 C 12 16, 64 4, 108 4 C 158 4, 197 14, 195 31 C 193 49, 142 57, 96 56 C 46 55, 4 48, 7 29 C 9 15, 42 7, 74 6"
+      />
+    </svg>
+  )
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  mark,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    /** Optional typographic mark shown before the label. */
+    mark?: keyof typeof MARKS
   }) {
   const Comp = asChild ? Slot.Root : "button"
+  const sketched = SKETCHED.has(variant ?? "default") && !String(size).startsWith("icon")
 
   return (
     <Comp
@@ -59,7 +97,15 @@ function Button({
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {mark ? (
+        <span aria-hidden className="text-[0.95em] leading-none opacity-70">
+          {MARKS[mark]}
+        </span>
+      ) : null}
+      <Slot.Slottable>{children}</Slot.Slottable>
+      {sketched ? <PencilLoop resting={variant === "outline"} /> : null}
+    </Comp>
   )
 }
 
