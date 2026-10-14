@@ -220,7 +220,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div ref={rootRef} className="flex min-h-dvh w-full">
       <PixelIntro ready={status !== "loading"} target={rootRef} />
-      <aside className="theme-night sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r-[1.5px] border-[var(--night)] bg-night bg-[radial-gradient(30rem_20rem_at_0%_0%,oklch(1_0_0/5%),transparent_60%)] px-4 py-5 md:flex">
+      {/* Reserves the sidebar's width: the sidebar itself is fixed, so scrolling (or the elastic bounce past the end of the page) never moves it. */}
+      <div aria-hidden className="hidden w-64 shrink-0 md:block" />
+      <aside className="theme-night fixed inset-y-0 left-0 z-20 hidden w-64 flex-col overflow-y-auto overscroll-contain gap-5 border-r-[1.5px] border-[var(--night)] bg-night bg-[radial-gradient(30rem_20rem_at_0%_0%,oklch(1_0_0/5%),transparent_60%)] px-4 py-5 md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[image:var(--texture-plaster)] bg-[length:260px_260px] opacity-[0.16] mix-blend-soft-light" />
         <span aria-hidden className="pointer-events-none absolute top-24 right-4 size-3 animate-wiggle [--wiggle-amount:25deg]">
           <SparkleDoodle className="size-full" color="var(--pop-yellow)" />

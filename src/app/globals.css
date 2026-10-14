@@ -207,6 +207,8 @@
   }
   html {
     @apply font-sans;
+    /* No elastic bounce past the ends of the page: it drags sticky elements out of place. */
+    overscroll-behavior-y: none;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
