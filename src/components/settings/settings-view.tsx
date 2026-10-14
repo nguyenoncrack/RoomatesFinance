@@ -220,7 +220,7 @@ function SettingsInner() {
           <CardTitle>Roommates</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ul className="divide-y rounded-xl border">
+          <ul className="divide-y rounded-2xl bg-card/60 sketch-line">
             {activeMembers.map((m) => {
               const balance = ledger.balances.get(m.id) ?? 0;
               const canKick = isOwner && m.id !== user.id;
@@ -228,14 +228,14 @@ function SettingsInner() {
                 <li key={m.id} className="flex flex-wrap items-center gap-3 px-3 py-2.5">
                   <MemberAvatar id={m.id} name={m.displayName} src={m.avatarUrl} />
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 truncate text-sm font-medium">
+                    <p className="flex items-center gap-2 truncate font-hand text-lg leading-tight">
                       {m.displayName}
                       {m.id === user.id ? <Badge variant="secondary">You</Badge> : null}
                       {m.role === "owner" ? <Badge variant="outline">Owner</Badge> : null}
                     </p>
                     <p className="text-xs text-muted-foreground">Joined {formatTimestamp(m.joinedAt)}</p>
                   </div>
-                  <BalanceAmount cents={balance} className="text-sm" />
+                  <BalanceAmount cents={balance} className="font-hand text-xl font-normal" />
                   {canKick ? (
                     confirmingKick === m.id ? (
                       <div className="flex items-center gap-1">

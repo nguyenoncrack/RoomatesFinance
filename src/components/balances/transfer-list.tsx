@@ -47,13 +47,13 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
               <MemberAvatar id={t.from} name={from?.displayName ?? "?"} src={from?.avatarUrl} className="ring-2 ring-background" />
               <MemberAvatar id={t.to} name={to?.displayName ?? "?"} src={to?.avatarUrl} className="ring-2 ring-background" />
             </div>
-            <p className="min-w-0 flex-1 text-sm">
-              <span className="font-semibold">{name(t.from)}</span>
+            <p className="min-w-0 flex-1 font-hand text-lg leading-tight">
+              <span>{name(t.from)}</span>
               <ArrowRight className="mx-1.5 inline size-3.5 text-muted-foreground" />
-              <span className="font-semibold">{name(t.to)}</span>
-              {compact ? null : <span className="block text-xs text-muted-foreground">{fromMe ? "You pay" : toMe ? "Pays you" : "Pays"}</span>}
+              <span>{name(t.to)}</span>
+              {compact ? null : <span className="block text-[15px] text-muted-foreground">{fromMe ? "You pay" : toMe ? "Pays you" : "Pays"}</span>}
             </p>
-            <span className={cn("font-mono text-sm font-semibold tabular-nums", fromMe ? "text-negative" : toMe ? "text-positive" : "text-foreground/90")}>
+            <span className={cn("font-hand text-xl leading-none", fromMe ? "text-negative" : toMe ? "text-positive" : "text-foreground/90")}>
               <AnimatedMoney cents={t.amountCents} />
             </span>
             {fromMe || toMe ? (

@@ -108,14 +108,14 @@ export function ActivityFeed({
                 >
                   <CategoryIcon category={item.expense.category} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm">
-                      <b className="font-semibold">{name(item.expense.paidBy)}</b> paid for {item.expense.title}
+                    <span className="block truncate font-hand text-lg leading-tight">
+                      <b className="font-normal">{name(item.expense.paidBy)}</b> <span className="text-muted-foreground">paid for</span> {item.expense.title}
                     </span>
                     <span className="block text-xs text-muted-foreground">
                       {formatDay(item.expense.expenseDate)} · split {item.expense.splits.length} way{item.expense.splits.length === 1 ? "" : "s"}
                     </span>
                   </span>
-                  <span className="font-mono text-sm font-semibold tabular-nums">{formatCents(item.expense.amountCents)}</span>
+                  <span className="font-hand text-xl leading-none">{formatCents(item.expense.amountCents)}</span>
                 </button>
               ) : item.kind === "settlement" ? (
                 <div className={cn("flex items-start gap-3 rounded-xl px-2 py-2.5", item.settlement.status === "voided" && "opacity-55")}>
@@ -128,9 +128,9 @@ export function ActivityFeed({
                     {item.settlement.status === "pending" ? <Clock className="size-[18px]" strokeWidth={2} /> : <HandCoins className="size-[18px]" strokeWidth={2} />}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm", item.settlement.status === "voided" && "line-through")}>
-                      <b className="font-semibold">{name(item.settlement.paidBy)}</b> paid{" "}
-                      <b className="font-semibold">{name(item.settlement.paidTo) === "You" ? "you" : name(item.settlement.paidTo)}</b>
+                    <p className={cn("font-hand text-lg leading-tight", item.settlement.status === "voided" && "line-through")}>
+                      <b className="font-normal">{name(item.settlement.paidBy)}</b> <span className="text-muted-foreground">paid</span>{" "}
+                      <b className="font-normal">{name(item.settlement.paidTo) === "You" ? "you" : name(item.settlement.paidTo)}</b>
                     </p>
                     <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       {PAYMENT_METHOD_LABELS[item.settlement.paymentMethod]} · {relativeTime(item.settlement.createdAt)}
@@ -143,7 +143,7 @@ export function ActivityFeed({
                     </p>
                     {showActions ? <SettlementActions s={item.settlement} /> : null}
                   </div>
-                  <span className="font-mono text-sm font-semibold text-positive tabular-nums">{formatCents(item.settlement.amountCents)}</span>
+                  <span className="font-hand text-xl leading-none text-positive">{formatCents(item.settlement.amountCents)}</span>
                 </div>
               ) : (
                 <AuditRow item={item} name={name} />
@@ -176,7 +176,7 @@ function AuditRow({ item, name }: { item: Extract<ActivityItem, { kind: "audit" 
         <Icon className="size-[18px]" strokeWidth={2} />
       </span>
       <p className="min-w-0 flex-1 truncate text-sm">
-        <b className="font-medium text-foreground">{name(e.actorId)}</b> {meta.text}
+        <b className="font-hand text-lg font-normal text-foreground">{name(e.actorId)}</b> {meta.text}
         <span className="block text-xs">{relativeTime(e.createdAt)}</span>
       </p>
       {e.amountCents !== null && (e.action === "delete" || e.action === "voided") ? (

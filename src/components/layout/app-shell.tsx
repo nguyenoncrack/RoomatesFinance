@@ -92,7 +92,7 @@ function MyBalancePill() {
       <div className="flex items-center gap-2">
         <MemberAvatar id={user.id} name={user.displayName} src={user.avatarUrl} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{user.displayName}</p>
+          <p className="truncate font-hand text-lg leading-tight">{user.displayName}</p>
           <p className="text-xs text-muted-foreground">
             {net > 0 ? "You're owed" : net < 0 ? "You owe" : "All settled"}{" "}
             {net !== 0 ? <BalanceAmount cents={net} absolute animated className="text-xs" /> : null}

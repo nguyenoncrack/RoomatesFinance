@@ -227,7 +227,7 @@ export function ExpensesView() {
                           >
                             <CategoryIcon category={e.category} />
                             <span className="min-w-0 flex-1">
-                              <span className="flex items-center gap-1.5 text-sm font-medium">
+                              <span className="flex items-center gap-1.5 font-hand text-lg leading-tight">
                                 <span className="truncate">{e.title}</span>
                                 {e.receiptUrl ? <Paperclip className="size-3 shrink-0 text-muted-foreground" aria-label="Has receipt" /> : null}
                               </span>
@@ -236,10 +236,10 @@ export function ExpensesView() {
                               </span>
                             </span>
                             <span className="text-right">
-                              <span className="block text-sm font-semibold tabular-nums">{formatCents(e.amountCents)}</span>
+                              <span className="block font-hand text-xl leading-none">{formatCents(e.amountCents)}</span>
                               <span
                                 className={cn(
-                                  "block text-[11px] tabular-nums",
+                                  "block font-hand text-[15px]",
                                   impact > 0 ? "text-positive" : impact < 0 ? "text-negative" : "text-muted-foreground",
                                 )}
                               >
