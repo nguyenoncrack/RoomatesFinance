@@ -156,6 +156,7 @@ function AuditRow({ item, name }: { item: Extract<ActivityItem, { kind: "audit" 
     voided: { icon: Ban, text: "voided a payment" },
     join: { icon: UserPlus, text: "joined the household" },
     leave: { icon: UserMinus, text: "left the household" },
+    kick: { icon: UserMinus, text: `removed ${e.title ?? "a roommate"}` },
     rename: { icon: Type, text: `renamed the household to ${e.title ?? ""}` },
   };
   const meta = map[e.action] ?? { icon: Pencil, text: e.action };
