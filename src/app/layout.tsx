@@ -17,6 +17,14 @@ function PencilFilters() {
           <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="wobble" />
           <feDisplacementMap in="SourceGraphic" in2="wobble" scale="3" xChannelSelector="R" yChannelSelector="G" />
         </filter>
+        {/* Mosaic: sample one pixel per cell and dilate it over the cell. PixelIntro animates the sizes. */}
+        <filter id="pixelate" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feFlood id="pixelate-flood" x="4" y="4" width="1" height="1" />
+          <feComposite id="pixelate-tile" width="8" height="8" />
+          <feTile result="grid" />
+          <feComposite in="SourceGraphic" in2="grid" operator="in" />
+          <feMorphology id="pixelate-dilate" operator="dilate" radius="4" />
+        </filter>
         <filter id="pencil-strong" x="-5%" y="-20%" width="110%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="wobble" />
           <feDisplacementMap in="SourceGraphic" in2="wobble" scale="4.5" xChannelSelector="R" yChannelSelector="G" />

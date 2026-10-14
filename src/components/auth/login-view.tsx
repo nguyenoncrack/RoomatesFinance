@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowLeftRight, ArrowRight, House, Loader2, Scale, ShoppingCart, Smartphone, Wifi, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { INTRO_KEY } from "@/components/layout/pixel-intro";
 import { Logo } from "@/components/shared/logo";
 import { PencilRing } from "@/components/shared/pencil-ring";
 import { ScrambleText } from "@/components/shared/scramble-text";
@@ -34,6 +35,15 @@ export function LoginView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Reaching the login page means a fresh sign-in is coming, so let the pixel intro play again.
+  useEffect(() => {
+    try {
+      window.sessionStorage.removeItem(INTRO_KEY);
+    } catch {
+      // Storage blocked: nothing to reset.
+    }
+  }, []);
   const [error, setError] = useState<string | null>(params.get("error"));
   const [notice, setNotice] = useState<string | null>(null);
 

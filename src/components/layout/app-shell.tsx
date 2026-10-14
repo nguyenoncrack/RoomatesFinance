@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { HouseholdSetupCard, NoHouseholdState } from "./household-setup";
+import { PixelIntro } from "./pixel-intro";
 import { ShellError, ShellLoading } from "./shell-states";
 
 const NAV: { href: string; label: string; icon: LucideIcon; doodle: DoodleName }[] = [
@@ -190,9 +191,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const browsing = status === "no-households" && setupSkipped;
   const inApp = ready || browsing;
   const current = NAV.find((n) => pathname.startsWith(n.href));
+  const rootRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex min-h-dvh w-full">
+    <div ref={rootRef} className="flex min-h-dvh w-full">
+      <PixelIntro ready={status !== "loading"} target={rootRef} />
       <aside className="theme-night sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r-[1.5px] border-[var(--night)] bg-night bg-[radial-gradient(30rem_20rem_at_0%_0%,oklch(1_0_0/5%),transparent_60%)] px-4 py-5 md:flex">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[image:var(--texture-plaster)] bg-[length:260px_260px] opacity-[0.16] mix-blend-soft-light" />
         <span aria-hidden className="pointer-events-none absolute top-24 right-4 size-3 animate-wiggle [--wiggle-amount:25deg]">
