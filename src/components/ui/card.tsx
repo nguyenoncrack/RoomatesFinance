@@ -4,14 +4,16 @@ import { cn } from "cn"
 function Card({
   className,
   size = "default",
+  lift = false,
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: React.ComponentProps<"div"> & { size?: "default" | "sm"; lift?: boolean }) {
   return (
     <div
       data-slot="card"
       data-size={size}
       className={cn(
         "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-2xl bg-linear-to-b from-card to-card/70 py-(--card-spacing) text-sm text-card-foreground shadow-[inset_0_1px_0_0_oklch(1_0_0/5%)] ring-1 ring-white/[0.07] [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-2xl *:[img:last-child]:rounded-b-2xl",
+        lift && "transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:ring-primary/20 motion-reduce:hover:translate-y-0",
         className
       )}
       {...props}

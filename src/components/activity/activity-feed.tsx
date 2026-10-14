@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Ban, CircleCheck, Clock, HandCoins, Pencil, Trash2, UserMinus, UserPlus, Type } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { celebrate } from "@/components/shared/celebration";
 import { ExpenseDetailDialog } from "@/components/expenses/expense-detail-dialog";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { CategoryIcon } from "@/components/shared/category";
@@ -25,6 +26,7 @@ function SettlementActions({ s }: { s: Settlement }) {
     try {
       await setSettlementStatus(s.id, next);
       toast.success(next === "completed" ? "Marked as completed" : "Payment voided", { description: "Balances updated." });
+      if (next === "completed") celebrate("Payment recorded", { subtitle: formatCents(s.amountCents), priority: 1 });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't update the payment.");
     } finally {

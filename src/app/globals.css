@@ -206,10 +206,70 @@
   animation: skeleton-shine 1.6s linear infinite;
 }
 
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Breathing halo on the primary CTA. Animates opacity of a pseudo-element only, so it stays on the compositor. */
+@utility glow-pulse {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: 0 0 26px 3px oklch(0.79 0.17 157 / 55%);
+    opacity: 0.15;
+    pointer-events: none;
+    animation: glow-pulse 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Staggered entrance for a page's top-level blocks. */
+@utility stagger-children {
+  & > * {
+    animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  & > :nth-child(2) {
+    animation-delay: 50ms;
+  }
+  & > :nth-child(3) {
+    animation-delay: 100ms;
+  }
+  & > :nth-child(4) {
+    animation-delay: 150ms;
+  }
+  & > :nth-child(5) {
+    animation-delay: 200ms;
+  }
+  & > :nth-child(n + 6) {
+    animation-delay: 250ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker,
   .animate-blink,
-  .skeleton-shine {
+  .skeleton-shine,
+  .glow-pulse::after,
+  .stagger-children > * {
     animation: none;
   }
 }

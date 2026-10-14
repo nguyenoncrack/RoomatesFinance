@@ -27,7 +27,7 @@ export function ActivityView() {
   const settledTotal = snapshot.settlements.filter((s) => s.status === "completed").reduce((a, s) => a + s.amountCents, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="stagger-children space-y-5">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight md:hidden">Activity</h2>
         <p className="text-sm text-muted-foreground">
