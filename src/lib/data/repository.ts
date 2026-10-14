@@ -67,6 +67,8 @@ export interface Repository {
   createHousehold(name: string): Promise<string>;
   renameHousehold(householdId: string, name: string): Promise<void>;
   leaveHousehold(householdId: string): Promise<void>;
+  /** Owner-only. Removes another roommate once their balance is settled. History stays. */
+  kickMember(householdId: string, userId: string): Promise<void>;
   updateProfile(displayName: string): Promise<void>;
 
   createExpense(householdId: string, input: ExpenseInput): Promise<string>;

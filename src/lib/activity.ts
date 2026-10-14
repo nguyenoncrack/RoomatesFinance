@@ -6,7 +6,7 @@ export type ActivityItem =
   | { kind: "audit"; id: string; at: string; event: AuditEvent };
 
 // Voided payments already show (struck through) as settlement rows, so they're not repeated here.
-const AUDIT_ACTIONS = new Set(["update", "delete", "join", "leave", "rename"]);
+const AUDIT_ACTIONS = new Set(["update", "delete", "join", "leave", "kick", "rename"]);
 
 /** Chronological feed (newest first) of expenses, payments, and notable edits. */
 export function buildActivity(snapshot: HouseholdSnapshot): ActivityItem[] {
