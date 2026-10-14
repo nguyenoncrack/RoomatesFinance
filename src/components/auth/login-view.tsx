@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Logo } from "@/components/shared/logo";
 import { CodeComment, Cursor, StatTile, TerminalPanel } from "@/components/shared/terminal-panel";
+import { TabPill } from "@/components/shared/tab-pill";
 import { Ticker, type TickerItem } from "@/components/shared/ticker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -119,8 +120,14 @@ export function LoginView() {
         <CardContent className="space-y-4">
           <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
             <TabsList className="w-full rounded-xl bg-black/30">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
+              <TabsTrigger value="signin" className="relative isolate data-active:bg-transparent dark:data-active:border-transparent dark:data-active:bg-transparent">
+                {mode === "signin" ? <TabPill group="auth-mode" /> : null}
+                Sign in
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="relative isolate data-active:bg-transparent dark:data-active:border-transparent dark:data-active:bg-transparent">
+                {mode === "signup" ? <TabPill group="auth-mode" /> : null}
+                Sign up
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           <form onSubmit={onSubmit} className="space-y-3">

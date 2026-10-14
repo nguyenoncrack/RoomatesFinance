@@ -83,7 +83,7 @@ export function ExpensesView() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="stagger-children space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight md:hidden">Expenses</h2>
