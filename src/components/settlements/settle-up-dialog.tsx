@@ -200,7 +200,7 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
               Suggested: {formatCents(suggested)} clears this in the simplified plan.
               {amountCents !== null && amountCents > 0 && amountCents < suggested ? " Partial payments are fine." : ""}
               {amountCents !== null && amountCents > suggested ? (
-                <span className="text-amber-600"> That&apos;s more than owed; the extra will show as a new balance.</span>
+                <span className="text-amber-300"> That&apos;s more than owed; the extra will show as a new balance.</span>
               ) : null}
             </>
           ) : (

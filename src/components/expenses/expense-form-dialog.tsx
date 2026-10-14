@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Paperclip, X } from "lucide-react";
+import { Loader2, Paperclip, Plus, ReceiptText, X } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useAppData } from "@/components/providers/app-data-provider";
@@ -30,6 +30,9 @@ import {
 } from "@/lib/domain/types";
 import { firstName, todayDay } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+// Red is reserved for "owes", so the share bar sticks to greens, teals and blues.
+const SHARE_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-5)", "var(--chart-6)", "var(--chart-3)", "var(--chart-7)"];
 
 const bpToInput = (bp: number) => (bp / 100).toFixed(2).replace(/\.?0+$/, "");
 
@@ -69,7 +72,7 @@ export function ExpenseFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none sm:max-w-xl"
+        className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden border-t border-primary/25 p-0 shadow-[0_-20px_80px_-40px] shadow-primary/40 max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none sm:max-w-xl"
         onOpenAutoFocus={(e) => {
           // Don't pop the keyboard over the form on phones.
           if (window.matchMedia("(max-width: 640px)").matches) e.preventDefault();
@@ -207,15 +210,23 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
 
   return (
     <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col" noValidate>
-      <DialogHeader className="border-b px-5 pt-5 pb-4">
-        <DialogTitle className="text-lg font-semibold">{isEdit ? "Edit expense" : "Add an expense"}</DialogTitle>
-        <DialogDescription>
-          {isEdit ? "Changes recalculate everyone's balance." : "Log what you paid for and who it's for."}
-        </DialogDescription>
+      <DialogHeader className="relative border-b border-white/[0.06] px-5 pt-5 pb-4">
+        <span className="absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-white/15 sm:hidden" aria-hidden />
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25 shadow-[0_0_20px_-6px] shadow-primary/60">
+            <ReceiptText className="size-5" />
+          </span>
+          <div className="min-w-0 space-y-1 text-left">
+            <DialogTitle className="font-display text-xl font-semibold tracking-tight">{isEdit ? "Edit expense" : "Add an expense"}</DialogTitle>
+            <DialogDescription>
+              {isEdit ? "Changes recalculate everyone's balance." : "Log what you paid for and who it's for."}
+            </DialogDescription>
+          </div>
+        </div>
       </DialogHeader>
 
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
-        <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
+        <div className="grid gap-4 sm:grid-cols-[1fr_11rem]">
           <div className="space-y-1.5">
             <Label htmlFor="expense-title">What was it?</Label>
             <Input
@@ -225,14 +236,14 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
               maxLength={120}
               onChange={(e) => setTitle(e.target.value)}
               aria-invalid={Boolean(titleError)}
-              className="h-10"
+              className="h-11 rounded-xl"
             />
             {titleError ? <p className="text-xs text-destructive">{titleError}</p> : null}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="expense-amount">Total</Label>
             <div className="relative">
-              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">$</span>
+              <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 font-display text-lg text-accent-foreground">$</span>
               <Input
                 id="expense-amount"
                 inputMode="decimal"
@@ -240,7 +251,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                 value={amountInput}
                 onChange={(e) => setAmountInput(e.target.value)}
                 aria-invalid={Boolean(amountError)}
-                className="h-10 pl-6 text-base font-semibold tabular-nums"
+                className="h-11 rounded-xl border-primary/30 bg-primary/[0.06] pl-8 font-display text-xl font-semibold tabular-nums shadow-[0_0_24px_-10px] shadow-primary/70 focus-visible:border-primary/60 md:text-xl"
               />
             </div>
             {amountError ? <p className="text-xs text-destructive">{amountError}</p> : null}
@@ -251,7 +262,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
           <div className="space-y-1.5">
             <Label>Paid by</Label>
             <Select value={paidBy} onValueChange={setPaidBy}>
-              <SelectTrigger className="h-10 w-full" aria-label="Paid by">
+              <SelectTrigger className="h-11 w-full rounded-xl" aria-label="Paid by">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -265,7 +276,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="expense-date">Date</Label>
-            <Input id="expense-date" type="date" value={date} max="2100-12-31" onChange={(e) => setDate(e.target.value)} className="h-10" />
+            <Input id="expense-date" type="date" value={date} max="2100-12-31" onChange={(e) => setDate(e.target.value)} className="h-11 rounded-xl [color-scheme:dark]" />
           </div>
         </div>
 
@@ -283,8 +294,10 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                   aria-checked={active}
                   onClick={() => setCategory(c)}
                   className={cn(
-                    "flex flex-col items-center gap-1 rounded-xl border px-1 py-2 text-[11px] leading-tight font-medium transition-colors",
-                    active ? "border-primary bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:bg-muted",
+                    "flex flex-col items-center gap-1 rounded-xl border px-1 py-2.5 text-[11px] leading-tight font-medium transition-all active:scale-95",
+                    active
+                      ? "border-primary/60 bg-primary/10 text-accent-foreground shadow-[0_0_18px_-6px] shadow-primary/70"
+                      : "border-white/[0.07] bg-white/[0.02] text-muted-foreground hover:border-white/15 hover:text-foreground",
                   )}
                 >
                   <Icon className="size-4" />
@@ -307,19 +320,23 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
               aria-label="Split method"
             >
               {SPLIT_METHODS.map((m) => (
-                <ToggleGroupItem key={m} value={m} className="px-2.5 text-xs">
+                <ToggleGroupItem
+                  key={m}
+                  value={m}
+                  className="px-2.5 text-xs data-[state=on]:border-primary/40 data-[state=on]:bg-primary/15 data-[state=on]:text-accent-foreground"
+                >
                   {SPLIT_METHOD_LABELS[m]}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
           </div>
 
-          <div className="divide-y rounded-xl border">
+          <div className="divide-y divide-white/[0.06] overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.015]">
             {members.map((m) => {
               const on = selected.has(m.id);
               const share = shareById.get(m.id);
               return (
-                <div key={m.id} className={cn("flex items-center gap-3 px-3 py-2.5", !on && "opacity-55")}>
+                <div key={m.id} className={cn("flex items-center gap-3 px-3 py-2.5 transition-opacity", !on && "opacity-45")}>
                   <Checkbox
                     id={`p-${m.id}`}
                     checked={on}
@@ -348,7 +365,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                       ) : null}
                     </div>
                   ) : null}
-                  <span className="w-20 text-right text-sm font-semibold tabular-nums">
+                  <span className={cn("w-20 text-right font-mono text-sm font-semibold tabular-nums", on && share ? "text-foreground" : "text-muted-foreground")}>
                     {on ? (share !== undefined ? formatCents(share) : "—") : ""}
                   </span>
                 </div>
@@ -356,8 +373,22 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
             })}
           </div>
 
+          {split.ok && amountCents ? (
+            <div className="flex h-1.5 gap-0.5 overflow-hidden rounded-full" aria-hidden>
+              {split.splits.map((sp, i) => (
+                <motion.span
+                  key={sp.userId}
+                  layout
+                  className="h-full rounded-full"
+                  style={{ flexGrow: sp.shareCents, background: SHARE_COLORS[i % SHARE_COLORS.length] }}
+                  transition={{ type: "spring", stiffness: 400, damping: 40 }}
+                />
+              ))}
+            </div>
+          ) : null}
+
           <div className="flex items-center justify-between text-xs">
-            <span className={cn("font-medium", statusOk ? "text-muted-foreground" : "text-amber-600")}>
+            <span className={cn("font-medium", statusOk ? "text-muted-foreground" : "text-amber-300")}>
               {participants.length === 0 ? "Pick at least one roommate" : statusLine}
             </span>
             {method !== "equal" && participants.length > 0 ? (
@@ -425,12 +456,12 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         ) : null}
       </div>
 
-      <div className="flex items-center gap-3 border-t bg-muted/40 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="flex items-center gap-3 border-t border-white/[0.06] bg-black/20 px-5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="min-w-0 flex-1 text-xs text-muted-foreground">
           {amountCents ? (
             <>
-              <span className="font-semibold text-foreground tabular-nums">{formatCents(amountCents)}</span> ·{" "}
-              {participants.length} {participants.length === 1 ? "person" : "people"}
+              <span className="block font-display text-lg leading-tight font-semibold text-foreground tabular-nums">{formatCents(amountCents)}</span>
+              {participants.length === 1 ? "1 person" : `Split ${participants.length} ways`}
             </>
           ) : (
             "Enter an amount"
@@ -439,8 +470,8 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         <Button type="button" variant="ghost" onClick={onDone} disabled={submitting}>
           Cancel
         </Button>
-        <Button type="submit" size="lg" disabled={submitting} className="min-w-28">
-          {submitting ? <Loader2 className="animate-spin" /> : null}
+        <Button type="submit" size="lg" disabled={submitting} className="h-10 min-w-32 rounded-xl px-4 font-semibold glow-primary">
+          {submitting ? <Loader2 className="animate-spin" /> : isEdit ? null : <Plus strokeWidth={2.5} />}
           {isEdit ? "Save changes" : "Add expense"}
         </Button>
       </div>
