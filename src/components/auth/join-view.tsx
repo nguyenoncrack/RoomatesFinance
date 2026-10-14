@@ -91,7 +91,7 @@ export function JoinView({ token }: { token: string }) {
                 <CardDescription>This invite is for a household you belong to, so there&apos;s nothing to join.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full glow-primary" size="lg" onClick={openHousehold}>
+                <Button className="w-full" size="lg" onClick={openHousehold}>
                   Open {preview.householdName}
                 </Button>
               </CardContent>
@@ -136,7 +136,7 @@ export function JoinView({ token }: { token: string }) {
                     </Button>
                   </form>
                 ) : user ? (
-                  <Button className="w-full glow-primary" size="lg" onClick={() => accept()} disabled={busy}>
+                  <Button className="w-full" size="lg" onClick={() => accept()} disabled={busy}>
                     {busy ? <Loader2 className="animate-spin" /> : null} Join as {user.displayName}
                   </Button>
                 ) : (

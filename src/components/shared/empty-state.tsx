@@ -61,7 +61,7 @@ export function EmptyState({
           transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
-      <p className="font-display text-base font-semibold">{title}</p>
+      <p className="font-display text-base font-medium">{title}</p>
       {children ? <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">{children}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>

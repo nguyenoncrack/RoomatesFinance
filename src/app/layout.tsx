@@ -1,19 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Fredoka, Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter, Inter_Tight } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const geistSans = Geist({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const fredoka = Fredoka({
+// Tight neo-grotesk for headings and big numbers: light weights, negative tracking.
+const interTight = Inter_Tight({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -35,7 +35,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable} ${fredoka.variable} h-full antialiased`}>
+    <html lang="en" className={`dark ${inter.variable} ${geistMono.variable} ${interTight.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <MotionProvider>
           <TooltipProvider>{children}</TooltipProvider>

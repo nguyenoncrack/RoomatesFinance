@@ -99,7 +99,7 @@ export function CelebrationLayer() {
               </svg>
             </span>
             <div className="mt-3 rounded-2xl border border-primary/25 bg-popover/90 px-4 py-2 text-center shadow-2xl shadow-black/50 backdrop-blur">
-              <p className="font-display text-lg font-semibold">{current.title}</p>
+              <p className="font-display text-lg font-medium">{current.title}</p>
               {current.subtitle ? <p className="text-xs text-muted-foreground">{current.subtitle}</p> : null}
             </div>
           </motion.div>

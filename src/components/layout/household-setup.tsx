@@ -136,7 +136,7 @@ export function HouseholdSetupCard() {
           <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-accent-foreground ring-1 ring-primary/25 shadow-[0_0_24px_-6px] shadow-primary/60">
             <Home className="size-5" />
           </span>
-          <h2 className="font-display text-2xl font-semibold tracking-tight">Set up your household</h2>
+          <h2 className="font-display text-2xl font-medium tracking-tight">Set up your household</h2>
           <p className="text-sm text-muted-foreground">
             Create one for your place and invite your roommates, or join theirs with the link they sent you.
           </p>
@@ -176,14 +176,14 @@ export function NoHouseholdState({ pathname }: { pathname: string }) {
           <Home className="size-5" />
         </span>
         <div className="space-y-1.5">
-          <h2 className="font-display text-xl font-semibold tracking-tight">{copy.title}</h2>
+          <h2 className="font-display text-xl font-medium tracking-tight">{copy.title}</h2>
           <p className="mx-auto max-w-sm text-sm text-muted-foreground">{copy.body}</p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button onClick={() => openHousehold("create")} className="h-10 rounded-xl px-5 font-semibold glow-primary">
+          <Button onClick={() => openHousehold("create")} className="h-10 px-5">
             <Plus strokeWidth={2.5} /> Create household
           </Button>
-          <Button variant="outline" onClick={() => openHousehold("join")} className="h-10 rounded-xl border-white/10 bg-white/[0.03] px-5">
+          <Button variant="outline" onClick={() => openHousehold("join")} className="h-10 px-5">
             <Link2 /> Join household
           </Button>
         </div>

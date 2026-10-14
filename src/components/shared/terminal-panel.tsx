@@ -65,7 +65,7 @@ export function StatTile({
       <p className="text-[10px] font-medium tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
       <p
         className={cn(
-          "mt-1 truncate font-display text-base font-semibold tabular-nums sm:text-lg",
+          "mt-1 truncate font-display text-base font-medium tabular-nums sm:text-lg",
           tone === "positive" && "text-positive",
           tone === "negative" && "text-negative",
         )}

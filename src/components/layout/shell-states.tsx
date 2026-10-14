@@ -44,7 +44,7 @@ export function ShellError({ message, onRetry }: { message: string | null; onRet
         <span className="flex size-12 items-center justify-center rounded-2xl bg-negative-soft text-negative ring-1 ring-negative/25">
           <AlertTriangle className="size-5" />
         </span>
-        <h2 className="font-display text-lg font-semibold">We couldn&apos;t load your household</h2>
+        <h2 className="font-display text-lg font-medium">We couldn&apos;t load your household</h2>
         <p className="text-sm text-muted-foreground">{message ?? "Something went wrong."}</p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={onRetry} variant="outline">

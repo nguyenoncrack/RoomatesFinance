@@ -170,18 +170,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="min-w-0 md:hidden">
               {inApp ? <HouseholdSwitcher className="max-w-[48vw] border-0 bg-transparent px-0 hover:bg-transparent" /> : <Logo />}
             </div>
-            <h1 className="hidden font-display text-xl font-semibold tracking-tight md:block">{current?.label ?? "Roommate AI"}</h1>
+            <h1 className="hidden font-display text-xl font-medium tracking-tight md:block">{current?.label ?? "Roommate AI"}</h1>
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}
               {ready ? (
                 <>
-                  <Button variant="outline" size="sm" onClick={() => openSettleUp()} className="h-8 rounded-full px-3 sm:hidden">
+                  <Button variant="outline" size="sm" onClick={() => openSettleUp()} className="h-8 px-3 sm:hidden">
                     <HandCoins /> Settle
                   </Button>
-                  <Button variant="outline" onClick={() => openSettleUp()} className="hidden h-9 rounded-full px-4 sm:inline-flex">
+                  <Button variant="outline" onClick={() => openSettleUp()} className="hidden h-9 px-4 sm:inline-flex">
                     <HandCoins /> Settle up
                   </Button>
-                  <Button onClick={() => openAddExpense()} className="hidden h-9 rounded-full px-4 font-semibold glow-primary glow-pulse sm:inline-flex">
+                  <Button onClick={() => openAddExpense()} className="hidden h-9 px-4 sm:inline-flex">
                     <Plus strokeWidth={2.5} /> Add Expense
                   </Button>
                 </>

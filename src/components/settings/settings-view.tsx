@@ -139,7 +139,7 @@ function NoHouseholdSettings() {
           <CardDescription>You&apos;re not in a household yet. Start one for your place, or join your roommates with their invite link.</CardDescription>
         </CardHeader>
         <CardFooter className="flex flex-wrap gap-2">
-          <Button onClick={() => openHousehold("create")} className="font-semibold glow-primary">
+          <Button onClick={() => openHousehold("create")}>
             <Plus strokeWidth={2.5} /> Create household
           </Button>
           <Button variant="outline" onClick={() => openHousehold("join")}>

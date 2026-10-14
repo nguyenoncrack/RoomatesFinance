@@ -50,7 +50,7 @@ export function LoginView() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="group h-11 w-full rounded-xl text-[15px] font-semibold glow-primary" size="lg">
+            <Button asChild className="group h-11 w-full text-sm" size="lg">
               <Link href="/dashboard">
                 Open the demo household <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
               </Link>
@@ -164,7 +164,7 @@ export function LoginView() {
                 <AlertDescription>{notice}</AlertDescription>
               </Alert>
             ) : null}
-            <Button type="submit" className="h-11 w-full rounded-xl text-[15px] font-semibold glow-primary" size="lg" disabled={busy}>
+            <Button type="submit" className="h-11 w-full text-sm" size="lg" disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : null}
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
@@ -174,7 +174,7 @@ export function LoginView() {
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <Separator className="flex-1" /> or <Separator className="flex-1" />
               </div>
-              <Button variant="outline" className="h-11 w-full rounded-xl border-white/10 bg-white/[0.03]" size="lg" onClick={google} disabled={busy}>
+              <Button variant="outline" className="h-11 w-full" size="lg" onClick={google} disabled={busy}>
                 Continue with Google
               </Button>
             </>
@@ -216,7 +216,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
             Shared expenses × debt simplification × zero spreadsheets
           </span>
-          <h1 className="font-display text-[2.6rem] leading-[1.02] font-bold tracking-tight sm:text-6xl">
+          <h1 className="font-display text-[2.6rem] leading-[1.02] font-normal tracking-[-0.035em] sm:text-6xl">
             Split rent,
             <br />
             not <span className="text-gradient">friendships</span>.
@@ -274,7 +274,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground ring-1 ring-primary/20 transition-shadow group-hover:shadow-[0_0_20px_-4px] group-hover:shadow-primary/60">
               <Icon className="size-4" />
             </span>
-            <p className="mt-4 font-display text-base font-semibold">{title}</p>
+            <p className="mt-4 font-display text-base font-medium">{title}</p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
           </div>
         ))}

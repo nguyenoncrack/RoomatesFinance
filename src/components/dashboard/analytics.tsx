@@ -51,7 +51,7 @@ export function Analytics() {
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-semibold tracking-tight">Spending insights</h2>
+          <h2 className="font-display text-xl font-medium tracking-tight">Spending insights</h2>
           <p className="text-xs text-muted-foreground">Where the household&apos;s money goes.</p>
         </div>
         <ToggleGroup type="single" size="sm" variant="outline" value={range} onValueChange={(v) => v && setRange(v as "month" | "6m")}>

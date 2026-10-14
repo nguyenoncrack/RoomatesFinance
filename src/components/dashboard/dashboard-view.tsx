@@ -28,7 +28,7 @@ const fadeUp = (delay = 0) => ({
 
 function CardLink({ href, children }: { href: string; children: string }) {
   return (
-    <Button variant="ghost" size="sm" asChild className="group/link rounded-full text-muted-foreground hover:text-foreground">
+    <Button variant="ghost" size="sm" asChild className="group/link text-muted-foreground hover:text-foreground">
       <Link href={href}>
         {children}
         <ArrowRight className="transition-transform group-hover/link:translate-x-0.5" />
@@ -65,7 +65,7 @@ export function DashboardView() {
             <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
             {snapshot.household.name} · {activeMembers} roommate{activeMembers === 1 ? "" : "s"}
           </span>
-          <h2 className="font-display text-[2.1rem] leading-[1.08] font-bold tracking-tight sm:text-5xl">
+          <h2 className="font-display text-[2.1rem] leading-[1.08] font-normal tracking-[-0.035em] sm:text-5xl">
             Hey {me},
             <br />
             {net < 0 ? (
@@ -94,10 +94,10 @@ export function DashboardView() {
                 : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => openAddExpense()} className="h-11 rounded-xl px-5 text-[15px] font-semibold glow-primary glow-pulse">
+            <Button size="lg" onClick={() => openAddExpense()} className="h-11 px-5">
               <Plus strokeWidth={2.5} /> Add Expense
             </Button>
-            <Button size="lg" variant="outline" onClick={() => openSettleUp()} className="h-11 rounded-xl border-white/10 bg-white/[0.03] px-5 text-[15px]">
+            <Button size="lg" variant="outline" onClick={() => openSettleUp()} className="h-11 px-5">
               <HandCoins /> Settle up
             </Button>
           </div>
@@ -190,7 +190,7 @@ export function DashboardView() {
                   icon={Receipt}
                   title="No expenses yet"
                   action={
-                    <Button onClick={() => openAddExpense()} className="rounded-full px-4 glow-primary">
+                    <Button onClick={() => openAddExpense()} className="px-4">
                       <Plus /> Add Expense
                     </Button>
                   }

@@ -220,7 +220,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
             <ReceiptText className="size-5" />
           </span>
           <div className="min-w-0 space-y-1 text-left">
-            <DialogTitle className="font-display text-xl font-semibold tracking-tight">{isEdit ? "Edit expense" : "Add an expense"}</DialogTitle>
+            <DialogTitle className="font-display text-xl font-medium tracking-tight">{isEdit ? "Edit expense" : "Add an expense"}</DialogTitle>
             <DialogDescription>
               {isEdit ? "Changes recalculate everyone's balance." : "Log what you paid for and who it's for."}
             </DialogDescription>
@@ -254,7 +254,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                 value={amountInput}
                 onChange={(e) => setAmountInput(e.target.value)}
                 aria-invalid={Boolean(amountError)}
-                className="h-11 rounded-xl border-primary/30 bg-primary/[0.06] pl-8 font-display text-xl font-semibold tabular-nums shadow-[0_0_24px_-10px] shadow-primary/70 focus-visible:border-primary/60 md:text-xl"
+                className="h-11 rounded-xl border-primary/30 bg-primary/[0.06] pl-8 font-display text-xl font-medium tabular-nums shadow-[0_0_24px_-10px] shadow-primary/70 focus-visible:border-primary/60 md:text-xl"
               />
             </div>
             {amountError ? <p className="text-xs text-destructive">{amountError}</p> : null}
@@ -468,7 +468,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         <div className="min-w-0 flex-1 text-xs text-muted-foreground">
           {amountCents ? (
             <>
-              <span className="block font-display text-lg leading-tight font-semibold text-foreground tabular-nums">{formatCents(amountCents)}</span>
+              <span className="block font-display text-lg leading-tight font-medium text-foreground tabular-nums">{formatCents(amountCents)}</span>
               {participants.length === 1 ? "1 person" : `Split ${participants.length} ways`}
             </>
           ) : (
@@ -478,7 +478,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
         <Button type="button" variant="ghost" onClick={onDone} disabled={submitting}>
           Cancel
         </Button>
-        <Button type="submit" size="lg" disabled={submitting} className="h-10 min-w-32 rounded-xl px-4 font-semibold glow-primary">
+        <Button type="submit" size="lg" disabled={submitting} className="h-10 min-w-32 px-4">
           {submitting ? <Loader2 className="animate-spin" /> : isEdit ? null : <Plus strokeWidth={2.5} />}
           {isEdit ? "Save changes" : "Add expense"}
         </Button>

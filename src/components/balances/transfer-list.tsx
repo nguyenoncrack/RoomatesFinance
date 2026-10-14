@@ -62,7 +62,7 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
               <Button
                 size="sm"
                 variant={fromMe ? "default" : "outline"}
-                className={cn("rounded-full px-3", fromMe && "glow-primary")}
+                className="px-3"
                 onClick={() =>
                   openSettleUp({ direction: fromMe ? "pay" : "receive", counterpartyId: fromMe ? t.to : t.from, amountCents: t.amountCents })
                 }
