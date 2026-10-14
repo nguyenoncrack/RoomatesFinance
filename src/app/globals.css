@@ -96,6 +96,7 @@
   --negative: oklch(0.56 0.17 8);
   --negative-soft: oklch(0.74 0.15 0 / 16%);
   --glow: oklch(0.47 0.07 135);
+  --texture-plaster: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='p' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23fff' surfaceScale='1.4' diffuseConstant='1.1'%3E%3CfeDistantLight azimuth='225' elevation='62'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
   /* Charcoal "night" panels, like the dark sections of an editorial page. */
   --night: oklch(0.205 0.006 85);
   --night-foreground: oklch(0.93 0.008 95);
@@ -131,12 +132,46 @@
   --sidebar-ring: oklch(0.47 0.07 135);
 }
 
+/* Re-themes a subtree for the charcoal palette (used by the sidebar). Portaled menus keep the light theme. */
+.theme-night {
+  --background: var(--night);
+  --foreground: var(--night-foreground);
+  --card: oklch(0.255 0.007 85);
+  --card-foreground: var(--night-foreground);
+  --muted: oklch(0.28 0.007 85);
+  --muted-foreground: oklch(0.72 0.01 90);
+  --secondary: oklch(0.28 0.007 85);
+  --secondary-foreground: var(--night-foreground);
+  --primary: var(--pop-yellow);
+  --primary-foreground: oklch(0.235 0.008 85);
+  --border: oklch(0.93 0.008 95 / 14%);
+  --input: oklch(0.93 0.008 95 / 18%);
+  --sidebar: var(--night);
+  --sidebar-foreground: var(--night-foreground);
+  --sidebar-border: oklch(0.93 0.008 95 / 10%);
+  color: var(--foreground);
+  color-scheme: dark;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    isolation: isolate;
+  }
+  /* Faint plaster grain over the whole page: embossed noise, multiplied into the paper color. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--texture-plaster);
+    background-size: 260px 260px;
+    mix-blend-mode: multiply;
+    opacity: 0.32;
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;

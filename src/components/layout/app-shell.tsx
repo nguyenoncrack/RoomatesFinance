@@ -86,7 +86,7 @@ function MyBalancePill() {
   if (!ledger || !user) return null;
   const net = ledger.balances.get(user.id) ?? 0;
   return (
-    <div className="rounded-xl border border-foreground/[0.07] bg-foreground/[0.03] p-3">
+    <div className="rounded-2xl border-[1.5px] border-foreground/20 bg-foreground/[0.04] p-3">
       <div className="flex items-center gap-2">
         <MemberAvatar id={user.id} name={user.displayName} src={user.avatarUrl} />
         <div className="min-w-0 flex-1">
@@ -131,7 +131,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh w-full">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r border-sidebar-border bg-sidebar px-4 py-5 md:flex">
+      <aside className="theme-night sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-5 border-r-[1.5px] border-[var(--night)] bg-night bg-[radial-gradient(30rem_20rem_at_0%_0%,oklch(1_0_0/5%),transparent_60%)] px-4 py-5 md:flex">
         <div className="flex items-center justify-between">
           <Logo />
           {repo.mode === "demo" ? <DemoBadge /> : null}
@@ -277,7 +277,7 @@ function SettledWatcher() {
 
 function DemoBadge({ className }: { className?: string }) {
   return (
-    <Badge variant="outline" className={cn("gap-1 rounded-full border-primary/25 bg-primary/10 text-[10px] text-accent-foreground", className)}>
+    <Badge variant="outline" className={cn("gap-1 rounded-full border-primary/40 bg-primary/15 text-[10px] text-foreground", className)}>
       <span className="size-1.5 rounded-full bg-primary" /> Demo
     </Badge>
   );
