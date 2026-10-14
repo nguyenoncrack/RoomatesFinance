@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { centsToInput, formatCents, parseCents } from "@/lib/domain/money";
+import { amountInputError, centsToInput, formatCents, parseCents } from "@/lib/domain/money";
 import { PAYMENT_METHODS, PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/domain/types";
 import { firstName } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -84,7 +84,7 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
   const amountCents = parseCents(amountInput);
   const suggested = suggestion(direction, other);
   const otherMember = others.find((m) => m.id === other);
-  const otherName = otherMember ? firstName(otherMember.displayName) : "them";
+  const otherName = otherMember ? (ledger?.shortName.get(otherMember.id) ?? firstName(otherMember.displayName)) : "them";
 
   function pick(nextDirection: "pay" | "receive", nextOther: string) {
     setDirection(nextDirection);
@@ -98,7 +98,8 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
     if (submitting) return;
     setError(null);
     if (!other) return setError("Pick who you're settling with.");
-    if (amountCents === null || amountCents <= 0) return setError("Enter an amount greater than $0.");
+    const amountError = amountInputError(amountInput);
+    if (amountError || amountCents === null) return setError(amountError ?? "Enter an amount greater than $0.");
     setSubmitting(true);
     try {
       await recordSettlement({
