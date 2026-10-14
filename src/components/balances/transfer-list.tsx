@@ -18,9 +18,7 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
 
   if (transfers.length === 0) {
     return (
-      <EmptyState icon={CircleCheck} tone="positive" title="Everyone's square">
-        {emptyText ?? "No payments needed right now."}
-      </EmptyState>
+      <EmptyState icon={CircleCheck} tone="positive" title={emptyText ?? "Everyone's square"} />
     );
   }
 

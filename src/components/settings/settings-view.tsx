@@ -218,10 +218,6 @@ function SettingsInner() {
       <Card tone="mint" doodle="people">
         <CardHeader>
           <CardTitle>Roommates</CardTitle>
-          <CardDescription>
-            Everyone in {snapshot.household.name}.
-            {isOwner ? " You can remove a roommate once their balance is settled. Their history stays." : ""}
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <ul className="divide-y rounded-xl border">

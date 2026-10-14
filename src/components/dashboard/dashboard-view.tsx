@@ -15,7 +15,7 @@ import { ScrambleText } from "@/components/shared/scramble-text";
 import { NightPanel, StatRow, StatTile } from "@/components/shared/terminal-panel";
 import { Mascot, SparkleDoodle } from "@/components/shared/doodles";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildActivity } from "@/lib/activity";
 import { spendingThisMonth } from "@/lib/analytics";
 import { formatCents } from "@/lib/domain/money";
@@ -54,9 +54,6 @@ export function DashboardView() {
   const monthTotal = spendingThisMonth(snapshot.expenses);
   const monthCount = snapshot.expenses.filter((e) => e.expenseDate.slice(0, 7) === new Date().toISOString().slice(0, 7)).length;
   const activity = buildActivity(snapshot).slice(0, 6);
-  const nameOf = (id: string) => (ledger.shortName.get(id) ?? "Former roommate");
-  const creditors = myDebts.map((t) => nameOf(t.to));
-  const debtors = myCredits.map((t) => nameOf(t.from));
   const tone = net > 0 ? "positive" : net < 0 ? "negative" : "neutral";
   const me = firstName(user.displayName);
   const activeMembers = snapshot.members.filter((m) => m.leftAt === null).length;
@@ -109,13 +106,6 @@ export function DashboardView() {
                 )}
               </span>
             </h2>
-            <p className="max-w-md text-[15px] leading-relaxed text-foreground/70">
-              {net < 0
-                ? `Pay ${creditors.join(" and ")} to get back to zero. Balances are simplified, so that's the fewest transfers we found.`
-                : net > 0
-                  ? `${debtors.join(" and ")} ${debtors.length === 1 ? "owes" : "owe"} you. Nudge them, or record it when the money lands.`
-                  : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
-            </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" mark="star" onClick={() => openAddExpense()}>
                 Add expense
@@ -158,7 +148,6 @@ export function DashboardView() {
           <Card lift tone="sky" doodle="arrows">
             <CardHeader>
               <CardTitle>Who pays whom</CardTitle>
-              <CardDescription>Simplified so the household needs fewer payments.</CardDescription>
               <CardAction>
                 <CardLink href="/balances">Details</CardLink>
               </CardAction>
@@ -172,9 +161,6 @@ export function DashboardView() {
           <Card lift tone="lilac" doodle="scale">
             <CardHeader>
               <CardTitle>Balances</CardTitle>
-              <CardDescription>
-                <span className="rounded-full bg-pop-green px-1.5 text-foreground">Green</span> gets money back, <span className="rounded-full bg-pop-pink px-1.5 text-foreground">pink</span> owes.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <MemberBalanceList detailed />
@@ -199,9 +185,7 @@ export function DashboardView() {
                       Add expense
                     </Button>
                   }
-                >
-                  Add your first shared expense — groceries, rent, the Wi-Fi bill.
-                </EmptyState>
+                />
               ) : (
                 <ActivityFeed items={activity} />
               )}

@@ -58,7 +58,6 @@ export function Analytics() {
             Spending insights
             <SparkleDoodle className="size-6 animate-wiggle [--wiggle-amount:16deg]" color="var(--pop-yellow)" />
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Where the household&apos;s money goes.</p>
         </div>
         <ToggleGroup type="single" size="sm" variant="outline" value={range} onValueChange={(v) => v && setRange(v as "month" | "6m")}>
           <ToggleGroupItem value="month" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-foreground">
@@ -79,9 +78,7 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
-              <EmptyState icon={ChartPie} tone="neutral" title="Nothing spent yet" className="py-6">
-                Expenses in this period will show up here by category.
-              </EmptyState>
+              <EmptyState icon={ChartPie} tone="neutral" title="Nothing spent yet" className="py-6" />
             ) : (
               <div className="flex items-center gap-4">
                 <div className="size-32 shrink-0">
@@ -113,7 +110,6 @@ export function Analytics() {
         <Card lift tone="butter" doodle="chart">
           <CardHeader>
             <CardTitle>Monthly spending</CardTitle>
-            <CardDescription>Household total, last 6 months</CardDescription>
           </CardHeader>
           <CardContent className="h-44">
             <ResponsiveContainer width="100%" height="100%">
@@ -135,13 +131,10 @@ export function Analytics() {
         <Card lift tone="mint" doodle="people">
           <CardHeader>
             <CardTitle>Who paid what</CardTitle>
-            <CardDescription>Paid vs. their share</CardDescription>
           </CardHeader>
           <CardContent className="h-44 min-h-44">
             {people.length === 0 ? (
-              <EmptyState icon={Users} tone="neutral" title="No one has paid yet" className="py-6">
-                Contributions appear once someone logs an expense.
-              </EmptyState>
+              <EmptyState icon={Users} tone="neutral" title="No one has paid yet" className="py-6" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={people} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barGap={2}>

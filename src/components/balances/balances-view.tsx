@@ -32,7 +32,6 @@ export function BalancesView() {
         <Card tone="lilac" doodle="scale">
           <CardHeader>
             <CardTitle>Net balances</CardTitle>
-            <CardDescription>What each person paid minus their share, after completed payments.</CardDescription>
           </CardHeader>
           <CardContent>
             <MemberBalanceList detailed />
@@ -71,7 +70,7 @@ export function BalancesView() {
                 </p>
               </TabsContent>
               <TabsContent value="original" className="space-y-5">
-                <TransferList transfers={ledger.original} compact emptyText="No direct debts between roommates." />
+                <TransferList transfers={ledger.original} compact emptyText="No direct debts" />
                 <div>
                   <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Expense by expense</p>
                   {perExpense.length === 0 ? (
@@ -111,7 +110,6 @@ export function BalancesView() {
       <Card tone="butter" doodle="people">
         <CardHeader>
           <CardTitle>Your position with each roommate</CardTitle>
-          <CardDescription>Direct balance from shared expenses (original debts), after payments between you two.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {snapshot.members

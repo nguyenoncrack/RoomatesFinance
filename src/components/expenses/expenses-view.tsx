@@ -184,9 +184,7 @@ export function ExpensesView() {
                   Add the first expense
                 </Button>
               }
-            >
-              When someone pays for something shared, log it here and we&apos;ll keep everyone&apos;s balance up to date.
-            </EmptyState>
+            />
           </CardContent>
         </Card>
       ) : filtered.length === 0 ? (
