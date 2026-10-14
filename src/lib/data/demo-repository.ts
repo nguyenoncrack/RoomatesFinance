@@ -253,6 +253,28 @@ export class DemoRepository implements Repository {
     });
   }
 
+  kickMember(householdId: string, userId: string): Promise<void> {
+    return this.mutate((s) => {
+      const me = this.requireMember(s, householdId);
+      if (me.role !== "owner") throw new RepositoryError("Only the household owner can remove a roommate.", "forbidden");
+      if (userId === me.id) throw new RepositoryError("You can't remove yourself. Leave the household instead.", "invalid");
+      const target = this.activeMember(s, householdId, userId);
+      if (!target) throw new RepositoryError("That roommate isn't in this household.", "not_found");
+      const balances = computeNetBalances(
+        [],
+        s.expenses.filter((e) => e.householdId === householdId && e.deletedAt === null),
+        s.settlements.filter((x) => x.householdId === householdId),
+      );
+      if ((balances.get(target.id) ?? 0) !== 0) {
+        throw new RepositoryError("Settle their balance before removing them from this household.", "conflict");
+      }
+      target.leftAt = new Date().toISOString();
+      target.role = "member";
+      const name = s.profiles.find((p) => p.id === target.id)?.displayName ?? "A roommate";
+      this.log(s, { householdId, entityType: "member", entityId: target.id, action: "kick", summary: { title: name } });
+    });
+  }
+
   updateProfile(displayName: string): Promise<void> {
     return this.mutate((s) => {
       const trimmed = displayName.trim();
