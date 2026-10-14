@@ -1,13 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, Receipt, Wallet } from "lucide-react";
+import { ArrowRight, HandCoins, Plus, Receipt } from "lucide-react";
 import Link from "next/link";
 import { MemberBalanceList } from "@/components/balances/member-balance-list";
 import { TransferList } from "@/components/balances/transfer-list";
 import { ActivityFeed } from "@/components/activity/activity-feed";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
+import { EmptyState } from "@/components/shared/empty-state";
+import { CodeComment, Cursor, StatTile, TerminalPanel } from "@/components/shared/terminal-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildActivity } from "@/lib/activity";
@@ -17,158 +19,185 @@ import { firstName } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Analytics } from "./analytics";
 
-function StatCard({
-  label,
-  value,
-  hint,
-  icon: Icon,
-  tone = "neutral",
-  index,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  icon: typeof Wallet;
-  tone?: "positive" | "negative" | "neutral" | "primary";
-  index: number;
-}) {
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+});
+
+function CardLink({ href, children }: { href: string; children: string }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04, duration: 0.25 }}>
-      <Card className="h-full gap-2 py-4">
-        <CardContent className="space-y-2 px-4">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">{label}</p>
-            <span
-              className={cn(
-                "flex size-7 items-center justify-center rounded-lg",
-                tone === "positive" && "bg-positive-soft text-positive",
-                tone === "negative" && "bg-negative-soft text-negative",
-                tone === "neutral" && "bg-muted text-muted-foreground",
-                tone === "primary" && "bg-accent text-accent-foreground",
-              )}
-            >
-              <Icon className="size-3.5" />
-            </span>
-          </div>
-          <p
-            className={cn(
-              "text-xl font-semibold tracking-tight tabular-nums sm:text-2xl",
-              tone === "positive" && "text-positive",
-              tone === "negative" && "text-negative",
-            )}
-          >
-            {value}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">{hint}</p>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <Button variant="ghost" size="sm" asChild className="group/link rounded-full text-muted-foreground hover:text-foreground">
+      <Link href={href}>
+        {children}
+        <ArrowRight className="transition-transform group-hover/link:translate-x-0.5" />
+      </Link>
+    </Button>
   );
 }
 
 export function DashboardView() {
   const { ledger, snapshot, user } = useAppData();
-  const { openAddExpense } = useDialogs();
+  const { openAddExpense, openSettleUp } = useDialogs();
   if (!ledger || !snapshot || !user) return null;
 
   const net = ledger.balances.get(user.id) ?? 0;
-  const iOwe = ledger.simplified.filter((t) => t.from === user.id).reduce((a, t) => a + t.amountCents, 0);
-  const owedToMe = ledger.simplified.filter((t) => t.to === user.id).reduce((a, t) => a + t.amountCents, 0);
+  const myDebts = ledger.simplified.filter((t) => t.from === user.id);
+  const myCredits = ledger.simplified.filter((t) => t.to === user.id);
+  const iOwe = myDebts.reduce((a, t) => a + t.amountCents, 0);
+  const owedToMe = myCredits.reduce((a, t) => a + t.amountCents, 0);
   const monthTotal = spendingThisMonth(snapshot.expenses);
   const monthCount = snapshot.expenses.filter((e) => e.expenseDate.slice(0, 7) === new Date().toISOString().slice(0, 7)).length;
   const activity = buildActivity(snapshot).slice(0, 6);
-  const creditors = ledger.simplified.filter((t) => t.from === user.id).map((t) => firstName(ledger.memberById.get(t.to)?.displayName ?? ""));
+  const nameOf = (id: string) => firstName(ledger.memberById.get(id)?.displayName ?? "Former roommate");
+  const creditors = myDebts.map((t) => nameOf(t.to));
+  const debtors = myCredits.map((t) => nameOf(t.from));
+  const tone = net > 0 ? "positive" : net < 0 ? "negative" : "neutral";
+  const me = firstName(user.displayName);
+  const activeMembers = snapshot.members.filter((m) => m.leftAt === null).length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="hidden text-sm text-muted-foreground md:block">{snapshot.household.name}</p>
-        <h2 className="text-2xl font-semibold tracking-tight">Hey {firstName(user.displayName)}</h2>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          index={0}
-          label="Your balance"
-          value={formatCents(net, { signed: true })}
-          hint={net > 0 ? "The household owes you" : net < 0 ? "You owe the household" : "You're all settled up"}
-          icon={Wallet}
-          tone={net > 0 ? "positive" : net < 0 ? "negative" : "neutral"}
-        />
-        <StatCard
-          index={1}
-          label="You owe"
-          value={formatCents(iOwe)}
-          hint={creditors.length ? `To ${creditors.join(", ")}` : "Nothing to pay"}
-          icon={ArrowUpRight}
-          tone={iOwe ? "negative" : "neutral"}
-        />
-        <StatCard
-          index={2}
-          label="Owed to you"
-          value={formatCents(owedToMe)}
-          hint={owedToMe ? `From ${ledger.simplified.filter((t) => t.to === user.id).length} roommate(s)` : "Nobody owes you"}
-          icon={ArrowDownLeft}
-          tone={owedToMe ? "positive" : "neutral"}
-        />
-        <StatCard
-          index={3}
-          label="Spent this month"
-          value={formatCents(monthTotal)}
-          hint={`${monthCount} expense${monthCount === 1 ? "" : "s"} in the household`}
-          icon={CalendarDays}
-          tone="primary"
-        />
-      </div>
-
-      <div className="grid items-start gap-4 lg:grid-cols-[1.25fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Who pays whom</CardTitle>
-            <CardDescription>Simplified so the household needs fewer payments.</CardDescription>
-            <CardAction>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/balances">Details</Link>
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <TransferList transfers={ledger.simplified} />
-          </CardContent>
-        </Card>
-        <Card className="lg:row-span-2">
-          <CardHeader>
-            <CardTitle>Balances</CardTitle>
-            <CardDescription>Green gets money back, red owes.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MemberBalanceList detailed />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent activity</CardTitle>
-            <CardAction>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/activity">See all</Link>
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            {activity.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-8 text-center">
-                <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                  <Receipt className="size-5" />
-                </span>
-                <p className="text-sm font-medium">No expenses yet</p>
-                <p className="max-w-xs text-xs text-muted-foreground">Add your first shared expense — groceries, rent, the Wi-Fi bill.</p>
-                <Button onClick={() => openAddExpense()}>Add an expense</Button>
-              </div>
+    <div className="space-y-6 md:space-y-8">
+      <section className="grid items-center gap-6 lg:grid-cols-[1fr_1.05fr] lg:gap-10">
+        <motion.div {...fadeUp()} className="space-y-5">
+          <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground md:inline-flex">
+            <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
+            {snapshot.household.name} · {activeMembers} roommate{activeMembers === 1 ? "" : "s"}
+          </span>
+          <h2 className="font-display text-[2.1rem] leading-[1.08] font-bold tracking-tight sm:text-5xl">
+            Hey {me},
+            <br />
+            {net < 0 ? (
+              <>
+                you owe <span className="text-negative text-glow">{formatCents(-net)}</span>.
+              </>
+            ) : net > 0 ? (
+              <>
+                you&apos;re up <span className="text-gradient">{formatCents(net)}</span>.
+              </>
             ) : (
-              <ActivityFeed items={activity} />
+              <>
+                you&apos;re <span className="text-gradient">all square</span>.
+              </>
             )}
-          </CardContent>
-        </Card>
+          </h2>
+          <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
+            {net < 0
+              ? `Pay ${creditors.join(" and ")} to get back to zero. Balances are simplified, so that's the fewest transfers we found.`
+              : net > 0
+                ? `${debtors.join(" and ")} ${debtors.length === 1 ? "owes" : "owe"} you. Nudge them, or record it when the money lands.`
+                : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button size="lg" onClick={() => openAddExpense()} className="h-11 rounded-xl px-5 text-[15px] font-semibold glow-primary">
+              <Plus strokeWidth={2.5} /> Add Expense
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => openSettleUp()} className="h-11 rounded-xl border-white/10 bg-white/[0.03] px-5 text-[15px]">
+              <HandCoins /> Settle up
+            </Button>
+          </div>
+        </motion.div>
+
+        <motion.div {...fadeUp(0.08)}>
+          <TerminalPanel
+            command="ledger.simplify()"
+            status="Live balance"
+            className={cn(tone === "negative" && "border-negative/20 glow-negative")}
+            footer={
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <StatTile label="Your balance" value={formatCents(net, { signed: true })} tone={tone} />
+                <StatTile label="You owe" value={formatCents(iOwe)} tone={iOwe ? "negative" : "neutral"} />
+                <StatTile label="Owed to you" value={formatCents(owedToMe)} tone={owedToMe ? "positive" : "neutral"} />
+                <StatTile label="This month" value={formatCents(monthTotal)} hint={`${monthCount} expense${monthCount === 1 ? "" : "s"}`} />
+              </div>
+            }
+          >
+            <CodeComment>pulling {snapshot.household.name} ledger…</CodeComment>
+            <div className="truncate">
+              <span className="text-teal-300">const</span> you = <span className="text-teal-300">await</span>{" "}
+              <span className="text-emerald-300">ledger.net</span>(<span className="text-amber-200">&quot;{me}&quot;</span>);
+            </div>
+            <div className="truncate">
+              you.balance{"  "}={" "}
+              <span className={cn(tone === "positive" && "text-positive", tone === "negative" && "text-negative")}>
+                {formatCents(net, { signed: true })} {net > 0 ? "▲" : net < 0 ? "▼" : ""}
+              </span>
+            </div>
+            {myDebts.slice(0, 2).map((t) => (
+              <div key={t.to} className="truncate">
+                you.<span className="text-emerald-300">pay</span>({nameOf(t.to).toLowerCase()},{" "}
+                <span className="text-negative">{formatCents(t.amountCents)}</span>);
+              </div>
+            ))}
+            {myCredits.slice(0, 2).map((t) => (
+              <div key={t.from} className="truncate">
+                {nameOf(t.from).toLowerCase()}.<span className="text-emerald-300">pay</span>(you,{" "}
+                <span className="text-positive">{formatCents(t.amountCents)}</span>);
+              </div>
+            ))}
+            <div className="truncate">
+              <span className="text-teal-300">return</span> <span className="text-emerald-300">settle</span>(you, roommates);
+              <Cursor />
+            </div>
+          </TerminalPanel>
+        </motion.div>
+      </section>
+
+      <div className="grid items-start gap-4 md:gap-5 lg:grid-cols-[1.25fr_1fr]">
+        <motion.div {...fadeUp(0.12)}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Who pays whom</CardTitle>
+              <CardDescription>Simplified so the household needs fewer payments.</CardDescription>
+              <CardAction>
+                <CardLink href="/balances">Details</CardLink>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <TransferList transfers={ledger.simplified} />
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div {...fadeUp(0.16)} className="lg:row-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Balances</CardTitle>
+              <CardDescription>
+                <span className="text-positive">Green</span> gets money back, <span className="text-negative">red</span> owes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MemberBalanceList detailed />
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div {...fadeUp(0.2)}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent activity</CardTitle>
+              <CardAction>
+                <CardLink href="/activity">See all</CardLink>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              {activity.length === 0 ? (
+                <EmptyState
+                  icon={Receipt}
+                  title="No expenses yet"
+                  action={
+                    <Button onClick={() => openAddExpense()} className="rounded-full px-4 glow-primary">
+                      <Plus /> Add Expense
+                    </Button>
+                  }
+                >
+                  Add your first shared expense — groceries, rent, the Wi-Fi bill.
+                </EmptyState>
+              ) : (
+                <ActivityFeed items={activity} />
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <Analytics />
