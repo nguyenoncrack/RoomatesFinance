@@ -86,6 +86,12 @@ export interface Repository {
   /** Owner-only. Removes another roommate once their balance is settled. History stays. */
   kickMember(householdId: string, userId: string): Promise<void>;
   updateProfile(displayName: string): Promise<void>;
+  /**
+   * Permanently closes your account and signs you out. Your name on past expenses becomes "Deleted user"
+   * and the history stays for your roommates. Fails while you owe or are owed money, or while you're the
+   * only owner of a household that still has other roommates.
+   */
+  deleteOwnAccount(): Promise<void>;
 
   createExpense(householdId: string, input: ExpenseInput): Promise<string>;
   updateExpense(expenseId: string, input: ExpenseInput, expectedUpdatedAt: string): Promise<void>;

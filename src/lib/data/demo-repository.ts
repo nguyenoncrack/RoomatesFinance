@@ -1,3 +1,4 @@
+import { deleteAccountBlocks, describeDeleteAccountBlock } from "@/lib/domain/account";
 import { computeNetBalances } from "@/lib/domain/balances";
 import { CADENCES, anchorDayOf, dueOccurrences, isValidSettleSchedule, nextOccurrence, type SettleSchedule } from "@/lib/domain/recurring";
 import { validateSplits } from "@/lib/domain/splits";
@@ -301,6 +302,32 @@ export class DemoRepository implements Repository {
       if (trimmed.length < 1 || trimmed.length > 60) throw new RepositoryError("Names are 1–60 characters.", "invalid");
       s.profiles.find((p) => p.id === this.me(s))!.displayName = trimmed;
     });
+  }
+
+  /** Same rules as the delete_own_account RPC. In demo mode "deleting" resets the demo data. */
+  deleteOwnAccount(): Promise<void> {
+    return this.mutate((s) => {
+      const me = this.me(s);
+      const contexts = s.members
+        .filter((m) => m.id === me && m.leftAt === null)
+        .map((m) => {
+          const active = s.members.filter((x) => x.householdId === m.householdId && x.leftAt === null);
+          const balances = computeNetBalances(
+            [],
+            s.expenses.filter((e) => e.householdId === m.householdId && e.deletedAt === null),
+            s.settlements.filter((x) => x.householdId === m.householdId),
+          );
+          return {
+            name: s.households.find((h) => h.id === m.householdId)?.name ?? "this household",
+            role: m.role,
+            activeMemberCount: active.length,
+            otherOwnerCount: active.filter((x) => x.role === "owner" && x.id !== me).length,
+            netBalanceCents: balances.get(me) ?? 0,
+          };
+        });
+      const [block] = deleteAccountBlocks(contexts);
+      if (block) throw new RepositoryError(describeDeleteAccountBlock(block), "conflict");
+    }).then(() => this.resetDemo());
   }
 
   // ---- expenses ------------------------------------------------------------------

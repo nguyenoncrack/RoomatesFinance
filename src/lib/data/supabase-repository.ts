@@ -332,6 +332,12 @@ export class SupabaseRepository implements Repository {
     unwrap(await this.db.from("profiles").update({ display_name: displayName.trim() }).eq("id", uid));
   }
 
+  async deleteOwnAccount(): Promise<void> {
+    unwrap(await this.db.rpc("delete_own_account"));
+    // The login no longer exists, so just drop the local session without calling the server.
+    await this.db.auth.signOut({ scope: "local" });
+  }
+
   private async uploadReceipt(householdId: string, file: File): Promise<string> {
     if (file.size > 5 * 1024 * 1024) throw new RepositoryError("Receipts must be under 5 MB.", "invalid");
     const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
