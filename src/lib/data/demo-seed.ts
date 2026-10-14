@@ -1,7 +1,7 @@
 import { format, subDays, subMonths, startOfMonth, addDays } from "date-fns";
 import { computeSplit } from "@/lib/domain/splits";
 import { anchorDayOf, nextOccurrence } from "@/lib/domain/recurring";
-import type { Category, Expense, Household, Member, RecurringExpense, Settlement, SplitMethod } from "@/lib/domain/types";
+import type { AppNotification, Category, Expense, Household, Member, RecurringExpense, Settlement, SplitMethod } from "@/lib/domain/types";
 
 export interface DemoInvitation {
   id: string;
@@ -39,6 +39,8 @@ export interface DemoState {
   version: 1;
   /** Added after v1 shipped; older saved states are upgraded on read. */
   recurring: RecurringExpense[];
+  /** Per-person notifications (userId says who sees it). Also added after v1. */
+  notifications: (AppNotification & { userId: string })[];
   currentUserId: string;
   profiles: { id: string; displayName: string; avatarUrl: string | null }[];
   households: Household[];
@@ -211,6 +213,20 @@ export function createDemoState(now = new Date()): DemoState {
   return {
     version: 1,
     recurring: [repeatFrom("Rent"), repeatFrom("Cox Internet")],
+    // Chris's pending rent payment is waiting for Maya to confirm.
+    notifications: settlements
+      .filter((x) => x.status === "pending")
+      .map((x, i) => ({
+        id: `n-seed-${i}`,
+        householdId: x.householdId,
+        userId: x.paidTo,
+        kind: "settlement_requested" as const,
+        settlementId: x.id,
+        actorId: x.paidBy,
+        amountCents: x.amountCents,
+        createdAt: x.createdAt,
+        readAt: null,
+      })),
     currentUserId: alex,
     profiles,
     households: [

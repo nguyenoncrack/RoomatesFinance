@@ -1,7 +1,15 @@
 import { computeNetBalances } from "@/lib/domain/balances";
 import { CADENCES, anchorDayOf, dueOccurrences, isValidSettleSchedule, nextOccurrence, type SettleSchedule } from "@/lib/domain/recurring";
 import { validateSplits } from "@/lib/domain/splits";
-import { CATEGORIES, PAYMENT_METHODS, SPLIT_METHODS, type HouseholdSnapshot, type Profile } from "@/lib/domain/types";
+import {
+  CATEGORIES,
+  PAYMENT_METHODS,
+  SPLIT_METHODS,
+  type AppNotification,
+  type HouseholdSnapshot,
+  type NotificationKind,
+  type Profile,
+} from "@/lib/domain/types";
 import { createDemoState, type DemoAuditEvent, type DemoState } from "./demo-seed";
 import {
   RepositoryError,
@@ -84,6 +92,7 @@ export class DemoRepository implements Repository {
         if (parsed.version === 1) {
           // Saved before repeats and settle days existed: fill in the new fields.
           parsed.recurring ??= [];
+          parsed.notifications ??= [];
           for (const h of parsed.households) {
             h.settleCadence ??= null;
             h.settleDay ??= null;
@@ -468,6 +477,28 @@ export class DemoRepository implements Repository {
 
   // ---- settlements ---------------------------------------------------------------
 
+  private notify(
+    s: DemoState,
+    householdId: string,
+    userId: string,
+    kind: NotificationKind,
+    settlementId: string,
+    amountCents: number,
+  ) {
+    s.notifications.push({
+      id: uid("n"),
+      householdId,
+      userId,
+      kind,
+      settlementId,
+      actorId: this.me(s),
+      amountCents,
+      createdAt: new Date().toISOString(),
+      readAt: null,
+    });
+  }
+
+  /** Same rules as the record_settlement RPC: the payer's own record always waits for the recipient. */
   recordSettlement(householdId: string, input: SettlementInput): Promise<string> {
     return this.mutate((s) => {
       this.requireMember(s, householdId);
@@ -481,6 +512,20 @@ export class DemoRepository implements Repository {
       }
       if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) throw new RepositoryError("Amount must be greater than zero.", "invalid");
       if (!PAYMENT_METHODS.includes(input.paymentMethod)) throw new RepositoryError("Unknown payment method.", "invalid");
+      const status = me === input.paidTo ? input.status : "pending";
+      if (
+        status === "pending" &&
+        s.settlements.some(
+          (x) =>
+            x.householdId === householdId &&
+            x.paidBy === input.paidBy &&
+            x.paidTo === input.paidTo &&
+            x.amountCents === input.amountCents &&
+            x.status === "pending",
+        )
+      ) {
+        throw new RepositoryError("That payment is already waiting for confirmation.", "conflict");
+      }
       const now = new Date().toISOString();
       const id = uid("s");
       s.settlements.push({
@@ -490,28 +535,72 @@ export class DemoRepository implements Repository {
         paidTo: input.paidTo,
         amountCents: input.amountCents,
         paymentMethod: input.paymentMethod,
-        status: input.status,
+        status,
         note: input.note?.trim() || null,
         createdBy: me,
         createdAt: now,
-        completedAt: input.status === "completed" ? now : null,
+        completedAt: status === "completed" ? now : null,
         clientRequestId: input.clientRequestId,
       });
+      if (status === "pending" && me !== input.paidTo) this.notify(s, householdId, input.paidTo, "settlement_requested", id, input.amountCents);
       return id;
     });
   }
 
-  setSettlementStatus(settlementId: string, status: "completed" | "voided"): Promise<void> {
+  /** Same rules as the set_settlement_status RPC. */
+  setSettlementStatus(settlementId: string, status: "completed" | "rejected" | "voided"): Promise<void> {
     return this.mutate((s) => {
       const x = s.settlements.find((p) => p.id === settlementId);
-      if (!x || !this.activeMember(s, x.householdId, this.me(s))) throw new RepositoryError("Payment not found.", "not_found");
-      if (x.paidBy !== this.me(s) && x.paidTo !== this.me(s)) throw new RepositoryError("Only the payer or recipient can change this payment.", "forbidden");
-      if (status === "completed" && x.status !== "pending") throw new RepositoryError("Only pending payments can be marked completed.", "conflict");
+      const me = this.me(s);
+      if (!x || !this.activeMember(s, x.householdId, me)) throw new RepositoryError("Payment not found.", "not_found");
+      if (x.paidBy !== me && x.paidTo !== me) throw new RepositoryError("Only the payer or recipient can change this payment.", "forbidden");
       if (x.status === status) return;
+      if (status === "completed" || status === "rejected") {
+        if (me !== x.paidTo) throw new RepositoryError("Only the recipient can confirm this payment.", "forbidden");
+        if (x.status !== "pending") throw new RepositoryError(`This payment was already ${x.status}.`, "conflict");
+      } else {
+        if (x.status === "pending" && me !== x.paidBy && x.createdBy !== me) {
+          throw new RepositoryError("The recipient can accept or reject this payment instead.", "forbidden");
+        }
+        if (x.status !== "pending" && x.status !== "completed") throw new RepositoryError(`This payment was already ${x.status}.`, "conflict");
+      }
+      const previous = x.status;
       x.status = status;
       if (status === "completed") x.completedAt = new Date().toISOString();
+      if (status === "completed") this.notify(s, x.householdId, x.paidBy, "settlement_accepted", x.id, x.amountCents);
+      else if (status === "rejected") this.notify(s, x.householdId, x.paidBy, "settlement_rejected", x.id, x.amountCents);
+      else if (previous === "pending" && me !== x.paidTo) this.notify(s, x.householdId, x.paidTo, "settlement_cancelled", x.id, x.amountCents);
+      for (const n of s.notifications) {
+        if (n.settlementId === x.id && n.kind === "settlement_requested") n.readAt ??= new Date().toISOString();
+      }
       this.log(s, { householdId: x.householdId, entityType: "settlement", entityId: x.id, action: status, summary: { amountCents: x.amountCents } });
     });
+  }
+
+  async listNotifications(householdId: string): Promise<AppNotification[]> {
+    const s = this.read();
+    const me = this.me(s);
+    return s.notifications
+      .filter((n) => n.userId === me && n.householdId === householdId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 30)
+      .map(({ userId: _u, ...n }) => n);
+  }
+
+  markNotificationsRead(ids?: string[]): Promise<void> {
+    return this.mutate((s) => {
+      const me = this.me(s);
+      const now = new Date().toISOString();
+      for (const n of s.notifications) {
+        if (n.userId === me && n.readAt === null && (!ids || ids.includes(n.id))) n.readAt = now;
+      }
+    });
+  }
+
+  subscribeNotifications(onChange: () => void): () => void {
+    // Demo changes from any tab already fan out through the same listeners.
+    this.listeners.add(onChange);
+    return () => this.listeners.delete(onChange);
   }
 
   // ---- invitations -----------------------------------------------------------------

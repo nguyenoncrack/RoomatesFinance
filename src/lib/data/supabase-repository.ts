@@ -1,10 +1,12 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type {
+  AppNotification,
   AuditEvent,
   Category,
   Expense,
   HouseholdSnapshot,
   Member,
+  NotificationKind,
   PaymentMethod,
   Profile,
   RecurringExpense,
@@ -76,6 +78,16 @@ interface RecurringRow {
   next_date: string;
   created_by: string;
   created_at: string;
+}
+interface NotificationRow {
+  id: string;
+  household_id: string;
+  kind: NotificationKind;
+  settlement_id: string | null;
+  actor_id: string | null;
+  amount_cents: number | null;
+  created_at: string;
+  read_at: string | null;
 }
 interface AuditRow {
   id: number;
@@ -426,8 +438,51 @@ export class SupabaseRepository implements Repository {
     );
   }
 
-  async setSettlementStatus(settlementId: string, status: "completed" | "voided"): Promise<void> {
+  async setSettlementStatus(settlementId: string, status: "completed" | "rejected" | "voided"): Promise<void> {
     unwrap(await this.db.rpc("set_settlement_status", { p_settlement_id: settlementId, p_status: status }));
+  }
+
+  async listNotifications(householdId: string): Promise<AppNotification[]> {
+    const rows = unwrap<NotificationRow[]>(
+      await this.db
+        .from("notifications")
+        .select("id, household_id, kind, settlement_id, actor_id, amount_cents, created_at, read_at")
+        .eq("household_id", householdId)
+        .order("created_at", { ascending: false })
+        .limit(30),
+    );
+    return rows.map((n) => ({
+      id: n.id,
+      householdId: n.household_id,
+      kind: n.kind,
+      settlementId: n.settlement_id,
+      actorId: n.actor_id,
+      amountCents: n.amount_cents === null ? null : num(n.amount_cents),
+      createdAt: n.created_at,
+      readAt: n.read_at,
+    }));
+  }
+
+  async markNotificationsRead(ids?: string[]): Promise<void> {
+    unwrap(await this.db.rpc("mark_notifications_read", { p_ids: ids ?? null }));
+  }
+
+  /** Realtime feed of the signed-in user's own notification rows (RLS still applies). */
+  subscribeNotifications(onChange: () => void): () => void {
+    let closed = false;
+    let remove: (() => void) | null = null;
+    void this.db.auth.getUser().then(({ data }) => {
+      if (closed || !data.user) return;
+      const channel = this.db
+        .channel(`notifications:${data.user.id}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${data.user.id}` }, onChange)
+        .subscribe();
+      remove = () => void this.db.removeChannel(channel);
+    });
+    return () => {
+      closed = true;
+      remove?.();
+    };
   }
 
   async createInvite(householdId: string): Promise<CreatedInvite> {

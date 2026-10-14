@@ -5,6 +5,7 @@ import type {
   ExpenseSplit,
   HouseholdSnapshot,
   PaymentMethod,
+  AppNotification,
   Profile,
   SplitMethod,
 } from "@/lib/domain/types";
@@ -99,7 +100,18 @@ export interface Repository {
   setSettleSchedule(householdId: string, schedule: SettleSchedule | null): Promise<void>;
 
   recordSettlement(householdId: string, input: SettlementInput): Promise<string>;
-  setSettlementStatus(settlementId: string, status: "completed" | "voided"): Promise<void>;
+  /**
+   * completed (accept) and rejected: recipient only, from pending. voided: the payer cancels their
+   * pending payment, or either side voids a completed one.
+   */
+  setSettlementStatus(settlementId: string, status: "completed" | "rejected" | "voided"): Promise<void>;
+
+  /** Your notifications in this household, newest first. */
+  listNotifications(householdId: string): Promise<AppNotification[]>;
+  /** Marks the given notifications (or all of yours) as read. */
+  markNotificationsRead(ids?: string[]): Promise<void>;
+  /** Calls back when one of your notifications is added or changes. Returns an unsubscribe fn. */
+  subscribeNotifications(onChange: () => void): () => void;
 
   createInvite(householdId: string): Promise<CreatedInvite>;
   previewInvite(token: string): Promise<InvitePreview | null>;

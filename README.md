@@ -7,7 +7,8 @@ Split shared expenses with your roommates, see who owes what, and settle up with
 - **Debt balancing**: each person's net balance is computed in integer cents, then a deterministic greedy pass matches debtors to creditors. You can switch between "Simplified" and "Original debts" (expense by expense).
 - **Repeats**: "Add again" chips reopen a recent expense with the same payer and split, dated today. Any new expense can repeat weekly or monthly; due repeats are added when someone opens the app (missed ones are caught up, at most 12 at a time).
 - **Settle day**: an optional weekly or monthly day set by the owner. On and after it, the dashboard reminds you to settle, but only while you owe or are owed money.
-- **Settle up**: record Venmo, Zelle, cash, or other payments made outside the app, including partial or pending ones. Completed payments update balances immediately.
+- **Settle up**: record Venmo, Zelle, cash, or other payments made outside the app, including partial ones. A payment you send is saved as pending and the recipient is notified to accept or reject it; only the recipient can confirm. Accepting completes it and updates balances, rejecting leaves balances alone, and either way the sender is notified. Payments you receive can be marked completed right away.
+- **Notifications**: a bell in the header lists confirmation requests and responses, delivered live through Supabase Realtime, with Accept/Reject inline. New ones also pop a toast.
 - **History**: search and filter by category, payer, roommate, and date. Expenses can be edited or deleted (soft delete with an audit trail).
 - **Dashboard**: summary cards, who-pays-whom, balances, recent activity, and charts for spending by category, by month, and by roommate.
 
@@ -49,7 +50,7 @@ Once both keys are set, signed-out visitors are redirected to `/login`. New user
 
 ### How the database protects the money
 
-- Clients can only **read** financial tables, and RLS limits reads to households you're an active member of. Every write goes through a `SECURITY DEFINER` RPC: `create_expense`, `update_expense`, `delete_expense`, `record_settlement`, `set_settlement_status`, `create_household`, `create_invitation`, `accept_invitation`, `leave_household`, and `rename_household`. Each RPC checks membership and permissions and validates amounts inside a single transaction.
+- Clients can only **read** financial tables, and RLS limits reads to households you're an active member of. Every write goes through a `SECURITY DEFINER` RPC: `create_expense`, `update_expense`, `delete_expense`, `record_settlement` (a payer's own record is always pending), `set_settlement_status` (only the recipient can accept or reject), `mark_notifications_read`, `create_household`, `create_invitation`, `accept_invitation`, `leave_household`, and `rename_household`. Each RPC checks membership and permissions and validates amounts inside a single transaction.
 - Money is stored as `bigint` cents. A deferred constraint trigger guarantees an expense's splits always sum to its amount. Negative amounts and non-member participants are rejected.
 - Expenses and settlements accept a client-generated `client_request_id`, so double clicks and retries return the original row instead of creating a duplicate. Edits pass the `updated_at` they started from, and if someone else changed the expense in the meantime the edit is rejected rather than silently overwriting.
 - Deleting an expense is a soft delete. Voided payments keep their row. Every change is written to `audit_log` with before and after snapshots. Members who leave keep their history, and you can't leave while your balance is non-zero.
@@ -66,6 +67,7 @@ psql -d roommate_test -f supabase/tests/supabase-stubs.sql
 for f in supabase/migrations/*.sql; do psql -d roommate_test -f "$f"; done
 psql -d roommate_test -f supabase/tests/rpc-smoke.sql        # expected rejections print as ERROR lines
 psql -d roommate_test -f supabase/tests/recurring-smoke.sql  # repeats and settle day
+psql -d roommate_test -f supabase/tests/settlement-confirmation-smoke.sql  # recipient confirmation
 ```
 
 ## Project layout

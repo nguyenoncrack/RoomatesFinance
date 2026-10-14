@@ -50,7 +50,7 @@ export function buildTicker(snapshot: HouseholdSnapshot, viewerId: string | null
     });
   }
   for (const s of snapshot.settlements) {
-    if (s.status === "voided") continue;
+    if (s.status === "voided" || s.status === "rejected") continue;
     entries.push({
       kind: "settlement",
       id: `s:${s.id}`,

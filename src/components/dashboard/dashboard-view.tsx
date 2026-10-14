@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { RepeatChips } from "@/components/expenses/repeat-chips";
 import { Analytics } from "./analytics";
 import { SettleReminder } from "./settle-reminder";
+import { ConfirmPaymentsCard } from "@/components/settlements/confirm-payments-card";
 
 // Soft focus pull, like the section changes on an editorial landing page.
 const fadeUp = (delay = 0) => ({
@@ -66,6 +67,7 @@ export function DashboardView() {
   return (
     <div className="space-y-6 md:space-y-8">
       <SettleReminder />
+      <ConfirmPaymentsCard />
       <section className="grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)] lg:gap-7">
         <motion.div
           {...fadeUp()}

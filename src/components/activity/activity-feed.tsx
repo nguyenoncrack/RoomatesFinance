@@ -1,12 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Ban, CalendarClock, CircleCheck, Clock, HandCoins, Pencil, Repeat, Trash2, Type, UserMinus, UserPlus } from "lucide-react";
+import { Ban, CalendarClock, Clock, HandCoins, Pencil, Repeat, Trash2, Type, UserMinus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { celebrate } from "@/components/shared/celebration";
 import { ExpenseDetailDialog } from "@/components/expenses/expense-detail-dialog";
 import { useAppData } from "@/components/providers/app-data-provider";
+import { ConfirmButtons, settlementRole } from "@/components/settlements/confirm";
 import { CategoryIcon } from "@/components/shared/category";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,25 @@ import { cn } from "@/lib/utils";
 
 function SettlementActions({ s }: { s: Settlement }) {
   const { user, setSettlementStatus } = useAppData();
-  const [busy, setBusy] = useState<"completed" | "voided" | null>(null);
+  const [busy, setBusy] = useState<"voided" | null>(null);
   const [confirmingVoid, setConfirmingVoid] = useState(false);
-  if (!user || (s.paidBy !== user.id && s.paidTo !== user.id) || s.status === "voided" || s.id.startsWith("optimistic-")) return null;
+  if (!user || (s.paidBy !== user.id && s.paidTo !== user.id) || s.status === "voided" || s.status === "rejected" || s.id.startsWith("optimistic-")) return null;
+  const { incoming, awaiting } = settlementRole(s, user.id);
+
+  async function voidIt() {
+    setBusy("voided");
+    try {
+      await setSettlementStatus(s.id, "voided");
+      toast.success(s.status === "pending" ? "Payment cancelled" : "Payment voided", { description: s.status === "pending" ? undefined : "Balances updated." });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't update the payment.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  // The recipient confirms; only they can.
+  if (incoming) return <ConfirmButtons settlement={s} size="xs" className="mt-2" />;
 
   if (confirmingVoid) {
     return (
@@ -29,44 +45,36 @@ function SettlementActions({ s }: { s: Settlement }) {
         <Button size="xs" variant="ghost" onClick={() => setConfirmingVoid(false)} disabled={busy !== null}>
           Keep
         </Button>
-        <Button size="xs" variant="destructive" onClick={() => run("voided")} disabled={busy !== null}>
+        <Button size="xs" variant="destructive" onClick={voidIt} disabled={busy !== null}>
           <Ban /> Void payment
         </Button>
       </div>
     );
   }
 
-  async function run(next: "completed" | "voided") {
-    setBusy(next);
-    try {
-      await setSettlementStatus(s.id, next);
-      toast.success(next === "completed" ? "Marked as completed" : "Payment voided", { description: "Balances updated." });
-      if (next === "completed") celebrate("Payment recorded", { subtitle: formatCents(s.amountCents), priority: 1 });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't update the payment.");
-    } finally {
-      setBusy(null);
-    }
-  }
-
   return (
-    <div className="mt-2 flex gap-2">
-      {s.status === "pending" ? (
-        <Button size="xs" onClick={() => run("completed")} disabled={busy !== null}>
-          <CircleCheck /> Mark completed
-        </Button>
-      ) : null}
+    <div className="mt-2 flex items-center gap-2">
+      {awaiting ? <span className="font-hand text-base text-muted-foreground">Awaiting confirmation</span> : null}
       <Button
         size="xs"
         variant="ghost"
         className="text-muted-foreground"
-        onClick={() => (s.status === "completed" ? setConfirmingVoid(true) : run("voided"))}
+        onClick={() => (s.status === "completed" ? setConfirmingVoid(true) : voidIt())}
         disabled={busy !== null}
       >
         <Ban /> {s.status === "pending" ? "Cancel" : "Void"}
       </Button>
     </div>
   );
+}
+
+/** Badge text for a non-completed settlement, from the viewer's side. */
+function statusLabel(s: Settlement, userId: string | undefined): string {
+  if (s.status === "pending") {
+    if (s.paidTo === userId) return "needs your OK";
+    return "awaiting confirmation";
+  }
+  return s.status;
 }
 
 export function ActivityFeed({
@@ -118,32 +126,41 @@ export function ActivityFeed({
                   <span className="font-hand text-xl leading-none">{formatCents(item.expense.amountCents)}</span>
                 </button>
               ) : item.kind === "settlement" ? (
-                <div className={cn("flex items-start gap-3 rounded-xl px-2 py-2.5", item.settlement.status === "voided" && "opacity-55")}>
+                <div className={cn("flex items-start gap-3 rounded-xl px-2 py-2.5", (item.settlement.status === "voided" || item.settlement.status === "rejected") && "opacity-55")}>
                   <span
                     className={cn(
                       "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-foreground sticker-sm",
-                      item.settlement.status === "pending" ? "bg-butter" : "bg-mint",
+                      item.settlement.status === "pending" ? "bg-butter" : item.settlement.status === "rejected" ? "bg-blush" : "bg-mint",
                     )}
                   >
                     {item.settlement.status === "pending" ? <Clock className="size-[18px]" strokeWidth={2} /> : <HandCoins className="size-[18px]" strokeWidth={2} />}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className={cn("font-hand text-lg leading-tight", item.settlement.status === "voided" && "line-through")}>
+                    <p className={cn("font-hand text-lg leading-tight", (item.settlement.status === "voided" || item.settlement.status === "rejected") && "line-through")}>
                       <b className="font-normal">{name(item.settlement.paidBy)}</b> <span className="text-muted-foreground">paid</span>{" "}
                       <b className="font-normal">{name(item.settlement.paidTo) === "You" ? "you" : name(item.settlement.paidTo)}</b>
                     </p>
                     <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       {PAYMENT_METHOD_LABELS[item.settlement.paymentMethod]} · {relativeTime(item.settlement.createdAt)}
                       {item.settlement.status !== "completed" ? (
-                        <Badge variant="outline" className={cn("h-4 px-1.5 text-[10px]", item.settlement.status === "pending" && "border-amber-400/40 text-amber-700")}>
-                          {item.settlement.status}
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "h-4 px-1.5 text-[10px]",
+                            item.settlement.status === "pending" && "bg-butter",
+                            item.settlement.status === "rejected" && "bg-blush text-negative",
+                          )}
+                        >
+                          {statusLabel(item.settlement, user?.id)}
                         </Badge>
                       ) : null}
                       {item.settlement.note ? <span className="truncate">“{item.settlement.note}”</span> : null}
                     </p>
                     {showActions ? <SettlementActions s={item.settlement} /> : null}
                   </div>
-                  <span className="font-hand text-xl leading-none text-positive">{formatCents(item.settlement.amountCents)}</span>
+                  <span className={cn("font-hand text-xl leading-none", item.settlement.status === "completed" ? "text-positive" : "text-muted-foreground")}>
+                    {formatCents(item.settlement.amountCents)}
+                  </span>
                 </div>
               ) : (
                 <AuditRow item={item} name={name} />

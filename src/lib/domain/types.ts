@@ -19,7 +19,8 @@ export type SplitMethod = (typeof SPLIT_METHODS)[number];
 export const PAYMENT_METHODS = ["venmo", "zelle", "cash", "other"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
-export type SettlementStatus = "pending" | "completed" | "voided";
+/** pending waits for the recipient; only completed counts toward balances. */
+export type SettlementStatus = "pending" | "completed" | "voided" | "rejected";
 export type MemberRole = "owner" | "member";
 
 export interface Profile {
@@ -88,6 +89,20 @@ export interface RecurringExpense {
   nextDate: string;
   createdBy: string;
   createdAt: string;
+}
+
+export type NotificationKind = "settlement_requested" | "settlement_accepted" | "settlement_rejected" | "settlement_cancelled";
+
+/** Something another roommate did that you should know about, kept until you read it. */
+export interface AppNotification {
+  id: string;
+  householdId: string;
+  kind: NotificationKind;
+  settlementId: string | null;
+  actorId: string | null;
+  amountCents: Cents | null;
+  createdAt: string;
+  readAt: string | null;
 }
 
 export interface Settlement {

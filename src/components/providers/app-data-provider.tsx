@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { asDemo, getRepository, type ExpenseInput, type HouseholdSummary, type RecurringInput, type Repository, type SettlementInput } from "@/lib/data";
 import type { SettleSchedule } from "@/lib/domain/recurring";
 import { todayDay } from "@/lib/format";
-import type { Expense, HouseholdSnapshot, Profile, Settlement } from "@/lib/domain/types";
+import type { AppNotification, Expense, HouseholdSnapshot, Profile, Settlement } from "@/lib/domain/types";
 import { buildLedger, type Ledger } from "@/lib/ledger";
 
 const ACTIVE_KEY = "roommate-ai:active-household";
@@ -30,7 +30,10 @@ interface AppData {
   updateExpense: (id: string, input: ExpenseInput, expectedUpdatedAt: string) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   recordSettlement: (input: SettlementInput) => Promise<void>;
-  setSettlementStatus: (id: string, status: "completed" | "voided") => Promise<void>;
+  setSettlementStatus: (id: string, status: "completed" | "rejected" | "voided") => Promise<void>;
+  /** Your notifications for the active household, newest first. */
+  notifications: AppNotification[];
+  markNotificationsRead: (ids?: string[]) => Promise<void>;
   createHousehold: (name: string) => Promise<void>;
   createRecurring: (input: RecurringInput) => Promise<void>;
   stopRecurring: (id: string) => Promise<void>;
@@ -48,6 +51,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
   const [setupSkipped, setSetupSkipped] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const activeRef = useRef<string | null>(null);
   const snapshotRef = useRef<HouseholdSnapshot | null>(null);
   useEffect(() => {
@@ -66,10 +70,21 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           // A failed catch-up shouldn't block the dashboard; the next load retries.
         }
       }
-      if (activeRef.current === householdId) setSnapshot(snap);
+      const notes = await repo.listNotifications(householdId).catch(() => null);
+      if (activeRef.current === householdId) {
+        setSnapshot(snap);
+        if (notes) setNotifications(notes);
+      }
     },
     [repo],
   );
+
+  const refreshNotifications = useCallback(async () => {
+    const householdId = activeRef.current;
+    if (!householdId) return;
+    const notes = await repo.listNotifications(householdId).catch(() => null);
+    if (notes && activeRef.current === householdId) setNotifications(notes);
+  }, [repo]);
 
   const reload = useCallback(async () => {
     try {
@@ -107,6 +122,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (!activeHouseholdId) return;
     return repo.subscribe(activeHouseholdId, () => void reload());
   }, [repo, activeHouseholdId, reload]);
+
+  // Your own notifications arrive on a separate realtime channel (they're per person, not per household).
+  useEffect(() => {
+    if (!activeHouseholdId) return;
+    return repo.subscribeNotifications(() => {
+      void refreshNotifications();
+      void reload();
+    });
+  }, [repo, activeHouseholdId, refreshNotifications, reload]);
 
   const setActiveHousehold = useCallback(
     (id: string) => {
@@ -210,11 +234,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
             paidTo: input.paidTo,
             amountCents: input.amountCents,
             paymentMethod: input.paymentMethod,
-            status: input.status,
+            // Mirrors the server: a payer's own record waits for the recipient to confirm.
+            status: user?.id === input.paidTo ? input.status : "pending",
             note: input.note,
             createdBy: user?.id ?? input.paidBy,
             createdAt: now,
-            completedAt: input.status === "completed" ? now : null,
+            completedAt: user?.id === input.paidTo && input.status === "completed" ? now : null,
           };
           return { ...s, settlements: [temp, ...s.settlements] };
         },
@@ -224,7 +249,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   );
 
   const setSettlementStatus = useCallback(
-    (id: string, next: "completed" | "voided") =>
+    (id: string, next: "completed" | "rejected" | "voided") =>
       optimistic(
         (s) => ({ ...s, settlements: s.settlements.map((x) => (x.id === id ? { ...x, status: next } : x)) }),
         () => repo.setSettlementStatus(id, next),
@@ -266,6 +291,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [optimistic, repo],
   );
 
+  const markNotificationsRead = useCallback(
+    async (ids?: string[]) => {
+      const now = new Date().toISOString();
+      setNotifications((prev) => prev.map((n) => (n.readAt === null && (!ids || ids.includes(n.id)) ? { ...n, readAt: now } : n)));
+      try {
+        await repo.markNotificationsRead(ids);
+      } catch {
+        void refreshNotifications();
+      }
+    },
+    [repo, refreshNotifications],
+  );
+
   const skipSetup = useCallback(() => {
     if (user) window.localStorage.setItem(skipKey(user.id), "1");
     setSetupSkipped(true);
@@ -289,6 +327,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     deleteExpense,
     recordSettlement,
     setSettlementStatus,
+    notifications,
+    markNotificationsRead,
     createHousehold,
     createRecurring,
     stopRecurring,

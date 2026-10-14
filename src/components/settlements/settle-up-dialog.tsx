@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Clock, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { celebrate } from "@/components/shared/celebration";
@@ -101,23 +101,28 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
     const amountError = amountInputError(amountInput);
     if (amountError || amountCents === null) return setError(amountError ?? "Enter an amount greater than $0.");
     setSubmitting(true);
+    // A payment you sent always waits for the recipient to confirm it; only received ones can be completed here.
+    const status = direction === "pay" ? "pending" : completed ? "completed" : "pending";
     try {
       await recordSettlement({
         paidBy: direction === "pay" ? me : other,
         paidTo: direction === "pay" ? other : me,
         amountCents,
         paymentMethod: method,
-        status: completed ? "completed" : "pending",
+        status,
         note: note.trim() || null,
         clientRequestId,
       });
-      toast.success(completed ? "Payment recorded" : "Payment saved as pending", {
-        description:
-          direction === "pay"
-            ? `You paid ${otherName} ${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]}`
-            : `${otherName} paid you ${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]}`,
-      });
-      if (completed) celebrate("Payment recorded", { subtitle: `${formatCents(amountCents)} ${direction === "pay" ? "to" : "from"} ${otherName}`, priority: 1 });
+      if (direction === "pay") {
+        toast.success(`Sent to ${otherName} to confirm`, {
+          description: `${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]} · balances update once ${otherName} accepts`,
+        });
+      } else {
+        toast.success(status === "completed" ? "Payment recorded" : "Payment saved as pending", {
+          description: `${otherName} paid you ${formatCents(amountCents)} via ${PAYMENT_METHOD_LABELS[method]}`,
+        });
+        if (status === "completed") celebrate("Payment recorded", { subtitle: `${formatCents(amountCents)} from ${otherName}`, priority: 1 });
+      }
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't record this payment.");
@@ -236,13 +241,19 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
           <Input id="settle-note" maxLength={280} placeholder="Optional" value={note} onChange={(e) => setNote(e.target.value)} className="h-10" />
         </div>
 
-        <label className="flex items-center justify-between gap-3 rounded-xl border p-3">
-          <span>
-            <span className="block text-sm font-medium">Mark as completed</span>
-            <span className="block text-xs text-muted-foreground">Pending payments don&apos;t change balances until completed.</span>
-          </span>
-          <Switch checked={completed} onCheckedChange={setCompleted} />
-        </label>
+        {direction === "pay" ? (
+          <p className="flex items-center gap-2 rounded-xl bg-butter/60 p-3 font-hand text-lg leading-tight sketch-line">
+            <Clock className="size-4 shrink-0" strokeWidth={2} /> {otherName} confirms it before balances change.
+          </p>
+        ) : (
+          <label className="flex items-center justify-between gap-3 rounded-xl border p-3">
+            <span>
+              <span className="block text-sm font-medium">Mark as completed</span>
+              <span className="block text-xs text-muted-foreground">Pending payments don&apos;t change balances until completed.</span>
+            </span>
+            <Switch checked={completed} onCheckedChange={setCompleted} />
+          </label>
+        )}
 
         {error ? (
           <Alert variant="destructive">
@@ -257,7 +268,7 @@ function SettleUpForm({ prefill, onDone }: { prefill: SettleUpPrefill | null; on
         </Button>
         <Button type="submit" size="lg" disabled={submitting || others.length === 0} className="min-w-32">
           {submitting ? <Loader2 className="animate-spin" /> : null}
-          Record payment
+          {direction === "pay" ? "Send for confirmation" : "Record payment"}
         </Button>
       </div>
     </form>
