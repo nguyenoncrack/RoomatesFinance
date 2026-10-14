@@ -45,7 +45,7 @@ With no environment variables set, the app runs in **demo mode**. It seeds a hou
    This creates the tables, RLS policies, RPC functions, the private `receipts` storage bucket, and the realtime publication entries.
 3. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API). Restart `npm run dev`.
 4. In **Authentication → URL Configuration**, add `http://localhost:4317/auth/callback` (and your production URL) to the redirect allow-list.
-5. Optional: Google sign-in. Enable the Google provider under **Authentication → Providers**, then set `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=true`.
+5. Google sign-in: enable the Google provider under **Authentication → Providers** (add your Google OAuth client ID and secret, and copy Supabase's callback URL into the Google console). The sign-in and sign-up pages show "Continue with Google" automatically whenever Supabase is configured; set `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=false` to hide it.
 
 Once both keys are set, signed-out visitors are redirected to `/login`. New users create a household or open an invite link.
 

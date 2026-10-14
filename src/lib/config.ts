@@ -6,4 +6,5 @@ export const supabaseAnonKey =
 export const isSupabaseConfigured =
   Boolean(supabaseUrl && supabaseAnonKey) && process.env.NEXT_PUBLIC_DEMO_MODE !== "true";
 
-export const isGoogleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
+/** Google sign-in shows whenever Supabase auth is on. Set NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=false to hide it. */
+export const isGoogleAuthEnabled = isSupabaseConfigured && process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH !== "false";
