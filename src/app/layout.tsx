@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { ElfsightChatbot } from "@/components/shared/elfsight-chatbot";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>{children}</TooltipProvider>
         </MotionProvider>
         <Toaster theme="light" position="top-center" richColors={false} />
+        <ElfsightChatbot />
       </body>
     </html>
   );
