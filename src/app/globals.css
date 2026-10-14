@@ -553,6 +553,23 @@
   }
 }
 
+/*
+ * Elfsight pins its launcher bottom-right. On small screens the tab bar and the
+ * floating + Add Expense button occupy that band — lift the widget so both stay tappable.
+ */
+@media (max-width: 767px) {
+  .eapps-widget,
+  .es-window-container,
+  [class*="FloatingButton__FloatingButtonContainer"],
+  [class*="WidgetButton"],
+  [class*="Window__WindowComponent"],
+  iframe[title*="Elfsight" i],
+  iframe[name*="elfsight" i],
+  iframe[id*="eapps"] {
+    bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-ticker,
   .animate-blink,
