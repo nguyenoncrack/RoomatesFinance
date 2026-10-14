@@ -165,7 +165,7 @@ export class SupabaseRepository implements Repository {
         .from("audit_log")
         .select("id, actor_id, entity_type, entity_id, action, before, after, created_at")
         .eq("household_id", householdId)
-        .in("action", ["update", "delete", "voided", "join", "leave", "rename"])
+        .in("action", ["update", "delete", "voided", "join", "leave", "kick", "rename"])
         .order("created_at", { ascending: false })
         .limit(100),
     ]);
@@ -252,6 +252,10 @@ export class SupabaseRepository implements Repository {
 
   async leaveHousehold(householdId: string): Promise<void> {
     unwrap(await this.db.rpc("leave_household", { p_household_id: householdId }));
+  }
+
+  async kickMember(householdId: string, userId: string): Promise<void> {
+    unwrap(await this.db.rpc("kick_member", { p_household_id: householdId, p_user_id: userId }));
   }
 
   async updateProfile(displayName: string): Promise<void> {
