@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
 import { EmptyState } from "@/components/shared/empty-state";
+import { AnimatedMoney } from "@/components/shared/animated-money";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { Button } from "@/components/ui/button";
 import type { Transfer } from "@/lib/domain/balances";
-import { formatCents } from "@/lib/domain/money";
 import { firstName } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +57,7 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
               {compact ? null : <span className="block text-xs text-muted-foreground">{fromMe ? "You pay" : toMe ? "Pays you" : "Pays"}</span>}
             </p>
             <span className={cn("font-mono text-sm font-semibold tabular-nums", fromMe ? "text-negative" : toMe ? "text-positive" : "text-foreground/90")}>
-              {formatCents(t.amountCents)}
+              <AnimatedMoney cents={t.amountCents} />
             </span>
             {fromMe || toMe ? (
               <Button

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { BalanceAmount, balanceLabel } from "@/components/shared/money";
@@ -30,12 +31,14 @@ export function MemberBalanceList({ detailed }: { detailed?: boolean }) {
               </div>
               <div className="mt-1.5 flex items-center gap-2">
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-                  <div
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: pct / 100 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 22 }}
                     className={cn(
-                      "h-full rounded-full transition-[width] duration-700 ease-out",
+                      "h-full w-full origin-left rounded-full",
                       s.netCents > 0 ? "bg-positive shadow-[0_0_10px] shadow-positive/60" : s.netCents < 0 ? "bg-negative shadow-[0_0_10px] shadow-negative/60" : "bg-transparent",
                     )}
-                    style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
@@ -46,7 +49,7 @@ export function MemberBalanceList({ detailed }: { detailed?: boolean }) {
               ) : null}
             </div>
             <div className="w-28 text-right">
-              <BalanceAmount cents={s.netCents} className="block font-mono text-sm" />
+              <BalanceAmount cents={s.netCents} animated className="block font-mono text-sm" />
               <span className="text-[11px] text-muted-foreground">{balanceLabel(s.netCents)}</span>
             </div>
           </li>

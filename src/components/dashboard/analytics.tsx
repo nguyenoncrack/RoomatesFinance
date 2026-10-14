@@ -7,6 +7,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { useAppData } from "@/components/providers/app-data-provider";
 import { CATEGORY_META } from "@/components/shared/category";
 import { EmptyState } from "@/components/shared/empty-state";
+import { TabPill } from "@/components/shared/tab-pill";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { byCategory, contributions, monthlyTrend } from "@/lib/analytics";
@@ -56,16 +57,18 @@ export function Analytics() {
           <p className="text-xs text-muted-foreground">Where the household&apos;s money goes.</p>
         </div>
         <ToggleGroup type="single" size="sm" variant="outline" value={range} onValueChange={(v) => v && setRange(v as "month" | "6m")}>
-          <ToggleGroupItem value="month" className="px-3 text-xs data-[state=on]:bg-primary/15 data-[state=on]:text-accent-foreground">
+          <ToggleGroupItem value="month" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground">
+            {range === "month" ? <TabPill group="analytics-range" /> : null}
             This month
           </ToggleGroupItem>
-          <ToggleGroupItem value="6m" className="px-3 text-xs data-[state=on]:bg-primary/15 data-[state=on]:text-accent-foreground">
+          <ToggleGroupItem value="6m" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground">
+            {range === "6m" ? <TabPill group="analytics-range" /> : null}
             6 months
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
+      <div className="stagger-children grid gap-4 lg:grid-cols-3">
+        <Card lift className="lg:col-span-1">
           <CardHeader>
             <CardTitle>By category</CardTitle>
             <CardDescription className="font-mono">{formatCents(total)} total</CardDescription>
@@ -103,7 +106,7 @@ export function Analytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card lift>
           <CardHeader>
             <CardTitle>Monthly spending</CardTitle>
             <CardDescription>Household total, last 6 months</CardDescription>
@@ -127,7 +130,7 @@ export function Analytics() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card lift>
           <CardHeader>
             <CardTitle>Who paid what</CardTitle>
             <CardDescription>Paid vs. their share</CardDescription>

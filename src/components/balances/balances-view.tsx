@@ -6,6 +6,7 @@ import { useAppData } from "@/components/providers/app-data-provider";
 import { CategoryIcon } from "@/components/shared/category";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TabPill } from "@/components/shared/tab-pill";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { expenseDebts } from "@/lib/domain/balances";
 import { formatCents } from "@/lib/domain/money";
@@ -25,7 +26,7 @@ export function BalancesView() {
   const completedPayments = snapshot.settlements.filter((s) => s.status === "completed");
 
   return (
-    <div className="space-y-5">
+    <div className="stagger-children space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Balances</h2>
       <div className="grid items-start gap-4 lg:grid-cols-[1fr_1.2fr]">
         <Card>
@@ -52,8 +53,14 @@ export function BalancesView() {
           <CardContent>
             <Tabs value={view} onValueChange={setView}>
               <TabsList className="mb-4 w-full">
-                <TabsTrigger value="simplified">Simplified</TabsTrigger>
-                <TabsTrigger value="original">Original debts</TabsTrigger>
+                <TabsTrigger value="simplified" className="relative isolate data-active:bg-transparent dark:data-active:border-transparent dark:data-active:bg-transparent">
+                  {view === "simplified" ? <TabPill group="balances-view" /> : null}
+                  Simplified
+                </TabsTrigger>
+                <TabsTrigger value="original" className="relative isolate data-active:bg-transparent dark:data-active:border-transparent dark:data-active:bg-transparent">
+                  {view === "original" ? <TabPill group="balances-view" /> : null}
+                  Original debts
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="simplified" className="space-y-4">
                 <TransferList transfers={ledger.simplified} />

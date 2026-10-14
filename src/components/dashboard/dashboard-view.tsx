@@ -8,6 +8,7 @@ import { TransferList } from "@/components/balances/transfer-list";
 import { ActivityFeed } from "@/components/activity/activity-feed";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
+import { AnimatedMoney } from "@/components/shared/animated-money";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CodeComment, Cursor, StatTile, TerminalPanel } from "@/components/shared/terminal-panel";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <section className="grid items-center gap-6 lg:grid-cols-[1fr_1.05fr] lg:gap-10">
+      <section className="grid grid-cols-[minmax(0,1fr)] items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
         <motion.div {...fadeUp()} className="space-y-5">
           <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground md:inline-flex">
             <span className="size-1.5 rounded-full bg-primary shadow-[0_0_8px] shadow-primary" />
@@ -69,11 +70,15 @@ export function DashboardView() {
             <br />
             {net < 0 ? (
               <>
-                you owe <span className="text-negative text-glow">{formatCents(-net)}</span>.
+                you owe <span className="text-negative text-glow">
+                  <AnimatedMoney cents={-net} />
+                </span>.
               </>
             ) : net > 0 ? (
               <>
-                you&apos;re up <span className="text-gradient">{formatCents(net)}</span>.
+                you&apos;re up <span className="text-gradient">
+                  <AnimatedMoney cents={net} flash={false} />
+                </span>.
               </>
             ) : (
               <>
@@ -89,7 +94,7 @@ export function DashboardView() {
                 : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => openAddExpense()} className="h-11 rounded-xl px-5 text-[15px] font-semibold glow-primary">
+            <Button size="lg" onClick={() => openAddExpense()} className="h-11 rounded-xl px-5 text-[15px] font-semibold glow-primary glow-pulse">
               <Plus strokeWidth={2.5} /> Add Expense
             </Button>
             <Button size="lg" variant="outline" onClick={() => openSettleUp()} className="h-11 rounded-xl border-white/10 bg-white/[0.03] px-5 text-[15px]">
@@ -105,10 +110,10 @@ export function DashboardView() {
             className={cn(tone === "negative" && "border-negative/20 glow-negative")}
             footer={
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <StatTile label="Your balance" value={formatCents(net, { signed: true })} tone={tone} />
-                <StatTile label="You owe" value={formatCents(iOwe)} tone={iOwe ? "negative" : "neutral"} />
-                <StatTile label="Owed to you" value={formatCents(owedToMe)} tone={owedToMe ? "positive" : "neutral"} />
-                <StatTile label="This month" value={formatCents(monthTotal)} hint={`${monthCount} expense${monthCount === 1 ? "" : "s"}`} />
+                <StatTile label="Your balance" value={<AnimatedMoney cents={net} signed />} tone={tone} />
+                <StatTile label="You owe" value={<AnimatedMoney cents={iOwe} />} tone={iOwe ? "negative" : "neutral"} />
+                <StatTile label="Owed to you" value={<AnimatedMoney cents={owedToMe} />} tone={owedToMe ? "positive" : "neutral"} />
+                <StatTile label="This month" value={<AnimatedMoney cents={monthTotal} />} hint={`${monthCount} expense${monthCount === 1 ? "" : "s"}`} />
               </div>
             }
           >
@@ -143,9 +148,9 @@ export function DashboardView() {
         </motion.div>
       </section>
 
-      <div className="grid items-start gap-4 md:gap-5 lg:grid-cols-[1.25fr_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <motion.div {...fadeUp(0.12)}>
-          <Card>
+          <Card lift>
             <CardHeader>
               <CardTitle>Who pays whom</CardTitle>
               <CardDescription>Simplified so the household needs fewer payments.</CardDescription>
@@ -159,7 +164,7 @@ export function DashboardView() {
           </Card>
         </motion.div>
         <motion.div {...fadeUp(0.16)} className="lg:row-span-2">
-          <Card>
+          <Card lift>
             <CardHeader>
               <CardTitle>Balances</CardTitle>
               <CardDescription>
@@ -172,7 +177,7 @@ export function DashboardView() {
           </Card>
         </motion.div>
         <motion.div {...fadeUp(0.2)}>
-          <Card>
+          <Card lift>
             <CardHeader>
               <CardTitle>Recent activity</CardTitle>
               <CardAction>
