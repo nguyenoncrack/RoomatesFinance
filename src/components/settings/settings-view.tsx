@@ -54,7 +54,7 @@ function ProfileCard() {
   }
 
   return (
-    <Card tone="blush" doodle="sparkle">
+    <Card tone="blush" doodle="card">
       <CardHeader>
         <CardTitle>Your profile</CardTitle>
       </CardHeader>

@@ -14,9 +14,19 @@ const INK = {
   strokeLinejoin: "round",
 } as const satisfies SVGProps<SVGPathElement>;
 
-function Frame({ children, className, label }: { children: ReactNode; className?: string; label?: string }) {
+function Frame({
+  children,
+  className,
+  label,
+  viewBox = "0 0 64 64",
+}: {
+  children: ReactNode;
+  className?: string;
+  label?: string;
+  viewBox?: string;
+}) {
   return (
-    <svg viewBox="0 0 64 64" className={cn("size-14 overflow-visible text-foreground", className)} aria-hidden={label ? undefined : true} role={label ? "img" : undefined} aria-label={label}>
+    <svg viewBox={viewBox} className={cn("size-14 overflow-visible text-foreground", className)} aria-hidden={label ? undefined : true} role={label ? "img" : undefined} aria-label={label}>
       {children}
     </svg>
   );
@@ -169,6 +179,103 @@ export function SquiggleDoodle({ className }: { className?: string }) {
   );
 }
 
+/** "$" drawn as a thick ink stroke under a white one, so it reads as an outlined glyph. */
+function DollarGlyph({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  const d =
+    "M4.2 -5.6c-1-1.8-3-2.6-4.8-2.4-2.4.3-3.8 1.9-3.4 3.8.5 2.2 3.3 2.6 5.3 3.2 2.2.7 3.4 2.4 2.7 4.3-.8 2-3.6 2.8-6 1.8-1.2-.5-2-1.3-2.4-2.2M0 -10.2v2.4M0 7.8v2.4";
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+      <path d={d} fill="none" stroke="currentColor" strokeWidth={5.2} strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="white" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** A banknote: light face, darker panel with notched corners, a "$" medallion and two dots. */
+export function BillDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={cn("h-14 w-24", className)} viewBox="0 0 96 56">
+      <rect {...INK} x="3" y="5" width="90" height="46" rx="4" fill="var(--money-light)" />
+      <path {...INK} d="M15 12H81A6 6 0 0 0 87 18V38A6 6 0 0 0 81 44H15A6 6 0 0 0 9 38V18A6 6 0 0 0 15 12Z" fill="var(--money-dark)" strokeWidth={2} />
+      <circle {...INK} cx="48" cy="28" r="12.5" fill="var(--money-light)" strokeWidth={2.2} />
+      <DollarGlyph x={48} y={28} scale={0.95} />
+      <circle {...INK} cx="25" cy="28" r="3.6" fill="var(--money-light)" strokeWidth={2} />
+      <circle {...INK} cx="71" cy="28" r="3.6" fill="var(--money-light)" strokeWidth={2} />
+      <path d="M8 3.5h5M90 11v3" stroke="white" strokeWidth={2.4} strokeLinecap="round" />
+    </Frame>
+  );
+}
+
+export function DollarCoinDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={className}>
+      <circle {...INK} cx="33" cy="34" r="24" fill="currentColor" />
+      <circle {...INK} cx="31" cy="32" r="24" fill="var(--pop-yellow)" />
+      <circle {...INK} cx="31" cy="32" r="18" strokeWidth={1.8} strokeDasharray="2 5" />
+      <DollarGlyph x={31} y={32} scale={1.25} />
+      <path d="M16 22c2-4 6-7 10-8" stroke="white" strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.8} />
+    </Frame>
+  );
+}
+
+export function PiggyDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={className} viewBox="0 0 72 64">
+      <circle {...INK} cx="42" cy="9" r="7" fill="var(--pop-yellow)" strokeWidth={2} />
+      <path d="M42 5.5v7" {...INK} strokeWidth={1.8} />
+      <path {...INK} d="M30 24l-2-9 9 6" fill="var(--pop-pink)" />
+      <path {...INK} d="M9 40c-5 0-6-6-2-7" strokeWidth={2} />
+      <ellipse {...INK} cx="34" cy="38" rx="24" ry="17" fill="var(--pop-pink)" />
+      <path {...INK} d="M22 52v6h6v-4M40 54v4h6v-6" fill="var(--pop-pink)" />
+      <ellipse {...INK} cx="58" cy="37" rx="6" ry="7" fill="var(--blush)" />
+      <path d="M56.5 35v3M60 35v3" {...INK} strokeWidth={2} />
+      <circle cx="45" cy="31" r="2.2" fill="currentColor" />
+      <path d="M28 25h12" {...INK} strokeWidth={2.6} />
+      <path d="M17 33c2-5 6-8 11-9" stroke="white" strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.7} />
+    </Frame>
+  );
+}
+
+export function WalletDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={className}>
+      <g transform="rotate(-10 32 18)">
+        <rect {...INK} x="14" y="6" width="34" height="20" rx="2.5" fill="var(--money-light)" strokeWidth={2} />
+        <circle {...INK} cx="31" cy="16" r="5" fill="var(--money-dark)" strokeWidth={1.8} />
+      </g>
+      <rect {...INK} x="6" y="20" width="50" height="36" rx="7" fill="var(--pop-orange)" />
+      <path {...INK} d="M6 30h50" strokeWidth={2} opacity={0.5} />
+      <path {...INK} d="M42 33h16v14H42a7 7 0 0 1 0-14z" fill="var(--tangerine)" />
+      <circle cx="43" cy="40" r="2.6" fill="currentColor" />
+    </Frame>
+  );
+}
+
+export function CardDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={cn("h-12 w-[4.5rem]", className)} viewBox="0 0 72 48">
+      <rect {...INK} x="4" y="4" width="64" height="40" rx="6" fill="var(--pop-blue)" />
+      <path d="M4 14h64" stroke="currentColor" strokeWidth={6} />
+      <rect {...INK} x="11" y="21" width="12" height="9" rx="2" fill="var(--pop-yellow)" strokeWidth={2} />
+      <path {...INK} d="M11 37h10M26 37h8M39 37h8" strokeWidth={2} />
+      <circle {...INK} cx="52" cy="26" r="5" fill="var(--pop-pink)" strokeWidth={1.8} />
+      <circle {...INK} cx="58" cy="26" r="5" fill="var(--pop-orange)" strokeWidth={1.8} opacity={0.9} />
+    </Frame>
+  );
+}
+
+export function MoneyBagDoodle({ className }: { className?: string }) {
+  return (
+    <Frame className={className}>
+      <path {...INK} d="M24 14l-4-8c4 2 8 2 12 0s8-2 12 0l-4 8" fill="var(--tangerine)" />
+      <path {...INK} d="M24 16c-12 8-18 18-18 28 0 9 8 14 26 14s26-5 26-14c0-10-6-20-18-28z" fill="var(--butter)" />
+      <path {...INK} d="M22 16h20" strokeWidth={3.4} />
+      <DollarGlyph x={32} y={40} scale={1.2} />
+      <path d="M14 38c1-5 4-10 8-13" stroke="white" strokeWidth={3} strokeLinecap="round" fill="none" opacity={0.8} />
+    </Frame>
+  );
+}
+
 export const DOODLES = {
   coins: CoinsDoodle,
   house: HouseDoodle,
@@ -181,6 +288,12 @@ export const DOODLES = {
   clock: ClockDoodle,
   plant: PlantDoodle,
   sparkle: SparkleDoodle,
+  bill: BillDoodle,
+  dollar: DollarCoinDoodle,
+  piggy: PiggyDoodle,
+  wallet: WalletDoodle,
+  card: CardDoodle,
+  moneybag: MoneyBagDoodle,
 } as const;
 
 export type DoodleName = keyof typeof DOODLES;

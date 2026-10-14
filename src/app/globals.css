@@ -40,6 +40,8 @@
   --color-pop-blue: var(--pop-blue);
   --color-pop-yellow: var(--pop-yellow);
   --color-pop-purple: var(--pop-purple);
+  --color-money-light: var(--money-light);
+  --color-money-dark: var(--money-dark);
   --color-night-foreground: var(--night-foreground);
   --color-positive: var(--positive);
   --color-positive-soft: var(--positive-soft);
@@ -114,6 +116,9 @@
   --pop-blue: oklch(0.7 0.12 245);
   --pop-yellow: oklch(0.87 0.15 95);
   --pop-purple: oklch(0.66 0.13 300);
+  /* Banknote greens, light face and darker inner panel. */
+  --money-light: oklch(0.79 0.12 158);
+  --money-dark: oklch(0.62 0.12 158);
   --chart-1: var(--pop-green);
   --chart-2: var(--pop-pink);
   --chart-3: var(--pop-yellow);

@@ -38,7 +38,7 @@ export function BalancesView() {
           </CardContent>
         </Card>
 
-        <Card tone="sky" doodle="arrows">
+        <Card tone="sky" doodle="bill">
           <CardHeader>
             <CardTitle>How to settle</CardTitle>
             <CardDescription>
@@ -107,7 +107,7 @@ export function BalancesView() {
         </Card>
       </div>
 
-      <Card tone="butter" doodle="people">
+      <Card tone="butter" doodle="piggy">
         <CardHeader>
           <CardTitle>Your position with each roommate</CardTitle>
         </CardHeader>

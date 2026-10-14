@@ -11,6 +11,8 @@ import { useDialogs } from "@/components/providers/dialogs-provider";
 import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
+import { MoneyScatter } from "@/components/shared/money-scatter";
+import { PiggyDoodle, BillDoodle } from "@/components/shared/doodles";
 import { ScrambleText } from "@/components/shared/scramble-text";
 import { BalanceAmount } from "@/components/shared/money";
 import { Badge } from "@/components/ui/badge";
@@ -168,7 +170,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-auto space-y-3">{ready ? <MyBalancePill /> : null}</div>
+        <div className="mt-auto space-y-3">
+          <div aria-hidden className="relative mx-auto h-24 w-40">
+            <span className="absolute top-0 left-2 block h-10 w-16 animate-bob [animation-delay:0.6s]">
+              <BillDoodle className="size-full -rotate-12 drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
+            </span>
+            <span className="absolute right-3 bottom-0 block h-16 w-20 animate-bob">
+              <PiggyDoodle className="size-full drop-shadow-[2px_2px_0_oklch(0_0_0/60%)]" />
+            </span>
+          </div>
+          {ready ? <MyBalancePill /> : null}
+        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -207,7 +219,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           {ready ? <ActivityTicker className="border-b-0" /> : null}
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-32 md:px-8 md:pt-8 md:pb-12">
+        {inApp ? <MoneyScatter /> : null}
+        <main className="relative z-[1] mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-32 md:px-8 md:pt-8 md:pb-12">
           {status === "loading" ? <ShellLoading /> : null}
           {status === "error" ? <ShellError message={error} onRetry={reload} /> : null}
           {status === "no-households" && !setupSkipped ? <HouseholdSetupCard /> : null}

@@ -69,7 +69,16 @@ function SettlementActions({ s }: { s: Settlement }) {
   );
 }
 
-export function ActivityFeed({ items, showActions = false }: { items: ActivityItem[]; showActions?: boolean }) {
+export function ActivityFeed({
+  items,
+  showActions = false,
+  twoColumn = false,
+}: {
+  items: ActivityItem[];
+  showActions?: boolean;
+  /** Flow items into two columns on wide screens (dashboard's full-width card). */
+  twoColumn?: boolean;
+}) {
   const { ledger, user } = useAppData();
   const [viewing, setViewing] = useState<Expense | null>(null);
   if (!ledger) return null;
@@ -78,7 +87,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
 
   return (
     <>
-      <ul className="space-y-1">
+      <ul className={cn("space-y-1", twoColumn && "lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-1 lg:space-y-0")}>
         <AnimatePresence initial={false}>
           {items.map((item) => (
             <motion.li

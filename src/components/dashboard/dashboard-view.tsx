@@ -13,7 +13,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PencilRing } from "@/components/shared/pencil-ring";
 import { ScrambleText } from "@/components/shared/scramble-text";
 import { NightPanel, StatRow, StatTile } from "@/components/shared/terminal-panel";
-import { Mascot, SparkleDoodle } from "@/components/shared/doodles";
+import { BillDoodle, DollarCoinDoodle, Mascot, SparkleDoodle } from "@/components/shared/doodles";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildActivity } from "@/lib/activity";
@@ -75,6 +75,15 @@ export function DashboardView() {
             mood={tone === "negative" ? "worried" : tone === "positive" ? "proud" : "happy"}
             className="pointer-events-none absolute -right-3 -bottom-3 h-36 animate-bob sm:h-44 lg:h-48"
           />
+          <span aria-hidden className="pointer-events-none absolute top-7 right-28 hidden h-11 w-[4.5rem] animate-bob [animation-delay:0.8s] sm:block">
+            <BillDoodle className="size-full rotate-[-14deg] drop-shadow-[2px_2px_0_var(--foreground)]" />
+          </span>
+          <span aria-hidden className="pointer-events-none absolute top-24 right-6 h-10 w-16 animate-bob [animation-delay:1.6s]">
+            <BillDoodle className="size-full rotate-[18deg] drop-shadow-[2px_2px_0_var(--foreground)]" />
+          </span>
+          <span aria-hidden className="pointer-events-none absolute right-44 bottom-6 hidden size-9 animate-bob [animation-delay:0.3s] lg:block">
+            <DollarCoinDoodle className="size-full" />
+          </span>
           <SparkleDoodle className="pointer-events-none absolute top-5 right-6 size-7 animate-wiggle [--wiggle-amount:18deg]" color="var(--pop-pink)" />
           <SparkleDoodle className="pointer-events-none absolute top-16 right-24 size-4 animate-wiggle [--wiggle-amount:-22deg] [--wiggle-duration:1.8s]" color="var(--card)" />
           <div className="relative space-y-5 pr-24 sm:pr-36">
@@ -143,9 +152,9 @@ export function DashboardView() {
         </motion.div>
       </section>
 
-      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <motion.div {...fadeUp(0.12)}>
-          <Card lift tone="sky" doodle="arrows">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-stretch gap-5 lg:grid-cols-2">
+        <motion.div {...fadeUp(0.12)} className="flex">
+          <Card lift tone="sky" doodle="bill" className="flex-1">
             <CardHeader>
               <CardTitle>Who pays whom</CardTitle>
               <CardAction>
@@ -157,8 +166,8 @@ export function DashboardView() {
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div {...fadeUp(0.16)} className="lg:row-span-2">
-          <Card lift tone="lilac" doodle="scale">
+        <motion.div {...fadeUp(0.16)} className="flex">
+          <Card lift tone="lilac" doodle="scale" className="flex-1">
             <CardHeader>
               <CardTitle>Balances</CardTitle>
             </CardHeader>
@@ -167,8 +176,8 @@ export function DashboardView() {
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div {...fadeUp(0.2)}>
-          <Card lift doodle="receipt">
+        <motion.div {...fadeUp(0.2)} className="lg:col-span-2">
+          <Card lift doodle="wallet">
             <CardHeader>
               <CardTitle>Recent activity</CardTitle>
               <CardAction>
@@ -187,7 +196,7 @@ export function DashboardView() {
                   }
                 />
               ) : (
-                <ActivityFeed items={activity} />
+                <ActivityFeed items={activity} twoColumn />
               )}
             </CardContent>
           </Card>

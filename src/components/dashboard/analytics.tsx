@@ -8,7 +8,7 @@ import { useAppData } from "@/components/providers/app-data-provider";
 import { CATEGORY_META } from "@/components/shared/category";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TabPill } from "@/components/shared/tab-pill";
-import { SparkleDoodle } from "@/components/shared/doodles";
+import { MoneyBagDoodle } from "@/components/shared/doodles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { byCategory, contributions, monthlyTrend } from "@/lib/analytics";
@@ -56,7 +56,7 @@ export function Analytics() {
         <div>
           <h2 className="flex items-center gap-2 font-display text-3xl leading-none">
             Spending insights
-            <SparkleDoodle className="size-6 animate-wiggle [--wiggle-amount:16deg]" color="var(--pop-yellow)" />
+            <MoneyBagDoodle className="size-9 animate-wiggle [--wiggle-amount:10deg]" />
           </h2>
         </div>
         <ToggleGroup type="single" size="sm" variant="outline" value={range} onValueChange={(v) => v && setRange(v as "month" | "6m")}>
@@ -107,7 +107,7 @@ export function Analytics() {
           </CardContent>
         </Card>
 
-        <Card lift tone="butter" doodle="chart">
+        <Card lift tone="butter" doodle="moneybag">
           <CardHeader>
             <CardTitle>Monthly spending</CardTitle>
           </CardHeader>
