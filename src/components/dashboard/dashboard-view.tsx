@@ -123,7 +123,7 @@ export function DashboardView() {
               <span className="text-emerald-300">ledger.net</span>(<span className="text-amber-200">&quot;{me}&quot;</span>);
             </div>
             <div className="truncate">
-              you.balance{"  "}={ " "}
+              you.balance{"  "}={" "}
               <span className={cn(tone === "positive" && "text-positive", tone === "negative" && "text-negative")}>
                 {formatCents(net, { signed: true })} {net > 0 ? "▲" : net < 0 ? "▼" : ""}
               </span>
