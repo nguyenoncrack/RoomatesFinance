@@ -12,6 +12,7 @@ import { CelebrationLayer, celebrate } from "@/components/shared/celebration";
 import { Logo } from "@/components/shared/logo";
 import { MemberAvatar } from "@/components/shared/member-avatar";
 import { MoneyScatter } from "@/components/shared/money-scatter";
+import { MusicToggle } from "@/components/shared/music-toggle";
 import { BillDoodle, DOODLES, DollarCoinDoodle, Mascot, PiggyDoodle, SparkleDoodle, type DoodleName, PeopleDoodle, SquiggleDoodle } from "@/components/shared/doodles";
 import { ScrambleText } from "@/components/shared/scramble-text";
 import { BalanceAmount } from "@/components/shared/money";
@@ -255,6 +256,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <PageTitle key={current?.href} label={current?.label ?? "Roommate Finance"} doodle={current?.doodle} />
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}
+              {inApp ? <MusicToggle /> : null}
               {ready ? (
                 <>
                   <Button variant="mint" size="sm" doodle="dollar" onClick={() => openSettleUp()} className="sm:hidden">
