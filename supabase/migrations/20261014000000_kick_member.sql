@@ -42,3 +42,5 @@ $$;
 
 revoke execute on function public.kick_member(uuid, uuid) from public, anon;
 grant execute on function public.kick_member(uuid, uuid) to authenticated;
+
+notify pgrst, 'reload schema';
