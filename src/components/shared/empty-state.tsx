@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { SparkleDoodle, SquiggleDoodle } from "@/components/shared/doodles";
 import { cn } from "@/lib/utils";
 
-const SPARKLES = [
-  { left: "8%", top: "18%", delay: 0 },
-  { left: "86%", top: "8%", delay: 0.8 },
-  { left: "80%", top: "62%", delay: 1.6 },
-];
+const BLOB_FILL = {
+  primary: "var(--pop-yellow)",
+  positive: "var(--pop-green)",
+  neutral: "var(--lilac)",
+} as const;
 
 export function EmptyState({
   icon: Icon,
@@ -27,43 +28,35 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center gap-2 rounded-xl border border-dashed border-foreground/10 bg-foreground/[0.015] px-4 py-8 text-center",
-        className,
-      )}
-    >
-      <div className="relative mb-2 flex h-16 w-24 items-start justify-center" aria-hidden>
-        {SPARKLES.map((sp, i) => (
-          <motion.span
-            key={i}
-            className={cn("absolute size-1 rounded-full", tone === "neutral" ? "bg-foreground/40" : "bg-primary")}
-            style={{ left: sp.left, top: sp.top }}
-            animate={{ opacity: [0, 1, 0], scale: [0.4, 1.2, 0.4] }}
-            transition={{ duration: 2.4, repeat: Infinity, delay: sp.delay, ease: "easeInOut" }}
-          />
-        ))}
-        <motion.span
-          animate={{ y: [0, -5, 0], rotate: [0, -3, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-          className={cn(
-            "relative flex size-12 items-center justify-center rounded-2xl ring-1",
-            tone === "positive" && "bg-positive-soft text-positive ring-positive/25 shadow-[0_0_24px_-6px] shadow-positive/50",
-            tone === "primary" && "bg-primary/10 text-accent-foreground ring-primary/25",
-            tone === "neutral" && "bg-foreground/5 text-muted-foreground ring-foreground/10",
-          )}
+    <div className={cn("flex flex-col items-center gap-2 rounded-2xl px-4 py-7 text-center", className)}>
+      <div className="relative mb-2 h-24 w-32" aria-hidden>
+        <SparkleDoodle className="absolute top-1 left-1 size-5 animate-wiggle [--wiggle-amount:20deg]" color="var(--pop-pink)" />
+        <SparkleDoodle className="absolute top-8 right-0 size-4 animate-wiggle [--wiggle-amount:-24deg] [--wiggle-duration:2s]" color="var(--pop-blue)" />
+        <motion.div
+          animate={{ y: [0, -5, 0], rotate: [-4, 2, -4] }}
+          transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-x-0 top-2 mx-auto size-[4.5rem]"
         >
-          <Icon className="size-5" />
-        </motion.span>
-        <motion.span
-          className="absolute bottom-0 h-1.5 w-10 rounded-full bg-foreground/10 blur-[2px]"
-          animate={{ scaleX: [1, 0.75, 1], opacity: [0.7, 0.4, 0.7] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-        />
+          <svg viewBox="0 0 80 80" className="absolute inset-0 size-full overflow-visible text-foreground">
+            <path
+              d="M42 4c14 1 30 10 33 26 3 15-5 31-20 38-14 7-33 4-43-8C2 48 2 30 11 18 18 8 29 3 42 4z"
+              fill="currentColor"
+              transform="translate(3 3)"
+            />
+            <path
+              d="M42 4c14 1 30 10 33 26 3 15-5 31-20 38-14 7-33 4-43-8C2 48 2 30 11 18 18 8 29 3 42 4z"
+              fill={BLOB_FILL[tone]}
+              stroke="currentColor"
+              strokeWidth={2.4}
+            />
+          </svg>
+          <Icon className="relative m-auto mt-[1.35rem] size-7 text-foreground" strokeWidth={2} />
+        </motion.div>
+        <SquiggleDoodle className="absolute bottom-0 left-1/2 w-16 -translate-x-1/2 opacity-40" />
       </div>
-      <p className="font-display text-base font-medium">{title}</p>
-      {children ? <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">{children}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
+      <p className="font-display text-2xl leading-tight">{title}</p>
+      {children ? <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">{children}</p> : null}
+      {action ? <div className="mt-3">{action}</div> : null}
     </div>
   );
 }

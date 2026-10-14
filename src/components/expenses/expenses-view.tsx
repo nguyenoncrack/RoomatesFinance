@@ -2,7 +2,8 @@
 
 import { format, parseISO, startOfMonth, subDays } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { Paperclip, Plus, Search, SearchX, X } from "lucide-react";
+import { Paperclip, Receipt, Search, SearchX, X } from "lucide-react";
+import { EmptyState } from "@/components/shared/empty-state";
 import { useMemo, useState } from "react";
 import { useAppData } from "@/components/providers/app-data-provider";
 import { useDialogs } from "@/components/providers/dialogs-provider";
@@ -93,7 +94,7 @@ export function ExpensesView() {
         </div>
       </div>
 
-      <Card className="py-3">
+      <Card tone="sky" className="py-3">
         <CardContent className="space-y-3 px-3">
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -173,25 +174,34 @@ export function ExpensesView() {
       </Card>
 
       {snapshot.expenses.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <p className="text-base font-semibold">No expenses yet</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
+        <Card tone="butter">
+          <CardContent>
+            <EmptyState
+              icon={Receipt}
+              title="No expenses yet"
+              action={
+                <Button mark="star" onClick={() => openAddExpense()}>
+                  Add the first expense
+                </Button>
+              }
+            >
               When someone pays for something shared, log it here and we&apos;ll keep everyone&apos;s balance up to date.
-            </p>
-            <Button onClick={() => openAddExpense()}>
-              <Plus /> Add the first expense
-            </Button>
+            </EmptyState>
           </CardContent>
         </Card>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <SearchX className="size-6 text-muted-foreground" />
-            <p className="text-sm font-medium">No expenses match those filters</p>
-            <Button variant="outline" size="sm" onClick={clear}>
-              Clear filters
-            </Button>
+        <Card tone="lilac">
+          <CardContent>
+            <EmptyState
+              icon={SearchX}
+              tone="neutral"
+              title="No expenses match those filters"
+              action={
+                <Button variant="outline" size="sm" mark="cross" onClick={clear} className="bg-card">
+                  Clear filters
+                </Button>
+              }
+            />
           </CardContent>
         </Card>
       ) : (
@@ -199,7 +209,7 @@ export function ExpensesView() {
           {groups.map(([month, items]) => (
             <section key={month}>
               <div className="mb-2 flex items-baseline justify-between px-1">
-                <h3 className="text-sm font-semibold">{format(parseISO(`${month}-01`), "MMMM yyyy")}</h3>
+                <h3 className="font-display text-2xl leading-none">{format(parseISO(`${month}-01`), "MMMM yyyy")}</h3>
                 <span className="text-xs text-muted-foreground tabular-nums">{formatCents(items.reduce((a, e) => a + e.amountCents, 0))}</span>
               </div>
               <Card className="py-1">

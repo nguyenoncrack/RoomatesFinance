@@ -40,9 +40,9 @@ export function TransferList({ transfers, emptyText, compact }: { transfers: Tra
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04, duration: 0.25 }}
             className={cn(
-              "flex items-center gap-3 rounded-xl border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-3 transition-colors hover:border-foreground/[0.12] hover:bg-foreground/[0.04]",
-              fromMe && "border-negative/25 bg-negative-soft hover:border-negative/40 hover:bg-negative-soft",
-              toMe && "border-positive/25 bg-positive-soft hover:border-positive/40 hover:bg-positive-soft",
+              "flex items-center gap-3 rounded-2xl bg-card px-3 py-3 transition-transform sticker-sm hover:-translate-y-px",
+              fromMe && "bg-blush",
+              toMe && "bg-mint",
             )}
           >
             <div className="flex items-center -space-x-1.5">

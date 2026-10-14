@@ -52,8 +52,8 @@ export function PencilRing({
           cx={C}
           cy={C}
           r={R}
-          className="pencil-stroke"
-          strokeWidth={1.4}
+          className="pencil-stroke text-pop-yellow"
+          strokeWidth={3}
           transform={`rotate(-90 ${C} ${C})`}
           initial={reduce ? false : { pathLength: 0 }}
           animate={{ pathLength: p }}
@@ -62,7 +62,7 @@ export function PencilRing({
         {p > 0 ? (
           <motion.g initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.4 }}>
             <circle cx={tip.x} cy={tip.y} r={9} className="pencil-stroke opacity-40" strokeWidth={0.6} />
-            <circle cx={tip.x} cy={tip.y} r={2.6} fill="currentColor" />
+            <circle cx={tip.x} cy={tip.y} r={5} fill="var(--pop-pink)" stroke="currentColor" strokeWidth={1.5} />
           </motion.g>
         ) : null}
       </svg>

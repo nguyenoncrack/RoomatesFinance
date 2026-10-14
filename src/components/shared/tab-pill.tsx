@@ -11,7 +11,7 @@ export function TabPill({ group, className }: { group: string; className?: strin
   return (
     <motion.span
       layoutId={`tab-pill-${group}`}
-      className={cn("absolute inset-0 -z-10 rounded-[inherit] bg-primary/15 ring-1 ring-primary/35", className)}
+      className={cn("absolute inset-0 -z-10 rounded-[inherit] border-[1.5px] border-foreground bg-pop-yellow shadow-[2px_2px_0_0_var(--foreground)]", className)}
       transition={{ type: "spring", stiffness: 500, damping: 38 }}
     />
   );

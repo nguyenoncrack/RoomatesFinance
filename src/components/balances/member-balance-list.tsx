@@ -30,14 +30,15 @@ export function MemberBalanceList({ detailed }: { detailed?: boolean }) {
                 {m?.leftAt ? <Badge variant="outline">Left</Badge> : null}
               </div>
               <div className="mt-1.5 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-foreground/[0.06]">
+                <div className="h-3 flex-1 overflow-hidden rounded-full border-[1.5px] border-foreground bg-card">
                   <motion.div
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: pct / 100 }}
                     transition={{ type: "spring", stiffness: 120, damping: 22 }}
                     className={cn(
                       "h-full w-full origin-left rounded-full",
-                      s.netCents > 0 ? "bg-positive shadow-[0_0_10px] shadow-positive/60" : s.netCents < 0 ? "bg-negative shadow-[0_0_10px] shadow-negative/60" : "bg-transparent",
+                      s.netCents > 0 ? "bg-pop-green" : s.netCents < 0 ? "bg-pop-pink" : "bg-transparent",
+                      s.netCents !== 0 && "border-r-[1.5px] border-foreground",
                     )}
                   />
                 </div>

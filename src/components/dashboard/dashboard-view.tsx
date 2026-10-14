@@ -13,12 +13,14 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PencilRing } from "@/components/shared/pencil-ring";
 import { ScrambleText } from "@/components/shared/scramble-text";
 import { NightPanel, StatRow, StatTile } from "@/components/shared/terminal-panel";
+import { Mascot, SparkleDoodle } from "@/components/shared/doodles";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildActivity } from "@/lib/activity";
 import { spendingThisMonth } from "@/lib/analytics";
 import { formatCents } from "@/lib/domain/money";
 import { firstName } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { Analytics } from "./analytics";
 
 // Soft focus pull, like the section changes on an editorial landing page.
@@ -64,55 +66,70 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <section className="grid grid-cols-[minmax(0,1fr)] items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
-        <motion.div {...fadeUp()} className="space-y-5">
-          <span className="hidden items-center gap-2 rounded-full border border-foreground/15 px-3 py-1 font-label text-muted-foreground md:inline-flex">
-            {snapshot.household.name}
-            <span aria-hidden className="text-[8px] text-foreground/60">■</span>
-            {String(activeMembers).padStart(2, "0")}
-          </span>
-          <h2 className="font-display text-[2.9rem] leading-[0.95] tracking-[-0.015em] sm:text-7xl">
-            <ScrambleText text={`Hey ${me},`} />
-            <br />
-            <span className="text-gradient">
-              {net < 0 ? (
-                <>
-                  you owe <span className="text-negative">
-                    <AnimatedMoney cents={-net} />
-                  </span>
-                </>
-              ) : net > 0 ? (
-                <>
-                  you&apos;re up <span className="text-positive">
-                    <AnimatedMoney cents={net} flash={false} />
-                  </span>
-                </>
-              ) : (
-                <>
-                  you&apos;re <em>all square</em>
-                </>
-              )}
+      <section className="grid grid-cols-[minmax(0,1fr)] items-stretch gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.95fr)] lg:gap-7">
+        <motion.div
+          {...fadeUp()}
+          className={cn(
+            "relative overflow-hidden rounded-[28px] p-6 sticker sm:p-8",
+            tone === "negative" ? "bg-blush" : tone === "positive" ? "bg-mint" : "bg-butter",
+          )}
+        >
+          <Mascot
+            mood={tone === "negative" ? "worried" : tone === "positive" ? "proud" : "happy"}
+            className="pointer-events-none absolute -right-3 -bottom-3 h-36 animate-bob sm:h-44 lg:h-48"
+          />
+          <SparkleDoodle className="pointer-events-none absolute top-5 right-6 size-7 animate-wiggle [--wiggle-amount:18deg]" color="var(--pop-pink)" />
+          <SparkleDoodle className="pointer-events-none absolute top-16 right-24 size-4 animate-wiggle [--wiggle-amount:-22deg] [--wiggle-duration:1.8s]" color="var(--card)" />
+          <div className="relative space-y-5 pr-24 sm:pr-36">
+            <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 font-label text-foreground sticker-sm">
+              {snapshot.household.name}
+              <span aria-hidden className="text-[8px] text-foreground/60">■</span>
+              {String(activeMembers).padStart(2, "0")}
             </span>
-          </h2>
-          <p className="max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            {net < 0
-              ? `Pay ${creditors.join(" and ")} to get back to zero. Balances are simplified, so that's the fewest transfers we found.`
-              : net > 0
-                ? `${debtors.join(" and ")} ${debtors.length === 1 ? "owes" : "owe"} you. Nudge them, or record it when the money lands.`
-                : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button size="lg" mark="star" onClick={() => openAddExpense()}>
-              Add expense
-            </Button>
-            <Button size="lg" variant="outline" mark="cross" onClick={() => openSettleUp()}>
-              Settle up
-            </Button>
+            <h2 className="font-display text-[2.9rem] leading-[0.95] tracking-[-0.015em] sm:text-7xl">
+              <ScrambleText text={`Hey ${me},`} />
+              <br />
+              <span className="text-gradient">
+                {net < 0 ? (
+                  <>
+                    you owe <span className="text-negative">
+                      <AnimatedMoney cents={-net} />
+                    </span>
+                  </>
+                ) : net > 0 ? (
+                  <>
+                    you&apos;re up <span className="text-positive">
+                      <AnimatedMoney cents={net} flash={false} />
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    you&apos;re <em>all square</em>
+                  </>
+                )}
+              </span>
+            </h2>
+            <p className="max-w-md text-[15px] leading-relaxed text-foreground/70">
+              {net < 0
+                ? `Pay ${creditors.join(" and ")} to get back to zero. Balances are simplified, so that's the fewest transfers we found.`
+                : net > 0
+                  ? `${debtors.join(" and ")} ${debtors.length === 1 ? "owes" : "owe"} you. Nudge them, or record it when the money lands.`
+                  : "Nothing to pay and nothing to collect. Log the next grocery run and we'll keep the math honest."}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button size="lg" mark="star" onClick={() => openAddExpense()}>
+                Add expense
+              </Button>
+              <Button size="lg" variant="outline" mark="cross" onClick={() => openSettleUp()} className="bg-card">
+                Settle up
+              </Button>
+            </div>
           </div>
         </motion.div>
 
         <motion.div {...fadeUp(0.08)}>
           <NightPanel
+            className="h-full"
             eyebrow="Your share, covered"
             index={`${String(new Date().getMonth() + 1).padStart(2, "0")} / 12`}
             footer={
@@ -138,7 +155,7 @@ export function DashboardView() {
 
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <motion.div {...fadeUp(0.12)}>
-          <Card lift>
+          <Card lift tone="sky" doodle="arrows">
             <CardHeader>
               <CardTitle>Who pays whom</CardTitle>
               <CardDescription>Simplified so the household needs fewer payments.</CardDescription>
@@ -152,11 +169,11 @@ export function DashboardView() {
           </Card>
         </motion.div>
         <motion.div {...fadeUp(0.16)} className="lg:row-span-2">
-          <Card lift>
+          <Card lift tone="lilac" doodle="scale">
             <CardHeader>
               <CardTitle>Balances</CardTitle>
               <CardDescription>
-                <span className="text-positive">Green</span> gets money back, <span className="text-negative">red</span> owes.
+                <span className="rounded-full bg-pop-green px-1.5 text-foreground">Green</span> gets money back, <span className="rounded-full bg-pop-pink px-1.5 text-foreground">pink</span> owes.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -165,7 +182,7 @@ export function DashboardView() {
           </Card>
         </motion.div>
         <motion.div {...fadeUp(0.2)}>
-          <Card lift>
+          <Card lift doodle="receipt">
             <CardHeader>
               <CardTitle>Recent activity</CardTitle>
               <CardAction>

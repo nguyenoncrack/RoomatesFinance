@@ -28,6 +28,18 @@
   --color-chart-6: var(--chart-6);
   --color-chart-7: var(--chart-7);
   --color-night: var(--night);
+  --color-butter: var(--butter);
+  --color-blush: var(--blush);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
+  --color-lilac: var(--lilac);
+  --color-tangerine: var(--tangerine);
+  --color-pop-pink: var(--pop-pink);
+  --color-pop-green: var(--pop-green);
+  --color-pop-orange: var(--pop-orange);
+  --color-pop-blue: var(--pop-blue);
+  --color-pop-yellow: var(--pop-yellow);
+  --color-pop-purple: var(--pop-purple);
   --color-night-foreground: var(--night-foreground);
   --color-positive: var(--positive);
   --color-positive-soft: var(--positive-soft);
@@ -75,25 +87,39 @@
   --muted-foreground: oklch(0.52 0.01 85);
   --accent: oklch(0.47 0.07 135 / 10%);
   --accent-foreground: oklch(0.4 0.07 135);
-  --destructive: oklch(0.55 0.14 38);
+  --destructive: oklch(0.56 0.17 8);
   --border: oklch(0.235 0.008 85 / 12%);
   --input: oklch(0.235 0.008 85 / 18%);
   --ring: oklch(0.47 0.07 135);
-  --positive: oklch(0.5 0.095 140);
-  --positive-soft: oklch(0.5 0.095 140 / 11%);
-  --negative: oklch(0.55 0.14 38);
-  --negative-soft: oklch(0.55 0.14 38 / 10%);
+  --positive: oklch(0.52 0.12 150);
+  --positive-soft: oklch(0.72 0.15 150 / 18%);
+  --negative: oklch(0.56 0.17 8);
+  --negative-soft: oklch(0.74 0.15 0 / 16%);
   --glow: oklch(0.47 0.07 135);
   /* Charcoal "night" panels, like the dark sections of an editorial page. */
   --night: oklch(0.205 0.006 85);
   --night-foreground: oklch(0.93 0.008 95);
-  --chart-1: oklch(0.5 0.09 140);
-  --chart-2: oklch(0.64 0.07 120);
-  --chart-3: oklch(0.7 0.1 80);
-  --chart-4: oklch(0.58 0.12 40);
-  --chart-5: oklch(0.55 0.06 230);
-  --chart-6: oklch(0.42 0.05 160);
-  --chart-7: oklch(0.62 0.01 85);
+  /* Sticker pastels for cards and cartoon fills. */
+  --butter: oklch(0.93 0.085 96);
+  --blush: oklch(0.89 0.065 8);
+  --mint: oklch(0.91 0.065 158);
+  --sky: oklch(0.9 0.055 232);
+  --lilac: oklch(0.89 0.055 298);
+  --tangerine: oklch(0.86 0.1 60);
+  /* Saturated versions for doodle fills, chart slices and avatar dots. */
+  --pop-pink: oklch(0.74 0.15 0);
+  --pop-green: oklch(0.72 0.15 150);
+  --pop-orange: oklch(0.76 0.15 55);
+  --pop-blue: oklch(0.7 0.12 245);
+  --pop-yellow: oklch(0.87 0.15 95);
+  --pop-purple: oklch(0.66 0.13 300);
+  --chart-1: var(--pop-green);
+  --chart-2: var(--pop-pink);
+  --chart-3: var(--pop-yellow);
+  --chart-4: var(--pop-orange);
+  --chart-5: var(--pop-blue);
+  --chart-6: var(--pop-purple);
+  --chart-7: oklch(0.7 0.01 85);
   --radius: 0.75rem;
   --sidebar: oklch(0.938 0.009 95);
   --sidebar-foreground: oklch(0.235 0.008 85);
@@ -160,8 +186,8 @@
 
 @utility glow-negative {
   box-shadow:
-    0 0 0 1px oklch(0.55 0.14 38 / 18%),
-    0 18px 40px -30px oklch(0.55 0.14 38 / 30%);
+    0 0 0 1px oklch(0.56 0.17 8 / 18%),
+    0 18px 40px -30px oklch(0.56 0.17 8 / 30%);
 }
 
 @utility text-glow {
@@ -180,6 +206,45 @@
   background-image: linear-gradient(to bottom, oklch(0.235 0.008 85 / 6%) 1px, transparent 1px);
   background-size: 100% 44px;
   mask-image: radial-gradient(ellipse at 50% 0%, black 20%, transparent 75%);
+}
+
+/* Cartoon sticker: ink outline plus a hard offset shadow. */
+@utility sticker {
+  border: 1.5px solid var(--foreground);
+  box-shadow: 4px 4px 0 0 var(--foreground);
+}
+
+@utility sticker-sm {
+  border: 1.5px solid var(--foreground);
+  box-shadow: 2px 2px 0 0 var(--foreground);
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(var(--wiggle-base, 0deg));
+  }
+  50% {
+    transform: rotate(calc(var(--wiggle-base, 0deg) + var(--wiggle-amount, 6deg)));
+  }
+}
+
+@utility animate-wiggle {
+  animation: wiggle var(--wiggle-duration, 2.6s) ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+@utility animate-bob {
+  animation: bob 3.2s ease-in-out infinite;
 }
 
 /* Hand-drawn strokes (see PencilLoop / PencilRing): drawn in via stroke-dashoffset. */
@@ -286,6 +351,10 @@
   .animate-blink,
   .skeleton-shine,
   .stagger-children > * {
+    animation: none;
+  }
+  .animate-wiggle,
+  .animate-bob {
     animation: none;
   }
   .animate-pencil {

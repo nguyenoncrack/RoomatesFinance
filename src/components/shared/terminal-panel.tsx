@@ -22,7 +22,7 @@ export function NightPanel({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl bg-night text-night-foreground ring-1 ring-foreground/20",
+        "relative overflow-hidden rounded-[28px] bg-night text-night-foreground sticker",
         "bg-[radial-gradient(40rem_22rem_at_50%_40%,oklch(1_0_0/6%),transparent_65%)]",
         className,
       )}
@@ -57,8 +57,8 @@ export function StatTile({
       <p
         className={cn(
           "mt-1 truncate font-display text-2xl leading-none tabular-nums",
-          tone === "positive" && "text-[oklch(0.8_0.09_140)]",
-          tone === "negative" && "text-[oklch(0.78_0.11_45)]",
+          tone === "positive" && "text-pop-green",
+          tone === "negative" && "text-pop-pink",
         )}
       >
         {value}

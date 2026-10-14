@@ -93,7 +93,7 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                 <button
                   onClick={() => setViewing(item.expense)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-foreground/[0.04] focus-visible:bg-foreground/[0.04] focus-visible:outline-none",
+                    "flex w-full items-center gap-3 rounded-2xl px-2 py-2.5 text-left transition-colors hover:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05] focus-visible:outline-none",
                     item.expense.id.startsWith("optimistic-") && "opacity-60",
                   )}
                 >
@@ -112,11 +112,11 @@ export function ActivityFeed({ items, showActions = false }: { items: ActivityIt
                 <div className={cn("flex items-start gap-3 rounded-xl px-2 py-2.5", item.settlement.status === "voided" && "opacity-55")}>
                   <span
                     className={cn(
-                      "inline-flex size-9 shrink-0 items-center justify-center rounded-xl ring-1",
-                      item.settlement.status === "pending" ? "bg-amber-400/10 text-amber-700 ring-amber-400/20" : "bg-positive-soft text-positive ring-positive/15",
+                      "inline-flex size-10 shrink-0 items-center justify-center rounded-full text-foreground sticker-sm",
+                      item.settlement.status === "pending" ? "bg-butter" : "bg-mint",
                     )}
                   >
-                    {item.settlement.status === "pending" ? <Clock className="size-4" /> : <HandCoins className="size-4" />}
+                    {item.settlement.status === "pending" ? <Clock className="size-[18px]" strokeWidth={2} /> : <HandCoins className="size-[18px]" strokeWidth={2} />}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className={cn("text-sm", item.settlement.status === "voided" && "line-through")}>
@@ -163,8 +163,8 @@ function AuditRow({ item, name }: { item: Extract<ActivityItem, { kind: "audit" 
   const Icon = meta.icon;
   return (
     <div className="flex items-center gap-3 rounded-xl px-2 py-2 text-muted-foreground">
-      <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-foreground/5 ring-1 ring-foreground/10">
-        <Icon className="size-4" />
+      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border-[1.5px] border-dashed border-foreground/40 bg-card text-foreground/70">
+        <Icon className="size-[18px]" strokeWidth={2} />
       </span>
       <p className="min-w-0 flex-1 truncate text-sm">
         <b className="font-medium text-foreground">{name(e.actorId)}</b> {meta.text}

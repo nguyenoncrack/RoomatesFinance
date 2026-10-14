@@ -54,7 +54,7 @@ function ProfileCard() {
   }
 
   return (
-    <Card>
+    <Card tone="blush" doodle="sparkle">
       <CardHeader>
         <CardTitle>Your profile</CardTitle>
       </CardHeader>
@@ -78,7 +78,7 @@ function DemoControls() {
   const demo = useDemoRepository();
   if (!demo || !user) return null;
   return (
-    <Card className="border-dashed">
+    <Card tone="lilac" className="border-dashed">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserRoundCog className="size-4" /> Demo controls
@@ -131,7 +131,7 @@ function NoHouseholdSettings() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Settings</h2>
-      <Card className="glow-soft">
+      <Card tone="butter" doodle="house">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Home className="size-4" /> Household
@@ -215,7 +215,7 @@ function SettingsInner() {
     <div className="stagger-children mx-auto max-w-3xl space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Settings</h2>
 
-      <Card>
+      <Card tone="mint" doodle="people">
         <CardHeader>
           <CardTitle>Roommates</CardTitle>
           <CardDescription>
@@ -300,7 +300,7 @@ function SettingsInner() {
       <div className="grid gap-5 md:grid-cols-2">
         <ProfileCard />
 
-        <Card>
+        <Card tone="butter" doodle="house">
           <CardHeader>
             <CardTitle>Household</CardTitle>
             <CardDescription>{isOwner ? "You're the owner." : "Only the owner can rename it."}</CardDescription>
@@ -324,7 +324,7 @@ function SettingsInner() {
 
       <DemoControls />
 
-      <Card className="border-negative/20">
+      <Card tone="blush">
         <CardHeader>
           <CardTitle>Leave household</CardTitle>
           <CardDescription>

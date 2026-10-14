@@ -2,13 +2,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const PALETTE = [
-  "bg-emerald-400/15 text-emerald-800",
-  "bg-teal-400/15 text-teal-800",
-  "bg-amber-400/15 text-amber-800",
-  "bg-rose-400/15 text-rose-800",
-  "bg-sky-400/15 text-sky-800",
-  "bg-lime-400/15 text-lime-800",
-  "bg-cyan-400/15 text-cyan-800",
+  "bg-pop-pink text-foreground",
+  "bg-pop-green text-foreground",
+  "bg-pop-yellow text-foreground",
+  "bg-pop-blue text-foreground",
+  "bg-pop-orange text-foreground",
+  "bg-pop-purple text-foreground",
+  "bg-mint text-foreground",
 ];
 
 function hash(id: string) {
@@ -37,9 +37,9 @@ export function MemberAvatar({
 }) {
   const sizeClass = size === "sm" ? "size-6 text-[10px]" : size === "lg" ? "size-11 text-sm" : "size-8 text-xs";
   return (
-    <Avatar className={cn(sizeClass, className)}>
+    <Avatar className={cn(sizeClass, "border-[1.5px] border-foreground", className)}>
       {src ? <AvatarImage src={src} alt={name} /> : null}
-      <AvatarFallback className={cn("font-semibold", PALETTE[hash(id) % PALETTE.length])}>{initials(name)}</AvatarFallback>
+      <AvatarFallback className={cn("font-display text-[1.15em] leading-none", PALETTE[hash(id) % PALETTE.length])}>{initials(name)}</AvatarFallback>
     </Avatar>
   );
 }

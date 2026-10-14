@@ -8,6 +8,7 @@ import { useAppData } from "@/components/providers/app-data-provider";
 import { CATEGORY_META } from "@/components/shared/category";
 import { EmptyState } from "@/components/shared/empty-state";
 import { TabPill } from "@/components/shared/tab-pill";
+import { SparkleDoodle } from "@/components/shared/doodles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { byCategory, contributions, monthlyTrend } from "@/lib/analytics";
@@ -17,10 +18,12 @@ import { CATEGORY_LABELS } from "@/lib/domain/types";
 const compactUsd = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(cents / 100);
 
+const BAR_COLORS = ["var(--pop-pink)", "var(--pop-yellow)", "var(--pop-green)", "var(--pop-blue)", "var(--pop-orange)", "var(--pop-purple)"];
+
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number; name?: string }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-foreground/10 bg-popover/95 px-2.5 py-1.5 text-xs shadow-xl shadow-foreground/15 backdrop-blur">
+    <div className="rounded-xl bg-popover px-2.5 py-1.5 text-xs sticker-sm">
       {label ? <p className="font-medium">{label}</p> : null}
       {payload.map((p, i) => (
         <p key={i} className="font-mono tabular-nums text-muted-foreground">
@@ -51,22 +54,25 @@ export function Analytics() {
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-xl font-medium tracking-tight">Spending insights</h2>
-          <p className="text-xs text-muted-foreground">Where the household&apos;s money goes.</p>
+          <h2 className="flex items-center gap-2 font-display text-3xl leading-none">
+            Spending insights
+            <SparkleDoodle className="size-6 animate-wiggle [--wiggle-amount:16deg]" color="var(--pop-yellow)" />
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">Where the household&apos;s money goes.</p>
         </div>
         <ToggleGroup type="single" size="sm" variant="outline" value={range} onValueChange={(v) => v && setRange(v as "month" | "6m")}>
-          <ToggleGroupItem value="month" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground">
+          <ToggleGroupItem value="month" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-foreground">
             {range === "month" ? <TabPill group="analytics-range" /> : null}
             This month
           </ToggleGroupItem>
-          <ToggleGroupItem value="6m" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground">
+          <ToggleGroupItem value="6m" className="relative isolate px-3 text-xs data-[state=on]:bg-transparent data-[state=on]:text-foreground">
             {range === "6m" ? <TabPill group="analytics-range" /> : null}
             6 months
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
       <div className="stagger-children grid gap-4 lg:grid-cols-3">
-        <Card lift className="lg:col-span-1">
+        <Card lift tone="blush" doodle="pie" className="lg:col-span-1">
           <CardHeader>
             <CardTitle>By category</CardTitle>
             <CardDescription className="font-mono">{formatCents(total)} total</CardDescription>
@@ -81,7 +87,7 @@ export function Analytics() {
                 <div className="size-32 shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={categories} dataKey="cents" nameKey="category" innerRadius="62%" outerRadius="100%" paddingAngle={3} cornerRadius={4} stroke="none">
+                      <Pie data={categories} dataKey="cents" nameKey="category" innerRadius="62%" outerRadius="100%" paddingAngle={2} cornerRadius={6} stroke="var(--foreground)" strokeWidth={1.5}>
                         {categories.map((c) => (
                           <Cell key={c.category} fill={CATEGORY_META[c.category].chart} />
                         ))}
@@ -104,7 +110,7 @@ export function Analytics() {
           </CardContent>
         </Card>
 
-        <Card lift>
+        <Card lift tone="butter" doodle="chart">
           <CardHeader>
             <CardTitle>Monthly spending</CardTitle>
             <CardDescription>Household total, last 6 months</CardDescription>
@@ -112,23 +118,21 @@ export function Analytics() {
           <CardContent className="h-44">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trend} margin={{ top: 4, right: 0, left: -12, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="bar-green" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={1} />
-                    <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.25} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 4" />
+                <CartesianGrid vertical={false} stroke="var(--foreground)" strokeOpacity={0.12} strokeDasharray="3 4" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
                 <YAxis tickLine={false} axisLine={false} fontSize={11} tickFormatter={compactUsd} stroke="var(--muted-foreground)" width={48} />
-                <Tooltip content={<ChartTooltip />} cursor={{ fill: "oklch(1 0 0 / 4%)" }} />
-                <Bar dataKey="cents" fill="url(#bar-green)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--foreground)", fillOpacity: 0.05 }} />
+                <Bar dataKey="cents" stroke="var(--foreground)" strokeWidth={1.5} radius={[8, 8, 0, 0]} maxBarSize={36}>
+                  {trend.map((m, i) => (
+                    <Cell key={m.key} fill={BAR_COLORS[i % BAR_COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card lift>
+        <Card lift tone="mint" doodle="people">
           <CardHeader>
             <CardTitle>Who paid what</CardTitle>
             <CardDescription>Paid vs. their share</CardDescription>
@@ -143,9 +147,9 @@ export function Analytics() {
                 <BarChart data={people} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barGap={2}>
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} fontSize={11} width={56} stroke="var(--muted-foreground)" />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "oklch(1 0 0 / 4%)" }} />
-                  <Bar dataKey="paidCents" name="Paid" fill="var(--chart-1)" radius={[0, 4, 4, 0]} barSize={8} />
-                  <Bar dataKey="shareCents" name="Share" fill="var(--chart-7)" radius={[0, 4, 4, 0]} barSize={8} />
+                  <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--foreground)", fillOpacity: 0.05 }} />
+                  <Bar dataKey="paidCents" name="Paid" fill="var(--pop-green)" stroke="var(--foreground)" strokeWidth={1.25} radius={[0, 6, 6, 0]} barSize={10} />
+                  <Bar dataKey="shareCents" name="Share" fill="var(--card)" stroke="var(--foreground)" strokeWidth={1.25} radius={[0, 6, 6, 0]} barSize={10} />
                 </BarChart>
               </ResponsiveContainer>
             )}

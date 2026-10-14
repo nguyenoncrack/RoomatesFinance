@@ -326,7 +326,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                 <ToggleGroupItem
                   key={m}
                   value={m}
-                  className="relative isolate px-2.5 text-xs data-[state=on]:bg-transparent data-[state=on]:text-accent-foreground"
+                  className="relative isolate px-2.5 text-xs data-[state=on]:bg-transparent data-[state=on]:text-foreground"
                 >
                   {m === method ? <TabPill group="split-method" /> : null}
                   {SPLIT_METHOD_LABELS[m]}

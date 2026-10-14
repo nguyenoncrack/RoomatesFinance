@@ -29,7 +29,7 @@ export function BalancesView() {
     <div className="stagger-children space-y-5">
       <h2 className="text-2xl font-semibold tracking-tight md:hidden">Balances</h2>
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-        <Card>
+        <Card tone="lilac" doodle="scale">
           <CardHeader>
             <CardTitle>Net balances</CardTitle>
             <CardDescription>What each person paid minus their share, after completed payments.</CardDescription>
@@ -39,7 +39,7 @@ export function BalancesView() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card tone="sky" doodle="arrows">
           <CardHeader>
             <CardTitle>How to settle</CardTitle>
             <CardDescription>
@@ -108,7 +108,7 @@ export function BalancesView() {
         </Card>
       </div>
 
-      <Card>
+      <Card tone="butter" doodle="people">
         <CardHeader>
           <CardTitle>Your position with each roommate</CardTitle>
           <CardDescription>Direct balance from shared expenses (original debts), after payments between you two.</CardDescription>
