@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { centsToInput, formatCents, parseCents } from "@/lib/domain/money";
+import { amountInputError, centsToInput, formatCents, parseCents } from "@/lib/domain/money";
 import { allocateProportionally, computeSplit, FULL_PERCENT_BP } from "@/lib/domain/splits";
 import {
   CATEGORIES,
@@ -87,7 +87,7 @@ export function ExpenseFormDialog({
 }
 
 function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () => void }) {
-  const { snapshot, user, createExpense, updateExpense } = useAppData();
+  const { snapshot, ledger, user, createExpense, updateExpense } = useAppData();
   const members: Member[] = useMemo(() => snapshot?.members.filter((m) => m.leftAt === null) ?? [], [snapshot]);
   const isEdit = expense !== null;
 
@@ -149,7 +149,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
   }
 
   const titleError = touched && title.trim() === "" ? "Give it a name, like “Costco run”." : null;
-  const amountError = touched && (amountCents === null || amountCents <= 0) ? "Enter an amount greater than $0." : null;
+  const amountError = touched ? amountInputError(amountInput) : null;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -193,6 +193,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
     if (!amountCents || participants.length === 0) return null;
     switch (method) {
       case "equal":
+        if (participants.length === 1) return "One person covers it all";
         return split.ok ? `${formatCents(Math.floor(amountCents / participants.length))}${amountCents % participants.length ? "–" + formatCents(Math.ceil(amountCents / participants.length)) : ""} each` : null;
       case "custom": {
         const left = amountCents - assignedCustom;
@@ -348,7 +349,7 @@ function ExpenseForm({ expense, onDone }: { expense: Expense | null; onDone: () 
                   />
                   <label htmlFor={`p-${m.id}`} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
                     <MemberAvatar id={m.id} name={m.displayName} src={m.avatarUrl} size="sm" />
-                    <span className="truncate text-sm font-medium">{m.id === user?.id ? "You" : firstName(m.displayName)}</span>
+                    <span className="truncate text-sm font-medium">{m.id === user?.id ? "You" : (ledger?.shortName.get(m.id) ?? firstName(m.displayName))}</span>
                   </label>
                   {on && method !== "equal" ? (
                     <div className="relative w-24">
