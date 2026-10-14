@@ -11,6 +11,7 @@ Split shared expenses with your roommates, see who owes what, and settle up with
 - **Notifications**: a bell in the header lists confirmation requests and responses, delivered live through Supabase Realtime, with Accept/Reject inline. New ones also pop a toast.
 - **History**: search and filter by category, payer, roommate, and date. Expenses can be edited or deleted (soft delete with an audit trail).
 - **Dashboard**: summary cards, who-pays-whom, balances, recent activity, and charts for spending by category, by month, and by roommate.
+- **Help**: an Elfsight AI chatbot sits in the bottom-right of every page (including sign-in). On phones it sits above the tab bar so it does not cover Add Expense.
 
 Built with Next.js 16 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui, Lucide, Recharts, Framer Motion, and Supabase.
 
