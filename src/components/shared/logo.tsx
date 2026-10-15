@@ -23,16 +23,13 @@ function LogoMark() {
 
 export function Logo({ href = "/dashboard" }: { href?: string }) {
   return (
-    <Link href={href} className="group flex items-center gap-2" aria-label="Roommate Finance">
+    <Link href={href} className="group flex items-center gap-2" aria-label="Payther">
       <span className="origin-bottom transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transition-none">
         <LogoMark />
       </span>
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-[22px] leading-none">Roommate</span>
-        <span className="relative -mt-0.5 ml-1 w-fit -rotate-3 font-hand text-[17px] leading-tight text-primary">
-          finance
-          <SquiggleDoodle className="absolute -bottom-1 left-0 h-1.5 w-full text-primary/70" />
-        </span>
+      <span className="relative">
+        <span className="font-display text-[28px] leading-none">Payther</span>
+        <SquiggleDoodle className="absolute -bottom-1.5 left-0 h-1.5 w-full text-primary/80" />
       </span>
     </Link>
   );

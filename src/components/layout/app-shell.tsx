@@ -284,7 +284,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="min-w-0 md:hidden">
               {inApp ? <HouseholdSwitcher className="max-w-[48vw] bg-transparent px-0 after:hidden hover:bg-transparent" /> : <Logo />}
             </div>
-            <PageTitle key={current?.href} label={current?.label ?? "Roommate Finance"} doodle={current?.doodle} />
+            <PageTitle key={current?.href} label={current?.label ?? "Payther"} doodle={current?.doodle} />
             <div className="ml-auto flex items-center gap-2">
               {repo.mode === "demo" ? <DemoBadge className="md:hidden" /> : null}
               {ready ? <NotificationBell /> : null}

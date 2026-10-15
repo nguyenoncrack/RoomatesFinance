@@ -61,7 +61,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Roommate Finance — split expenses, settle up", template: "%s · Roommate Finance" },
+  title: { default: "Payther — split expenses, settle up", template: "%s · Payther" },
   description: "Track shared expenses with your roommates, split costs any way you like, and see exactly who pays whom.",
 };
 

@@ -167,7 +167,7 @@ export function NoHouseholdState({ pathname }: { pathname: string }) {
   const { openHousehold } = useDialogs();
   const copy = EMPTY_COPY.find((c) => pathname.startsWith(c.prefix)) ?? {
     title: "You're not in a household yet",
-    body: "Roommate Finance tracks shared costs per household. Start one for your place, or join the one your roommates already use.",
+    body: "Payther tracks shared costs per household. Start one for your place, or join the one your roommates already use.",
   };
   return (
     <Card className="mx-auto max-w-lg glow-soft">
