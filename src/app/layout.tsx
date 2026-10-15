@@ -1,6 +1,6 @@
 import { PencilDraw } from "@/components/shared/pencil-draw";
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand, Poppins } from "next/font/google";
+import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand, Fredoka } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { ElfsightChatbot } from "@/components/shared/elfsight-chatbot";
 import { Toaster } from "@/components/ui/sonner";
@@ -49,12 +49,11 @@ const instrumentSerif = Instrument_Serif({
   style: ["normal", "italic"],
 });
 
-// Heavy slanted geometric face, used only for the "PennyPincher" wordmark.
-const poppinsLogo = Poppins({
+// Chunky rounded face, used only for the "PennyPincher" wordmark.
+const poppinsLogo = Fredoka({
   variable: "--font-logo",
   subsets: ["latin"],
-  weight: "800",
-  style: "italic",
+  weight: "700",
 });
 
 // Handwriting for names, amounts in lists and small captions.

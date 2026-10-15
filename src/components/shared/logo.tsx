@@ -1,36 +1,50 @@
 import Link from "next/link";
-import { SquiggleDoodle } from "@/components/shared/doodles";
 
-/** Hand-drawn mark: a little yellow house whose door is a "$". */
+/** A gold coin caught in a crab-claw pincer: a penny, pinched. */
 function LogoMark() {
   return (
-    <svg viewBox="0 0 40 40" className="size-10 overflow-visible text-foreground" aria-hidden>
-      <path d="M30 13V6h4v10" fill="var(--pop-orange)" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" />
-      <path d="M5 19L20 6l15 13" fill="var(--pop-pink)" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8.5 17v18h23V17" fill="var(--pop-yellow)" stroke="currentColor" strokeWidth={2.2} strokeLinejoin="round" />
-      <path d="M16 35V26c0-1.5 1.2-2.5 4-2.5s4 1 4 2.5v9" fill="var(--money-light)" stroke="currentColor" strokeWidth={2} />
-      <path
-        d="M21.6 27.4c-.4-.7-1.2-1-1.9-.9-.9.1-1.5.7-1.3 1.4.2.8 1.2 1 2 1.2.8.3 1.3.9 1 1.6-.3.8-1.4 1.1-2.3.7M20 25.4v.9M20 32v.9"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.2}
-        strokeLinecap="round"
-      />
-      <path d="M2 35h36" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" />
+    <svg viewBox="0 0 56 46" className="logo-mark h-10 w-[49px] overflow-visible text-foreground" aria-hidden>
+      <g className="logo-coin" style={{ transformOrigin: "20px 20px", transformBox: "view-box" }}>
+        <circle cx="21" cy="21" r="15" fill="#201e1a" transform="translate(1.500 2)" />
+        <circle cx="20" cy="20" r="15" fill="var(--pop-yellow)" stroke="#201e1a" strokeWidth={2.400} />
+        <circle cx="20" cy="20" r="10.500" fill="none" stroke="#201e1a" strokeWidth={1.400} strokeDasharray="2.600 2" opacity={0.55} />
+        <path
+          d="M22.600 15.600c-.6-1.300-2-1.800-3.200-1.600-1.500.3-2.200 1.500-1.700 2.700.5 1.100 1.800 1.400 3 1.800 1.300.4 2 1.100 1.600 2.300-.4 1.200-2 1.700-3.400 1.100M20.200 12.400v1.600M20.200 23.400v1.800"
+          fill="none"
+          stroke="#201e1a"
+          strokeWidth={1.800}
+          strokeLinecap="round"
+        />
+        <path d="M9 12c2-3 5-4.500 8-4.800" stroke="#fff" strokeWidth={2} strokeLinecap="round" fill="none" opacity={0.7} />
+      </g>
+      {/* claw: an arm and two pincers closing on the coin */}
+      <g className="logo-claw" style={{ transformOrigin: "46px 34px", transformBox: "view-box" }} fill="none" strokeLinecap="round" strokeLinejoin="round">
+        {[
+          ["#201e1a", 10],
+          ["oklch(0.7 0.13 150)", 6],
+        ].map(([c, w]) => (
+          <g key={String(c)} stroke={c as string} strokeWidth={w as number}>
+            <path d="M47 34L53 41" />
+            <path d="M47 34C46 24 42 16 34 11" />
+            <path d="M47 34C42 37 37 35 34 30" />
+          </g>
+        ))}
+        <path d="M45 28C44 23 41 19 38 16" stroke="#fff" strokeWidth={1.800} opacity={0.55} />
+      </g>
+      <path d="M50 5l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="var(--pop-yellow)" stroke="#201e1a" strokeWidth={1.200} strokeLinejoin="round" />
     </svg>
   );
 }
 
 export function Logo({ href = "/dashboard" }: { href?: string }) {
   return (
-    <Link href={href} className="group flex items-center gap-2" aria-label="PennyPincher">
+    <Link href={href} className="group flex items-center gap-1" aria-label="PennyPincher">
       <span className="origin-bottom transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transition-none">
         <LogoMark />
       </span>
-      <span className="relative flex flex-col pr-1 pb-1.5 font-logo text-[23px] leading-[0.84]">
-        <span className="text-foreground">Penny</span>
-        <span className="logo-ther -mt-px ml-[0.45em]">Pincher</span>
-        <SquiggleDoodle className="absolute right-0 bottom-0 h-1.5 w-[62%] text-primary/70" />
+      <span className="logo-text font-logo flex -rotate-2 items-baseline text-[19px] leading-none whitespace-nowrap">
+        <span className="logo-word logo-penny">Penny</span>
+        <span className="logo-word logo-ther">Pincher</span>
       </span>
     </Link>
   );
