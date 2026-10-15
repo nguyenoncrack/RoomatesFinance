@@ -73,7 +73,7 @@ function InviteBody() {
   async function share() {
     if (!invite) return;
     try {
-      await navigator.share({ title: `Join ${householdName}`, text: `Join ${householdName} on Payther`, url: invite.url });
+      await navigator.share({ title: `Join ${householdName}`, text: `Join ${householdName} on PennyPincher`, url: invite.url });
     } catch {
       // Dismissed the share sheet: nothing to do.
     }

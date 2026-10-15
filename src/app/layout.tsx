@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand } from "next/font/google";
+import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand, Poppins } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { ElfsightChatbot } from "@/components/shared/elfsight-chatbot";
 import { Toaster } from "@/components/ui/sonner";
@@ -48,6 +48,14 @@ const instrumentSerif = Instrument_Serif({
   style: ["normal", "italic"],
 });
 
+// Heavy slanted geometric face, used only for the "PennyPincher" wordmark.
+const poppinsLogo = Poppins({
+  variable: "--font-logo",
+  subsets: ["latin"],
+  weight: "800",
+  style: "italic",
+});
+
 // Handwriting for names, amounts in lists and small captions.
 const patrickHand = Patrick_Hand({
   variable: "--font-hand",
@@ -61,7 +69,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Payther — split expenses, settle up", template: "%s · Payther" },
+  title: { default: "PennyPincher — split expenses, settle up", template: "%s · PennyPincher" },
   description: "Track shared expenses with your roommates, split costs any way you like, and see exactly who pays whom.",
 };
 
@@ -74,7 +82,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${geistMono.variable} ${instrumentSerif.variable} ${patrickHand.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${geistMono.variable} ${instrumentSerif.variable} ${patrickHand.variable} ${poppinsLogo.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <PencilFilters />
         <MotionProvider>
