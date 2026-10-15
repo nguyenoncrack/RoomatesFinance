@@ -3,6 +3,7 @@
 import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useAppData } from "@/components/providers/app-data-provider";
+import { playDing, playLever, playPrinting } from "@/lib/printer-sound";
 import { buildReceipt, type ReceiptData } from "@/lib/receipt";
 import { cn } from "@/lib/utils";
 
@@ -215,11 +216,18 @@ export function ReceiptPrinter({ className }: { className?: string }) {
       return;
     }
     setState("printing");
-    timers.current.push(window.setTimeout(() => setState("done"), PRINT_MS));
+    playPrinting(PRINT_MS);
+    timers.current.push(
+      window.setTimeout(() => {
+        setState("done");
+        playDing();
+      }, PRINT_MS),
+    );
   }
 
   function print() {
     if (busy) return;
+    playLever();
     if (receipt && !reduce) {
       setState("retracting");
       timers.current.push(window.setTimeout(startPrint, RETRACT_MS));
