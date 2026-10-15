@@ -1,3 +1,4 @@
+import { PencilDraw } from "@/components/shared/pencil-draw";
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter, Instrument_Serif, Patrick_Hand, Poppins } from "next/font/google";
 import { MotionProvider } from "@/components/providers/motion-provider";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} ${geistMono.variable} ${instrumentSerif.variable} ${patrickHand.variable} ${poppinsLogo.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <PencilFilters />
+        <PencilDraw />
         <MotionProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </MotionProvider>
