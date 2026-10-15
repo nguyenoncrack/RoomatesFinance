@@ -588,6 +588,148 @@
   }
 }
 
+/* ---- Receipt printer (components/dashboard/receipt-printer.tsx) ---- */
+.receipt-sheet {
+  transform-origin: 50% 100%;
+  transform: translateY(0) rotate(-1.200deg);
+}
+/* The paper feeds out in short bursts, like a thermal printer, with eased moves in between. */
+.receipt-print {
+  animation: receipt-feed 3.400s both;
+}
+.receipt-retract {
+  animation: receipt-retract 0.420s ease-in both;
+}
+.receipt-printer[data-state="printing"] .printer-body {
+  animation: printer-buzz 0.140s linear infinite;
+}
+.receipt-printer[data-state="printing"] .printer-gear {
+  animation: printer-spin 0.600s linear infinite;
+}
+.receipt-printer[data-state="printing"] .printer-light {
+  animation: printer-blink 0.380s steps(1, end) infinite;
+}
+.receipt-printer[data-state="printing"] .printer-mouth {
+  animation: printer-chatter 0.280s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+.receipt-printer[data-state="done"] .printer-body {
+  animation: printer-ding 0.600s ease-out;
+}
+.receipt-printer[data-state="idle"] .printer-light,
+.receipt-printer[data-state="done"] .printer-light {
+  animation: printer-glow 2.400s ease-in-out infinite;
+}
+
+@keyframes receipt-feed {
+  0% {
+    transform: translateY(104%) rotate(-1.200deg);
+  }
+  16% {
+    transform: translateY(78%) rotate(-1.200deg);
+  }
+  22% {
+    transform: translateY(76%) rotate(-1.200deg);
+  }
+  42% {
+    transform: translateY(46%) rotate(-1.200deg);
+  }
+  48% {
+    transform: translateY(44%) rotate(-1.200deg);
+  }
+  70% {
+    transform: translateY(14%) rotate(-1.200deg);
+  }
+  75% {
+    transform: translateY(12%) rotate(-1.200deg);
+  }
+  93% {
+    transform: translateY(-1.500%) rotate(-1.200deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-1.200deg);
+  }
+}
+@keyframes receipt-retract {
+  from {
+    transform: translateY(0) rotate(-1.200deg);
+  }
+  to {
+    transform: translateY(104%) rotate(-1.200deg);
+  }
+}
+@keyframes printer-buzz {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(0.700px, -0.400px);
+  }
+  50% {
+    transform: translate(-0.600px, 0.400px);
+  }
+  75% {
+    transform: translate(0.500px, 0.600px);
+  }
+}
+@keyframes printer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes printer-blink {
+  0% {
+    fill: var(--pop-orange);
+  }
+  50% {
+    fill: var(--pop-yellow);
+  }
+}
+@keyframes printer-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes printer-chatter {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.6);
+  }
+}
+@keyframes printer-ding {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  30% {
+    transform: translateY(-3px) scale(0.99, 1.03);
+  }
+  60% {
+    transform: translateY(1px) scale(1.01, 0.98);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .receipt-print,
+  .receipt-retract,
+  .receipt-printer .printer-body,
+  .receipt-printer .printer-gear,
+  .receipt-printer .printer-light,
+  .receipt-printer .printer-mouth {
+    animation: none !important;
+  }
+}
+
 /* ---- Roaming buddy (see components/shared/roaming-buddy.tsx and lib/buddy-engine.ts) ---- */
 .buddy {
   position: absolute;
