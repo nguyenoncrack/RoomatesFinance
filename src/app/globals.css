@@ -234,12 +234,12 @@
   letter-spacing: -0.05em;
 }
 
-/* Second half of the wordmark: leaf green on paper, brighter green on the charcoal sidebar. */
+/* Second half of the wordmark: deep blue on paper, the bright pop blue on the charcoal sidebar. */
 .logo-ther {
-  color: oklch(0.58 0.14 150);
+  color: oklch(0.5 0.17 255);
 }
 .theme-night .logo-ther {
-  color: var(--pop-green);
+  color: var(--pop-blue);
 }
 
 @utility font-label {
