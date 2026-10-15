@@ -61,7 +61,15 @@ export function BuddySprite() {
 
       {/* mouth */}
       <path className="buddy-mouth" d="M17.500 28q4.500 3.200 9 0" stroke={INK} strokeWidth={1.800} strokeLinecap="round" fill="none" />
+      <ellipse className="buddy-mouth-o" cx="22" cy="29.500" rx="2.800" ry="3.200" fill="#7a2e2e" stroke={INK} strokeWidth={1.300} />
       <path className="buddy-mouth-happy" d="M16.500 27q5.500 7.500 11 0z" fill="#7a2e2e" stroke={INK} strokeWidth={1.600} strokeLinejoin="round" />
+
+      {/* soccer ball: only shown while juggling */}
+      <g className="buddy-ball">
+        <circle cx="33" cy="52" r="5.600" fill="#fff" stroke={INK} strokeWidth={1.300} />
+        <path d="M33 49.400l2.500 1.800-1 2.900h-3L30.500 51.200z" fill={INK} />
+        <path d="M33 49.400V47.500M35.500 51.200l1.900-.7M34.500 54.100l1.200 1.600M31.500 54.100l-1.200 1.600M30.500 51.200l-1.900-.7" stroke={INK} strokeWidth={1} strokeLinecap="round" />
+      </g>
     </svg>
   );
 }
@@ -99,6 +107,9 @@ function BuddyLayer() {
         <i className="buddy-star buddy-star-1" />
         <i className="buddy-star buddy-star-2" />
         <i className="buddy-star buddy-star-3" />
+        <i className="buddy-z buddy-z-1" />
+        <i className="buddy-z buddy-z-2" />
+        <i className="buddy-z buddy-z-3" />
       </div>
     </div>
   );

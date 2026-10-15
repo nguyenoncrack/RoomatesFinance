@@ -604,13 +604,16 @@
   transition: transform 0.25s ease;
 }
 /* Sitting: hips on the ledge, legs hanging down in front of it. */
-.buddy[data-pose="sit"] .buddy-body {
+.buddy[data-pose="sit"] .buddy-body,
+.buddy[data-pose="wake"] .buddy-body {
   transform: translateY(14px);
 }
-.buddy[data-pose="sit"] .buddy-leg-l {
+.buddy[data-pose="sit"] .buddy-leg-l,
+.buddy[data-pose="wake"] .buddy-leg-l {
   animation: buddy-dangle 2.600s ease-in-out infinite;
 }
-.buddy[data-pose="sit"] .buddy-leg-r {
+.buddy[data-pose="sit"] .buddy-leg-r,
+.buddy[data-pose="wake"] .buddy-leg-r {
   animation: buddy-dangle 2.600s ease-in-out -1.300s infinite;
 }
 .buddy-leg {
@@ -737,6 +740,155 @@
   animation-delay: 0.400s;
 }
 
+/* ---- new activities ---- */
+/* Getting up from a seat: crouch, push off, land. Sitting down is the same in reverse, with a little plop. */
+.buddy[data-pose="standup"] .buddy-body {
+  animation: buddy-standup 0.480s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+  transition: none;
+}
+.buddy[data-pose="standup"] .buddy-leg-l,
+.buddy[data-pose="standup"] .buddy-leg-r {
+  animation: buddy-legs-land 0.480s ease-out both;
+}
+.buddy[data-pose="standup"] .buddy-arm-l {
+  animation: buddy-push-l 0.480s ease-out both;
+}
+.buddy[data-pose="standup"] .buddy-arm-r {
+  animation: buddy-push-r 0.480s ease-out both;
+}
+.buddy[data-pose="sitdown"] .buddy-body {
+  animation: buddy-sitdown 0.520s cubic-bezier(0.4, 0, 0.3, 1) both;
+  transition: none;
+}
+.buddy[data-pose="sitdown"] .buddy-leg-l,
+.buddy[data-pose="sitdown"] .buddy-leg-r {
+  animation: buddy-legs-settle 0.520s ease-out both;
+}
+.buddy[data-pose="sitdown"] .buddy-arm-l {
+  animation: buddy-push-l 0.520s ease-out both;
+}
+.buddy[data-pose="sitdown"] .buddy-arm-r {
+  animation: buddy-push-r 0.520s ease-out both;
+}
+
+/* Juggling a little soccer ball: foot taps, one header, shifting arms, eyes following it. */
+.buddy[data-pose="juggle"] .buddy-ball,
+.buddy[data-pose="oops"] .buddy-ball {
+  display: block;
+}
+.buddy-ball {
+  display: none;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.buddy[data-pose="juggle"] .buddy-ball {
+  animation: buddy-ball-juggle 3.200s linear infinite;
+}
+.buddy[data-pose="juggle"] .buddy-leg-r {
+  animation: buddy-kick 3.200s ease-out infinite;
+}
+.buddy[data-pose="juggle"] .buddy-leg-l {
+  animation: buddy-kick-l 3.200s ease-out infinite;
+}
+.buddy[data-pose="juggle"] .buddy-arm-l {
+  animation: buddy-balance-l 1.600s ease-in-out infinite;
+}
+.buddy[data-pose="juggle"] .buddy-arm-r {
+  animation: buddy-balance-r 1.600s ease-in-out infinite;
+}
+.buddy[data-pose="juggle"] .buddy-body {
+  animation: buddy-juggle-body 1.600s ease-in-out infinite;
+}
+.buddy[data-pose="juggle"] .buddy-pupil {
+  animation: buddy-follow 3.200s ease-in-out infinite;
+}
+
+/* Fumbled it: the ball hops away, he shrugs with an "oh". */
+.buddy[data-pose="oops"] .buddy-ball {
+  animation: buddy-ball-away 1.300s ease-out both;
+}
+.buddy[data-pose="oops"] .buddy-arm-l {
+  transform: rotate(62deg);
+}
+.buddy[data-pose="oops"] .buddy-arm-r {
+  transform: rotate(-62deg);
+}
+.buddy[data-pose="oops"] .buddy-mouth,
+.buddy[data-pose="wake"] .buddy-mouth {
+  display: none;
+}
+.buddy-mouth-o {
+  display: none;
+}
+.buddy[data-pose="oops"] .buddy-mouth-o,
+.buddy[data-pose="wake"] .buddy-mouth-o {
+  display: block;
+}
+
+/* Napping: eyes shut, head drooped, slow breathing, little z's drifting up. Waking: a big yawn and stretch. */
+.buddy[data-pose="nap"] .buddy-body {
+  animation:
+    buddy-nap-in 1.200s ease-out both,
+    buddy-nap 4.200s ease-in-out 1.200s infinite;
+}
+.buddy[data-pose="nap"] .buddy-lid {
+  animation: none;
+  transform: scaleY(1);
+  transition: transform 0.900s ease;
+}
+.buddy[data-pose="nap"] .buddy-arm-l {
+  transform: rotate(-50deg);
+}
+.buddy[data-pose="nap"] .buddy-arm-r {
+  transform: rotate(50deg);
+}
+.buddy[data-pose="nap"] .buddy-leg-l,
+.buddy[data-pose="nap"] .buddy-leg-r {
+  animation: buddy-nap-legs 5.200s ease-in-out infinite;
+}
+.buddy[data-pose="wake"] .buddy-lid {
+  animation: none;
+  transform: scaleY(0);
+  transition: transform 0.500s ease;
+}
+.buddy[data-pose="wake"] .buddy-arm-l {
+  animation: buddy-stretch-l 1.100s ease-in-out both;
+}
+.buddy[data-pose="wake"] .buddy-arm-r {
+  animation: buddy-stretch-r 1.100s ease-in-out both;
+}
+.buddy-z {
+  position: absolute;
+  left: 34px;
+  top: -4px;
+  opacity: 0;
+  pointer-events: none;
+}
+.buddy-z::before {
+  content: "z";
+  font-family: var(--font-hand), cursive;
+  font-size: 13px;
+  line-height: 1;
+  color: #201e1a;
+  text-shadow: 0 0 2px #fff, 0 0 3px #fff;
+}
+.buddy-z-2::before {
+  content: "Z";
+  font-size: 16px;
+}
+.buddy-z-3::before {
+  font-size: 11px;
+}
+.buddy[data-pose="nap"] .buddy-z {
+  animation: buddy-zzz 3.200s ease-out infinite;
+}
+.buddy[data-pose="nap"] .buddy-z-2 {
+  animation-delay: 1.060s;
+}
+.buddy[data-pose="nap"] .buddy-z-3 {
+  animation-delay: 2.130s;
+}
+
 /* Soapy patch under the scrubber (a visual only; it sits over empty card padding). */
 .buddy-suds {
   position: absolute;
@@ -778,6 +930,263 @@
 }
 .buddy-suds[data-gleam]::after {
   animation: buddy-gleam 1.200s ease-out both;
+}
+
+@keyframes buddy-standup {
+  0% {
+    transform: translateY(14px) scale(1.04, 0.94);
+  }
+  40% {
+    transform: translateY(-4px) scale(0.95, 1.08);
+  }
+  72% {
+    transform: translateY(1px) scale(1.03, 0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@keyframes buddy-sitdown {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  28% {
+    transform: translateY(-5px) scale(0.96, 1.07);
+  }
+  64% {
+    transform: translateY(16px) scale(1.04, 0.94);
+  }
+  100% {
+    transform: translateY(14px) scale(1, 1);
+  }
+}
+@keyframes buddy-legs-land {
+  0% {
+    transform: rotate(-8deg);
+  }
+  42% {
+    transform: rotate(16deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes buddy-legs-settle {
+  0% {
+    transform: rotate(0deg);
+  }
+  45% {
+    transform: rotate(14deg);
+  }
+  100% {
+    transform: rotate(-6deg);
+  }
+}
+@keyframes buddy-push-l {
+  0%,
+  100% {
+    transform: rotate(4deg);
+  }
+  40% {
+    transform: rotate(48deg);
+  }
+}
+@keyframes buddy-push-r {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  40% {
+    transform: rotate(-48deg);
+  }
+}
+@keyframes buddy-ball-juggle {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  12.500% {
+    transform: translate(-9px, -28px) rotate(110deg);
+  }
+  25% {
+    transform: translate(-17px, -1px) rotate(220deg);
+  }
+  37.500% {
+    transform: translate(-9px, -31px) rotate(340deg);
+  }
+  50% {
+    transform: translate(0, -1px) rotate(450deg);
+  }
+  62.500% {
+    transform: translate(-9px, -29px) rotate(560deg);
+  }
+  75% {
+    transform: translate(-17px, -1px) rotate(670deg);
+  }
+  87.500% {
+    transform: translate(-9px, -34px) rotate(790deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(900deg);
+  }
+}
+@keyframes buddy-kick {
+  0%,
+  50%,
+  100% {
+    transform: rotate(-26deg);
+  }
+  6%,
+  44%,
+  56%,
+  94% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes buddy-kick-l {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25%,
+  75% {
+    transform: rotate(-26deg);
+  }
+  19%,
+  31%,
+  69%,
+  81% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes buddy-balance-l {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+  50% {
+    transform: rotate(-38deg);
+  }
+}
+@keyframes buddy-balance-r {
+  0%,
+  100% {
+    transform: rotate(26deg);
+  }
+  50% {
+    transform: rotate(40deg);
+  }
+}
+@keyframes buddy-juggle-body {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.500deg);
+  }
+  50% {
+    transform: translateY(-1.500px) rotate(1.500deg);
+  }
+}
+@keyframes buddy-follow {
+  0%,
+  8%,
+  100% {
+    transform: translate(0, 1.200px);
+  }
+  18% {
+    transform: translate(0, -1px);
+  }
+  60%,
+  72% {
+    transform: translate(-0.500px, -2.600px);
+  }
+  86% {
+    transform: translate(0, 0.500px);
+  }
+}
+@keyframes buddy-ball-away {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  22% {
+    transform: translate(6px, -14px) rotate(160deg);
+  }
+  42% {
+    transform: translate(11px, 0) rotate(300deg);
+  }
+  58% {
+    transform: translate(15px, -6px) rotate(380deg);
+  }
+  74% {
+    transform: translate(18px, 0) rotate(440deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(21px, 0) rotate(480deg);
+    opacity: 0;
+  }
+}
+@keyframes buddy-nap-in {
+  0% {
+    transform: translateY(14px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(14px) rotate(5deg);
+  }
+}
+@keyframes buddy-nap {
+  0%,
+  100% {
+    transform: translateY(14px) rotate(5deg) scale(1, 1);
+  }
+  50% {
+    transform: translateY(14px) rotate(6.500deg) scale(1.01, 1.03);
+  }
+}
+@keyframes buddy-nap-legs {
+  0%,
+  100% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(-3deg);
+  }
+}
+@keyframes buddy-stretch-l {
+  0% {
+    transform: rotate(4deg);
+  }
+  45%,
+  70% {
+    transform: rotate(165deg);
+  }
+  100% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes buddy-stretch-r {
+  0% {
+    transform: rotate(-4deg);
+  }
+  45%,
+  70% {
+    transform: rotate(-165deg);
+  }
+  100% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes buddy-zzz {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(16px, -34px) scale(1.2);
+  }
 }
 
 @keyframes buddy-blink {

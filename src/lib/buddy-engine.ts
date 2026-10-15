@@ -28,8 +28,32 @@ type Step =
   | { t: "walk"; u: number }
   | { t: "hop"; to: HopTarget }
   | { t: "clean"; ms: number }
-  | { t: "happy"; ms: number };
-type Phase = "gone" | "idle" | "walk" | "sit" | "clean" | "happy" | "hop" | "poofOut" | "poofIn";
+  | { t: "happy"; ms: number }
+  | { t: "juggle"; ms: number }
+  | { t: "oops"; ms: number }
+  | { t: "nap"; ms: number }
+  | { t: "wake"; ms: number };
+type Phase =
+  | "gone"
+  | "idle"
+  | "walk"
+  | "sit"
+  | "clean"
+  | "happy"
+  | "hop"
+  | "poofOut"
+  | "poofIn"
+  | "standUp"
+  | "sitDown"
+  | "juggle"
+  | "oops"
+  | "nap"
+  | "wake";
+
+/** Phases where he's sitting on the ledge with legs hanging. Leaving or entering these goes through a transition. */
+const SITTING: ReadonlySet<Phase> = new Set<Phase>(["sit", "nap", "wake"]);
+const STAND_MS = 480;
+const SIT_MS = 520;
 
 /** Every big sticker surface: cards, plus the greeting banner, the dark ring panel and the settle reminder. */
 const CARD_SELECTOR = "main [data-slot='card'], main .sticker";
@@ -54,6 +78,12 @@ const POSE: Record<Phase, string> = {
   hop: "hop",
   poofOut: "poof",
   poofIn: "poof",
+  standUp: "standup",
+  sitDown: "sitdown",
+  juggle: "juggle",
+  oops: "oops",
+  nap: "nap",
+  wake: "wake",
 };
 
 interface Env {
@@ -102,6 +132,16 @@ function zoneBlank(x: number, y: number): boolean {
     [-12, -22],
     [12, -22],
     [0, -BODY_H + 2],
+  ];
+  return pts.every(([dx, dy]) => isBlankAt(x + dx, y + dy));
+}
+
+/** Napping floats little z's up and to the right of his head. */
+function napBlank(x: number, y: number): boolean {
+  const pts: [number, number][] = [
+    [18, -34],
+    [24, -48],
+    [30, -62],
   ];
   return pts.every(([dx, dy]) => isBlankAt(x + dx, y + dy));
 }
@@ -244,22 +284,30 @@ export function startBuddy({ buddy, suds }: BuddyDom): BuddyHandle {
 
   function plan() {
     const e = env();
-    const choice = pickWeighted<"sit" | "walk" | "hop" | "input" | "clean">(
+    const choice = pickWeighted<"sit" | "walk" | "hop" | "input" | "clean" | "juggle" | "nap">(
       [
-        { w: 38, v: "sit" },
-        { w: 18, v: "walk" },
-        { w: 14, v: "hop" },
-        { w: e.mobile ? 0 : 10, v: "input" },
-        { w: 16, v: "clean" },
+        { w: 26, v: "sit" },
+        { w: 15, v: "walk" },
+        { w: 12, v: "hop" },
+        { w: e.mobile ? 0 : 8, v: "input" },
+        { w: 13, v: "clean" },
+        { w: 11, v: "juggle" },
+        { w: 15, v: "nap" },
       ],
       Math.random(),
     );
     const look = Math.random() < 0.6;
     const r = (a: number, b: number) => Math.round(randomBetween(a, b));
-    if (choice === "sit") queue = [{ t: "idle", ms: r(900, 2400), look }, { t: "sit", ms: r(7000, 15000) }];
+    // Already sitting? Then sitting again or dozing off just carries on from the seat instead of standing up first.
+    const seated = SITTING.has(phase);
+    if (choice === "sit" && seated) queue = [{ t: "sit", ms: r(6000, 13000) }];
+    else if (choice === "nap" && seated) queue = [{ t: "sit", ms: r(1500, 3000) }, { t: "nap", ms: r(9000, 18000) }, { t: "wake", ms: 1100 }, { t: "idle", ms: r(1500, 3200), look: true }];
+    else if (choice === "sit") queue = [{ t: "idle", ms: r(900, 2400), look }, { t: "sit", ms: r(7000, 15000) }];
     else if (choice === "walk") queue = [{ t: "walk", u: randomBetween(0.05, 0.95) }, { t: "idle", ms: r(1200, 3000), look: true }, { t: "sit", ms: r(4000, 9000) }];
     else if (choice === "hop") queue = [{ t: "hop", to: "card" }, { t: "idle", ms: r(1200, 2600), look: true }, { t: "sit", ms: r(5000, 11000) }];
     else if (choice === "input") queue = [{ t: "hop", to: "input" }, { t: "sit", ms: r(8000, 16000) }];
+    else if (choice === "juggle") queue = [{ t: "idle", ms: r(700, 1400) }, { t: "juggle", ms: r(6500, 10500) }, { t: "idle", ms: r(1500, 2800), look: true }, { t: "sit", ms: r(4000, 8000) }];
+    else if (choice === "nap") queue = [{ t: "idle", ms: r(700, 1500), look }, { t: "sit", ms: r(2000, 3600) }, { t: "nap", ms: r(9000, 18000) }, { t: "wake", ms: 1100 }, { t: "idle", ms: r(1500, 3200), look: true }];
     else queue = [{ t: "hop", to: "clean" }, { t: "clean", ms: r(4500, 7500) }, { t: "happy", ms: 2000 }, { t: "idle", ms: r(2000, 4000), look: true }];
   }
 
@@ -286,6 +334,23 @@ export function startBuddy({ buddy, suds }: BuddyDom): BuddyHandle {
     if (!s) {
       plan();
       return nextStep(now, depth + 1);
+    }
+    // Never snap between seated and standing: put a stand-up / sit-down transition in between.
+    const sitting = SITTING.has(phase);
+    const wantsSit = s.t === "sit" || s.t === "nap" || s.t === "wake";
+    if (sitting && !wantsSit) {
+      queue.unshift(s);
+      setPose("standUp");
+      until = now + STAND_MS;
+      nextLook = Infinity;
+      return;
+    }
+    if (!sitting && wantsSit && phase !== "sitDown") {
+      queue.unshift(s);
+      setPose("sitDown");
+      until = now + SIT_MS;
+      nextLook = Infinity;
+      return;
     }
     const e = env();
     switch (s.t) {
@@ -343,6 +408,33 @@ export function startBuddy({ buddy, suds }: BuddyDom): BuddyHandle {
         until = now + s.ms;
         putSuds(false, true);
         return;
+      case "juggle":
+        // Low keepy-uppy between his feet stays inside the space already checked around his body.
+        setPose("juggle");
+        until = now + s.ms;
+        nextLook = Infinity;
+        return;
+      case "oops":
+        setPose("oops");
+        until = now + s.ms;
+        nextLook = Infinity;
+        return;
+      case "nap": {
+        const here = placeOf(spot, e);
+        if (!here || !napBlank(here.x, here.y)) {
+          queue = [{ t: "wake", ms: 1 }, { t: "idle", ms: 1500, look: true }];
+          return nextStep(now, depth + 1);
+        }
+        setPose("nap");
+        until = now + s.ms;
+        nextLook = Infinity;
+        return;
+      }
+      case "wake":
+        setPose("wake");
+        until = now + s.ms;
+        nextLook = Infinity;
+        return;
     }
   }
 
@@ -386,6 +478,8 @@ export function startBuddy({ buddy, suds }: BuddyDom): BuddyHandle {
       return;
     }
     if (hidden) show(true);
+    // Napping floats z's above and beside his head; wake him early if that space gets taken.
+    if (phase === "nap" && !napBlank(p.x, p.y)) until = now;
   }
 
   function frame(now: number) {
@@ -456,6 +550,20 @@ export function startBuddy({ buddy, suds }: BuddyDom): BuddyHandle {
           putSuds(false);
           nextStep(now);
         }
+        break;
+      case "juggle":
+        if (now >= until) {
+          // Sometimes the ball gets away from him.
+          if (Math.random() < 0.45) queue.unshift({ t: "oops", ms: 1300 });
+          nextStep(now);
+        }
+        break;
+      case "standUp":
+      case "sitDown":
+      case "oops":
+      case "nap":
+      case "wake":
+        if (now >= until) nextStep(now);
         break;
       default:
         break;
