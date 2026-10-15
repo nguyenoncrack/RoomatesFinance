@@ -110,6 +110,8 @@ function toError(error: PostgrestError | Error | null | undefined): RepositoryEr
     "22023": "invalid",
     "23514": "invalid",
     "40001": "conflict",
+    // Per-account rate limit (see supabase/migrations/…_rate_limits.sql).
+    "54000": "rate_limited",
     P0001: "conflict",
   };
   return new RepositoryError(error.message, (code && map[code]) || "unknown");

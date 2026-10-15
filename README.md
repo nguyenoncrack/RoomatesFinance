@@ -70,7 +70,12 @@ for f in supabase/migrations/*.sql; do psql -d roommate_test -f "$f"; done
 psql -d roommate_test -f supabase/tests/rpc-smoke.sql        # expected rejections print as ERROR lines
 psql -d roommate_test -f supabase/tests/recurring-smoke.sql  # repeats and settle day
 psql -d roommate_test -f supabase/tests/settlement-confirmation-smoke.sql  # recipient confirmation
+psql -d roommate_test -f supabase/tests/rate-limit-smoke.sql  # per-account rate limits
 ```
+
+## Abuse and DDoS protection
+
+The app refuses obvious floods early (per-IP rate limits and temporary blocks in `src/proxy.ts`), never turns anonymous traffic into Supabase calls, caps what one signed-in account can do in the database, and sends hardening headers. Large attacks are stopped by Vercel and Supabase, so [SECURITY.md](SECURITY.md) lists the dashboard settings to turn on and what to do during an attack.
 
 ## Project layout
 

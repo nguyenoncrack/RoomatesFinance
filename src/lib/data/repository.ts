@@ -134,7 +134,7 @@ export interface Repository {
 export class RepositoryError extends Error {
   constructor(
     message: string,
-    readonly code: "unauthenticated" | "forbidden" | "not_found" | "invalid" | "conflict" | "unknown" = "unknown",
+    readonly code: "unauthenticated" | "forbidden" | "not_found" | "invalid" | "conflict" | "rate_limited" | "unknown" = "unknown",
   ) {
     super(message);
     this.name = "RepositoryError";
