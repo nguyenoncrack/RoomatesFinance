@@ -16,7 +16,7 @@ type State = "idle" | "printing" | "done" | "retracting";
 /** The cartoon receipt printer: thick outline, hard shadow, a face and a status light. Motion comes from CSS keyed off `data-state`. */
 function PrinterArt({ onPull, disabled }: { onPull: () => void; disabled: boolean }) {
   return (
-    <svg viewBox="0 0 280 124" className="printer-art relative z-10 mx-auto block w-full max-w-[300px] overflow-visible" aria-hidden>
+    <svg viewBox="0 0 280 124" className="printer-art relative z-10 mx-auto block w-full max-w-[300px] overflow-visible @sm:max-w-[360px] @xl:max-w-[460px]" aria-hidden>
       <ellipse cx="140" cy="118" rx="112" ry="5" fill={INK} opacity={0.14} />
       {/* feet */}
       <rect x="42" y="104" width="34" height="10" rx="4" fill={INK} />
@@ -241,16 +241,18 @@ export function ReceiptPrinter({ className }: { className?: string }) {
       role="region"
       aria-label="Receipt printer"
       data-state={state}
-      className={cn("receipt-printer relative flex h-full flex-col rounded-[28px] bg-sky p-5 sticker", className)}
+      className={cn("receipt-printer @container relative flex h-full flex-col rounded-[28px] bg-sky p-5 sticker", className)}
     >
-      <div className="relative min-h-[420px] flex-1 overflow-hidden">
+      <div className="relative min-h-[420px] flex-1 @xl:min-h-[560px] overflow-hidden">
         {receipt ? (
           <div className="absolute inset-x-0 bottom-0 flex justify-center">
             <div
               key={run}
               className={cn("receipt-sheet", state === "printing" && "receipt-print", state === "retracting" && "receipt-retract")}
             >
-              <ReceiptPaper data={receipt} />
+              <div className="[zoom:1] @sm:[zoom:1.15] @xl:[zoom:1.4]">
+                <ReceiptPaper data={receipt} />
+              </div>
             </div>
           </div>
         ) : (
