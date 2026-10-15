@@ -13,13 +13,40 @@ const RETRACT_MS = 420;
 type State = "idle" | "printing" | "done" | "retracting";
 
 /** The cartoon receipt printer: thick outline, hard shadow, a face and a status light. Motion comes from CSS keyed off `data-state`. */
-function PrinterArt() {
+function PrinterArt({ onPull, disabled }: { onPull: () => void; disabled: boolean }) {
   return (
     <svg viewBox="0 0 280 124" className="printer-art relative z-10 mx-auto block w-full max-w-[300px] overflow-visible" aria-hidden>
       <ellipse cx="140" cy="118" rx="112" ry="5" fill={INK} opacity={0.14} />
       {/* feet */}
       <rect x="42" y="104" width="34" height="10" rx="4" fill={INK} />
       <rect x="204" y="104" width="34" height="10" rx="4" fill={INK} />
+
+      {/* slot-machine lever bolted to the side */}
+      <g
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-label="Pull lever to print another receipt"
+        aria-disabled={disabled}
+        onClick={onPull}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPull();
+          }
+        }}
+        className={cn("outline-none focus-visible:[&_.lever-base]:stroke-[#e5484d]", disabled ? "cursor-default" : "cursor-pointer")}
+      >
+        <g className="printer-lever" style={{ transformOrigin: "266px 56px", transformBox: "view-box" }}>
+          <path d="M266 56 L274 20" stroke={INK} strokeWidth={9} strokeLinecap="round" />
+          <path d="M266 56 L274 20" stroke="#d9d4c7" strokeWidth={4} strokeLinecap="round" />
+          <circle cx="275" cy="14" r="11" fill={INK} />
+          <circle cx="275" cy="14" r="9" fill="#e5484d" stroke={INK} strokeWidth={2} />
+          <circle cx="271.500" cy="10.500" r="2.500" fill="#fff" opacity={0.8} />
+        </g>
+        <rect className="lever-base" x="256" y="42" width="14" height="28" rx="6" fill="#e8bd2c" stroke={INK} strokeWidth={3} />
+        <circle cx="266" cy="56" r="3" fill={INK} />
+        <rect x="244" y="0" width="36" height="124" fill="transparent" />
+      </g>
 
       <g className="printer-body">
         {/* hard shadow, then the body */}
@@ -142,7 +169,7 @@ function ReceiptPaper({ data }: { data: ReceiptData }) {
 
 /**
  * Cartoon receipt printer. A receipt built from the real ledger slides out of the slot on entry.
- * The small red button retracts the old one and prints a fresh one.
+ * The side lever retracts the old one and prints a fresh one.
  */
 export function ReceiptPrinter({ className }: { className?: string }) {
   const { snapshot, ledger, user } = useAppData();
@@ -224,15 +251,7 @@ export function ReceiptPrinter({ className }: { className?: string }) {
       </div>
 
       <div className="relative -mt-3">
-        <PrinterArt />
-        <button
-          type="button"
-          onClick={print}
-          disabled={busy}
-          aria-label="Print another receipt"
-          title="Print another receipt"
-          className="absolute right-[17%] bottom-[22%] z-20 size-5 rounded-full border-2 border-[#201e1a] bg-[#e5484d] shadow-[0_2px_0_0_#201e1a] transition-transform hover:scale-110 active:translate-y-0.5 active:shadow-none disabled:opacity-60"
-        />
+        <PrinterArt onPull={print} disabled={busy} />
       </div>
 
       <span className="sr-only" role="status" aria-live="polite">

@@ -659,6 +659,16 @@
     transform: translateY(104%) rotate(-1.200deg);
   }
 }
+.receipt-printer[data-state="printing"] .printer-lever,
+.receipt-printer[data-state="retracting"] .printer-lever {
+  animation: lever-pull 0.8s ease-in-out both;
+}
+@keyframes lever-pull {
+  0% { transform: scaleY(1); }
+  40%, 60% { transform: scaleY(-1); }
+  100% { transform: scaleY(1); }
+}
+
 @keyframes printer-buzz {
   0%,
   100% {
@@ -723,6 +733,7 @@
   .receipt-print,
   .receipt-retract,
   .receipt-printer .printer-body,
+  .receipt-printer .printer-lever,
   .receipt-printer .printer-gear,
   .receipt-printer .printer-light,
   .receipt-printer .printer-mouth {
