@@ -3,7 +3,6 @@
 import { useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useAppData } from "@/components/providers/app-data-provider";
-import { Button } from "@/components/ui/button";
 import { buildReceipt, type ReceiptData } from "@/lib/receipt";
 import { cn } from "@/lib/utils";
 
@@ -142,8 +141,8 @@ function ReceiptPaper({ data }: { data: ReceiptData }) {
 }
 
 /**
- * Cartoon receipt printer. Press the button and a receipt built from the real ledger slides out of the slot.
- * Pressing again retracts the old one and prints a fresh one.
+ * Cartoon receipt printer. A receipt built from the real ledger slides out of the slot on entry.
+ * The small red button retracts the old one and prints a fresh one.
  */
 export function ReceiptPrinter({ className }: { className?: string }) {
   const { snapshot, ledger, user } = useAppData();
@@ -153,10 +152,29 @@ export function ReceiptPrinter({ className }: { className?: string }) {
   const [run, setRun] = useState(0);
   const timers = useRef<number[]>([]);
 
+  const ready = Boolean(snapshot && ledger && user);
+  const printRef = useRef<() => void>(() => {});
+  const auto = useRef(false);
+
+  useEffect(() => {
+    printRef.current = print;
+  });
+
   useEffect(() => {
     const pending = timers.current;
     return () => pending.forEach((t) => window.clearTimeout(t));
   }, []);
+
+  // Print one receipt automatically each time the dashboard is opened.
+  useEffect(() => {
+    if (!ready || auto.current) return;
+    auto.current = true;
+    const t = window.setTimeout(() => printRef.current(), 450);
+    return () => {
+      window.clearTimeout(t);
+      auto.current = false;
+    };
+  }, [ready]);
 
   if (!snapshot || !ledger || !user) return null;
   const busy = state === "printing" || state === "retracting";
@@ -190,7 +208,7 @@ export function ReceiptPrinter({ className }: { className?: string }) {
       data-state={state}
       className={cn("receipt-printer relative flex h-full flex-col rounded-[28px] bg-sky p-5 sticker", className)}
     >
-      <div className="relative min-h-[292px] flex-1 overflow-hidden">
+      <div className="relative min-h-[420px] flex-1 overflow-hidden">
         {receipt ? (
           <div className="absolute inset-x-0 bottom-0 flex justify-center">
             <div
@@ -205,20 +223,18 @@ export function ReceiptPrinter({ className }: { className?: string }) {
         )}
       </div>
 
-      <div className="-mt-3">
+      <div className="relative -mt-3">
         <PrinterArt />
+        <button
+          type="button"
+          onClick={print}
+          disabled={busy}
+          aria-label="Print another receipt"
+          title="Print another receipt"
+          className="absolute right-[17%] bottom-[22%] z-20 size-5 rounded-full border-2 border-[#201e1a] bg-[#e5484d] shadow-[0_2px_0_0_#201e1a] transition-transform hover:scale-110 active:translate-y-0.5 active:shadow-none disabled:opacity-60"
+        />
       </div>
 
-      <Button
-        variant="pop"
-        size="lg"
-        doodle="receipt"
-        onClick={print}
-        disabled={busy}
-        className="mt-4 h-12 w-full text-[12px] tracking-[0.14em]"
-      >
-        {state === "printing" ? "Printing…" : receipt ? "Print again" : "Print receipt"}
-      </Button>
       <span className="sr-only" role="status" aria-live="polite">
         {state === "printing" ? "Printing your receipt" : state === "done" ? "Receipt printed" : ""}
       </span>
